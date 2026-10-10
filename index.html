@@ -798,7 +798,7 @@
       let dayOffset = isNightZi ? 1 : 0;
       let dtUtc = new Date(Date.UTC(year, month - 1, day + dayOffset));
       let diffDays = Math.round((dtUtc - new Date(Date.UTC(2000, 0, 1))) / 86400000);
-      let dayGZIndex = (16 + diffDays) % 60;
+      let dayGZIndex = (54 + diffDays) % 60; // 2000-01-01為戊午日(甲子序數54)
       if (dayGZIndex < 0) dayGZIndex += 60;
       const dayGan = TIANGAN[dayGZIndex % 10];
       const dayZhi = DIZHI[dayGZIndex % 12];
