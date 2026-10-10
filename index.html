@@ -41,6 +41,24 @@
       font-weight: bold;
       color: #8b2500;
     }
+    .server-status {
+      font-size: 13px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: #f0f0f0;
+      color: #666;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .server-status.online {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .server-status.waking {
+      background: #fff3e0;
+      color: #e65100;
+    }
     .form-grid {
       display: flex;
       flex-wrap: wrap;
@@ -92,10 +110,38 @@
     }
     .loading-spinner {
       font-size: 15px;
-      color: #888;
+      color: #666;
       display: none;
+      text-align: center;
+      line-height: 1.8;
     }
     .loading-spinner.active { display: block; }
+
+    .error-card {
+      text-align: left;
+      background: #fff5f5;
+      border: 1px solid #ffcdd2;
+      border-radius: 6px;
+      padding: 16px;
+      max-width: 600px;
+      width: 100%;
+      font-size: 14px;
+    }
+    .error-card h4 {
+      color: #c62828;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+    .error-card code {
+      display: block;
+      background: #2b2b2b;
+      color: #f8f8f2;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin: 8px 0;
+      word-break: break-all;
+    }
 
     /* 來源標註頁尾 */
     .footer {
@@ -124,6 +170,9 @@
   <div class="header-card">
     <div class="header-top">
       <div class="app-title">☯ 專業八字命盤排盤系統</div>
+      <div class="server-status" id="serverStatus">
+        <span id="statusDot">●</span> <span id="statusText">伺服器狀態檢測中...</span>
+      </div>
     </div>
     <div class="form-grid">
       <div class="form-item">
@@ -134,8 +183,8 @@
         </select>
       </div>
       <div class="form-item">
-        <label>西元：</label>
-        <input type="number" id="inputYear" value="1975" min="1900" max="2050" style="width: 72px;"> 年
+        <label>年份：</label>
+        <select id="inputYear" style="width: 175px;"></select>
       </div>
       <div class="form-item">
         <select id="inputMonth" style="width: 62px;"></select> 月
@@ -178,7 +227,11 @@
 
   <!-- 命盤呈現區域 -->
   <div class="result-container" id="resultContainer">
-    <div class="loading-spinner" id="loadingSpinner">⏳ 正在與官方計算引擎同步計算中...</div>
+    <div class="loading-spinner" id="loadingSpinner">
+      <div style="font-size:24px; margin-bottom:8px;">⏳</div>
+      <div>正在連線 Render 後端並同步官方計算中...</div>
+      <div style="font-size:12px; color:#888; margin-top:4px;">（若伺服器處於閒置休眠狀態，首次啟動需等候約 30~50 秒，請稍候）</div>
+    </div>
     <div id="chartContent"></div>
   </div>
 
@@ -189,10 +242,27 @@
 </div>
 
 <script>
-  // 部署完成 Render 後，將此網址替換為您的 Render 專屬後端網址 (例如: https://bazi-api-xxxx.onrender.com)
-  const PROXY_API_URL = "https://bazi-app-e7uy.onrender.com/api/bazi";
+  // 您的 Render 專屬後端網址
+  const RENDER_BASE = "https://bazi-app-e7uy.onrender.com";
+  const PROXY_API_URL = `${RENDER_BASE}/api/bazi`;
 
   function initOptions() {
+    // 產生 1900 到 2050 年份下拉選單 (精確對齊官方 民國/西元年)
+    const ySel = document.getElementById("inputYear");
+    for (let y = 1900; y <= 2050; y++) {
+      let opt = document.createElement("option");
+      opt.value = y;
+      let label = "";
+      if (y >= 1912) {
+        label = `民國 ${y - 1911} (西元${y}) 年`;
+      } else {
+        label = `民前 ${1912 - y} (西元${y}) 年`;
+      }
+      opt.textContent = label;
+      if (y === 1975) opt.selected = true; // 預設 1975
+      ySel.appendChild(opt);
+    }
+
     const mSel = document.getElementById("inputMonth");
     for (let m = 1; m <= 12; m++) {
       let opt = document.createElement("option");
@@ -209,6 +279,26 @@
     }
   }
 
+  // 自動檢測並喚醒 Render 伺服器
+  async function checkServerStatus() {
+    const statusBox = document.getElementById("serverStatus");
+    const statusText = document.getElementById("statusText");
+    statusBox.className = "server-status waking";
+    statusText.textContent = "伺服器連線中...";
+
+    try {
+      const res = await fetch(`${RENDER_BASE}/`, { method: "GET" });
+      if (res.ok) {
+        statusBox.className = "server-status online";
+        statusText.textContent = "● 後端伺服器在線";
+      } else {
+        statusText.textContent = `伺服器回應異常 (${res.status})`;
+      }
+    } catch (e) {
+      statusText.textContent = "伺服器喚醒中，請稍候...";
+    }
+  }
+
   async function fetchBaziData() {
     const gender = document.getElementById("userGender").value;
     const year = document.getElementById("inputYear").value;
@@ -222,29 +312,45 @@
     spinner.classList.add("active");
     content.innerHTML = "";
 
+    const requestUrl = `${PROXY_API_URL}?year=${year}&month=${month}&day=${day}&hour=${hour}&gender=${encodeURIComponent(gender)}`;
+
     try {
-      const url = `${PROXY_API_URL}?year=${year}&month=${month}&day=${day}&hour=${hour}&gender=${encodeURIComponent(gender)}`;
-      const res = await fetch(url);
+      const res = await fetch(requestUrl);
+      if (!res.ok) {
+        throw new Error(`伺服器回應錯誤 HTTP ${res.status}: ${res.statusText}`);
+      }
       const data = await res.json();
       spinner.classList.remove("active");
 
       if (data.html) {
         content.innerHTML = data.html;
       } else {
-        content.innerHTML = `<div style="color:red;">獲取命盤失敗，請稍後重試。</div>`;
+        content.innerHTML = `<div style="color:red; text-align:center;">獲取命盤失敗，回傳資料格式異常。</div>`;
       }
     } catch (err) {
       spinner.classList.remove("active");
       content.innerHTML = `
-        <div style="text-align:center; padding: 20px; color:#666;">
-          <p>⚠️ 尚未連線到後端 Proxy 服務。</p>
-          <p style="font-size:13px; margin-top:8px;">請先將 <code>main.py</code> 部署至 Render.com 並替換本頁面的 <code>PROXY_API_URL</code>。</p>
+        <div class="error-card">
+          <h4>⚠️ 連線至後端 Proxy 失敗</h4>
+          <p>錯誤資訊：<b>${err.message}</b></p>
+          <p style="margin-top:6px;">請求網址：</p>
+          <code>${requestUrl}</code>
+          <p style="font-size:13px; color:#555; margin-top:8px;">
+            <b>可能原因：</b><br>
+            1. <b>免費主機休眠喚醒中</b>：Render 免費版閒置時會自動暫停，請點擊下方按鈕或等候 30~50 秒後再試一次。<br>
+            2. <b>瀏覽器快取未更新</b>：若您剛在 GitHub 更新檔案，請嘗試按 <code>Ctrl+F5</code>（或手機清除快取重新載入）。
+          </p>
+          <div style="margin-top:12px; text-align:center;">
+            <button onclick="fetchBaziData()" style="padding:6px 16px; background:#8b2500; color:#fff; border:none; border-radius:4px; cursor:pointer;">重試連線</button>
+            <a href="${RENDER_BASE}" target="_blank" style="margin-left:12px; font-size:13px; color:#1565c0;">手動開啟後端喚醒頁面</a>
+          </div>
         </div>
       `;
     }
   }
 
   initOptions();
+  checkServerStatus();
 </script>
 
 </body>
