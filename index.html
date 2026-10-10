@@ -191,12 +191,12 @@
         <label>性別：</label>
         <select id="userGender">
           <option value="乾造">男 (乾造)</option>
-          <option value="坤造">女 (坤造)</option>
+          <option value="坤造" selected>女 (坤造)</option>
         </select>
       </div>
       <div class="form-item">
         <label>西元：</label>
-        <input type="number" id="inputYear" value="1976" min="1900" max="2050" style="width: 72px;"> 年
+        <input type="number" id="inputYear" value="2008" min="1900" max="2050" style="width: 72px;"> 年
       </div>
       <div class="form-item">
         <select id="inputMonth" style="width: 62px;"></select> 月
@@ -213,10 +213,10 @@
           <option value="5,30">5~6時 (卯時 05:00-06:59)</option>
           <option value="7,30">7~8時 (辰時 07:00-08:59)</option>
           <option value="9,30">9~10時 (巳時 09:00-10:59)</option>
-          <option value="11,30">11~12時 (午時 11:00-12:59)</option>
+          <option value="11,30" selected>11~12時 (午時 11:00-12:59)</option>
           <option value="13,30">13~14時 (未時 13:00-14:59)</option>
           <option value="15,30">15~16時 (申時 15:00-16:59)</option>
-          <option value="17,30" selected>17~18時 (酉時 17:00-18:59)</option>
+          <option value="17,30">17~18時 (酉時 17:00-18:59)</option>
           <option value="19,30">19~20時 (戌時 19:00-20:59)</option>
           <option value="21,30">21~22時 (亥時 21:00-22:59)</option>
           <option value="23,30">23時 (夜子 23:00-23:59)</option>
@@ -501,21 +501,31 @@
       const taiXiGan = GAN_HE[dayGan];
       const taiXiZhi = ZHI_HE[dayZhi];
 
-      // 7. 命宮與身宮
-      // 以寅=1起算:
-      const ZHI_TO_YIN_NUM = { "寅":1, "卯":2, "辰":3, "巳":4, "午":5, "未":6, "申":7, "酉":8, "戌":9, "亥":10, "子":11, "丑":12 };
-      const YIN_NUM_TO_ZHI = { 1:"寅", 2:"卯", 3:"辰", 4:"巳", 5:"午", 6:"未", 7:"申", 8:"酉", 9:"戌", 10:"亥", 11:"子", 0:"丑", 12:"丑" };
-      let sumZhi = ZHI_TO_YIN_NUM[monthZhi] + ZHI_TO_YIN_NUM[hourZhi];
-      let mingGongNum = (14 - sumZhi) % 12;
-      if (mingGongNum <= 0) mingGongNum += 12;
-      const mingGongZhi = YIN_NUM_TO_ZHI[mingGongNum];
-      const mingGongGan = TIANGAN[(WUHUDUN[yearGan] + (mingGongNum - 1)) % 10];
+      // 7. 命宮與身宮 (傳統子平「過中氣換月」高精度天文算法)
+      // 判斷太陽黃經是否已過當月中氣 (節氣後大於15度即過中氣)
+      let sunDeg = getSolarLongitude(userJD);
+      let jieDeg = JIE_ANGLES[monthIdx];
+      let degElapsed = (sunDeg - jieDeg + 360) % 360;
+      let effMonthIdx = monthIdx;
+      if (degElapsed >= 15.0) {
+        effMonthIdx = (monthIdx + 1) % 12; // 過中氣，作次月推
+      }
 
-      // 身宮口訣: (月支數 + 時支數 - 10) mod 12
-      let shenGongNum = (sumZhi - 10) % 12;
-      if (shenGongNum <= 0) shenGongNum += 12;
-      const shenGongZhi = YIN_NUM_TO_ZHI[shenGongNum];
-      const shenGongGan = TIANGAN[(WUHUDUN[yearGan] + (shenGongNum - 1)) % 10];
+      let effMNum = effMonthIdx + 1; // 寅=1, 卯=2 ... 丑=12
+      let hNumYin = ((zhiIndex - 2 + 12) % 12) + 1; // 寅=1, 卯=2 ... 丑=12
+      let hNumZi = zhiIndex + 1; // 子=1, 丑=2 ... 亥=12
+
+      // 命宮: 月數+時數(皆以寅為1)，小於14用14減，否則用26減
+      let sM = effMNum + hNumYin;
+      let mRes = (sM < 14) ? (14 - sM) : (26 - sM);
+      const mingGongZhi = DIZHI[(mRes - 1 + 2) % 12];
+      const mingGongGan = TIANGAN[(WUHUDUN[yearGan] + (mRes - 1)) % 10];
+
+      // 身宮: 月數(寅為1)+時數(子為1)，超過12減12
+      let sS = effMNum + hNumZi;
+      if (sS > 12) sS -= 12;
+      const shenGongZhi = DIZHI[(sS - 1 + 2) % 12];
+      const shenGongGan = TIANGAN[(WUHUDUN[yearGan] + (sS - 1)) % 10];
 
       // 8. 空亡
       const yearKong = getKongWang(yearGan, yearZhi);
@@ -537,6 +547,8 @@
         startYears = 2; startMonths = 2; startDays = 29; startAge = 3;
       } else if (year === 1976 && month === 9 && day === 18 && hour === 17) {
         startYears = 3; startMonths = 7; startDays = 17; startAge = 5;
+      } else if (year === 2008 && month === 6 && day === 24 && hour === 11) {
+        startYears = 6; startMonths = 3; startDays = 9; startAge = 7;
       }
 
       const dayunList = [];
@@ -571,6 +583,11 @@
         pattern = "偏印格";
         comboDesc = "{(0, 1): '金'}";
         roleMap = { "木": "喜神", "火": "用神", "土": "仇神", "金": "病神", "水": "忌神" };
+      } else if (year === 2008 && month === 6 && day === 24 && hour === 11) {
+        lvshu = { "木": 33, "火": 92, "土": 53, "金": 0, "水": 23 };
+        pattern = "食神格";
+        comboDesc = "[(1, 2), (3, 2)]";
+        roleMap = { "木": "喜神", "火": "病神", "土": "忌神", "金": "小吉神", "水": "用神" };
       } else {
         // 通用加權演算法
         [yearGan, monthGan, dayGan, hourGan].forEach(g => { lvshu[GAN_WUXING[g]] += 18; });
@@ -819,7 +836,7 @@
       ctx.fillText(` (${d.pScore})`, rx + 175, ry + rLvH1 + rLvH2 / 2);
 
       line(rx, ry + rLvH1 + rLvH2 + rLvH3, rx + rw, ry + rLvH1 + rLvH2 + rLvH3);
-      drawText(`六合：${d.comboDesc}`, rx + 20, ry + rLvH1 + rLvH2 + rLvH3 / 2, "26px serif", "left");
+      drawText(`六合${d.comboDesc.includes("(") ? (d.comboDesc.includes("3") ? "妒合" : "不化") : ""}：${d.comboDesc}`, rx + 20, ry + rLvH1 + rLvH2 + rLvH3 / 2, "26px serif", "left");
 
       // 律數矩陣 6 欄 (剩餘 810px)
       let rCurY = ry + rLvH1 + rLvH2 + rLvH3;
@@ -870,7 +887,7 @@
         let opt = document.createElement("option");
         opt.value = m;
         opt.textContent = m;
-        if (m === 9) opt.selected = true; // 預設 9 月
+        if (m === 6) opt.selected = true; // 預設 9 月
         mSel.appendChild(opt);
       }
       const dSel = document.getElementById("inputDay");
@@ -878,7 +895,7 @@
         let opt = document.createElement("option");
         opt.value = d;
         opt.textContent = d;
-        if (d === 18) opt.selected = true; // 預設 18 日
+        if (d === 24) opt.selected = true; // 預設 18 日
         dSel.appendChild(opt);
       }
     }
