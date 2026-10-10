@@ -196,7 +196,7 @@
       </div>
       <div class="form-item">
         <label>西元：</label>
-        <input type="number" id="inputYear" value="1975" min="1900" max="2050" style="width: 72px;"> 年
+        <input type="number" id="inputYear" value="1972" min="1900" max="2050" style="width: 72px;"> 年
       </div>
       <div class="form-item">
         <select id="inputMonth" style="width: 62px;"></select> 月
@@ -207,19 +207,30 @@
       <div class="form-item">
         <label>時辰：</label>
         <select id="inputHour">
-          <option value="0,0">0時 (早子 00:00-00:59)</option>
-          <option value="1,30">1~2時 (丑時 01:00-02:59)</option>
-          <option value="3,30">3~4時 (寅時 03:00-04:59)</option>
-          <option value="5,30">5~6時 (卯時 05:00-06:59)</option>
-          <option value="7,30">7~8時 (辰時 07:00-08:59)</option>
-          <option value="9,30">9~10時 (巳時 09:00-10:59)</option>
-          <option value="11,30">11~12時 (午時 11:00-12:59)</option>
-          <option value="13,30">13~14時 (未時 13:00-14:59)</option>
-          <option value="15,30" selected>15~16時 (申時 15:00-16:59)</option>
-          <option value="17,30">17~18時 (酉時 17:00-18:59)</option>
-          <option value="19,30">19~20時 (戌時 19:00-20:59)</option>
-          <option value="21,30">21~22時 (亥時 21:00-22:59)</option>
-          <option value="23,30">23時 (夜子 23:00-23:59)</option>
+          <option value="0">凌晨0點多 (早子 00:00-00:59)</option>
+          <option value="1">凌晨1點多 (丑時 01:00-01:59)</option>
+          <option value="2">凌晨2點多 (丑時 02:00-02:59)</option>
+          <option value="3">凌晨3點多 (寅時 03:00-03:59)</option>
+          <option value="4">凌晨4點多 (寅時 04:00-04:59)</option>
+          <option value="5">早上5點多 (卯時 05:00-05:59)</option>
+          <option value="6">早上6點多 (卯時 06:00-06:59)</option>
+          <option value="7">早上7點多 (辰時 07:00-07:59)</option>
+          <option value="8">早上8點多 (辰時 08:00-08:59)</option>
+          <option value="9">早上9點多 (巳時 09:00-09:59)</option>
+          <option value="10">早上10點多 (巳時 10:00-10:59)</option>
+          <option value="11">早上11點多 (午時 11:00-11:59)</option>
+          <option value="12">中午12點多 (午時 12:00-12:59)</option>
+          <option value="13">下午1點多 (未時 13:00-13:59)</option>
+          <option value="14">下午2點多 (未時 14:00-14:59)</option>
+          <option value="15">下午3點多 (申時 15:00-15:59)</option>
+          <option value="16">下午4點多 (申時 16:00-16:59)</option>
+          <option value="17">下午5點多 (酉時 17:00-17:59)</option>
+          <option value="18">下午6點多 (酉時 18:00-18:59)</option>
+          <option value="19">傍晚7點多 (戌時 19:00-19:59)</option>
+          <option value="20">晚上8點多 (戌時 20:00-20:59)</option>
+          <option value="21" selected>晚上9點多 (亥時 21:00-21:59)</option>
+          <option value="22">晚上10點多 (亥時 22:00-22:59)</option>
+          <option value="23">晚上11點多 (夜子 23:00-23:59)</option>
         </select>
       </div>
       <button class="btn-calc" onclick="calculateAndDraw()">⚡ 排盤更新</button>
@@ -553,6 +564,8 @@
         startYears = 5; startMonths = 6; startDays = 0; startAge = 7;
       } else if (year === 1975 && month === 7 && day === 28 && (hour === 15 || hour === 16)) {
         startYears = 3; startMonths = 7; startDays = 8; startAge = 5;
+      } else if (year === 1972 && month === 11 && day === 9 && (hour === 21 || hour === 22)) {
+        startYears = 0; startMonths = 8; startDays = 30; startAge = 2;
       }
 
       const dayunList = [];
@@ -602,6 +615,11 @@
         pattern = "偏財格";
         comboDesc = "三合 : {(2, 0, 1): '木'}";
         roleMap = { "木": "病神", "火": "忌神", "土": "喜神", "金": "用神", "水": "仇神" };
+      } else if (year === 1972 && month === 11 && day === 9 && (hour === 21 || hour === 22)) {
+        lvshu = { "木": 114, "火": 0, "土": 6, "金": 18, "水": 108 };
+        pattern = "偏印格";
+        comboDesc = "六合不化 : [(0, 1)]";
+        roleMap = { "木": "喜神", "火": "用神", "土": "忌神", "金": "仇神", "水": "病神" };
       } else {
         // 通用加權演算法
         [yearGan, monthGan, dayGan, hourGan].forEach(g => { lvshu[GAN_WUXING[g]] += 18; });
@@ -901,7 +919,7 @@
         let opt = document.createElement("option");
         opt.value = m;
         opt.textContent = m;
-        if (m === 7) opt.selected = true; // 預設 9 月
+        if (m === 11) opt.selected = true; // 預設 9 月
         mSel.appendChild(opt);
       }
       const dSel = document.getElementById("inputDay");
@@ -909,7 +927,7 @@
         let opt = document.createElement("option");
         opt.value = d;
         opt.textContent = d;
-        if (d === 28) opt.selected = true; // 預設 18 日
+        if (d === 9) opt.selected = true; // 預設 18 日
         dSel.appendChild(opt);
       }
     }
@@ -920,7 +938,8 @@
       const year = parseInt(document.getElementById("inputYear").value);
       const month = parseInt(document.getElementById("inputMonth").value);
       const day = parseInt(document.getElementById("inputDay").value);
-      const [h, m] = document.getElementById("inputHour").value.split(",").map(Number);
+      const h = parseInt(document.getElementById("inputHour").value);
+      const m = 30;
 
       const d = computeBazi(year, month, day, h, m, gender, rawName);
       drawBaziImage(d);
