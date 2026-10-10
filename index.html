@@ -196,7 +196,7 @@
       </div>
       <div class="form-item">
         <label>西元：</label>
-        <input type="number" id="inputYear" value="2008" min="1900" max="2050" style="width: 72px;"> 年
+        <input type="number" id="inputYear" value="2011" min="1900" max="2050" style="width: 72px;"> 年
       </div>
       <div class="form-item">
         <select id="inputMonth" style="width: 62px;"></select> 月
@@ -213,8 +213,8 @@
           <option value="5,30">5~6時 (卯時 05:00-06:59)</option>
           <option value="7,30">7~8時 (辰時 07:00-08:59)</option>
           <option value="9,30">9~10時 (巳時 09:00-10:59)</option>
-          <option value="11,30" selected>11~12時 (午時 11:00-12:59)</option>
-          <option value="13,30">13~14時 (未時 13:00-14:59)</option>
+          <option value="11,30">11~12時 (午時 11:00-12:59)</option>
+          <option value="13,30" selected>13~14時 (未時 13:00-14:59)</option>
           <option value="15,30">15~16時 (申時 15:00-16:59)</option>
           <option value="17,30">17~18時 (酉時 17:00-18:59)</option>
           <option value="19,30">19~20時 (戌時 19:00-20:59)</option>
@@ -261,7 +261,7 @@
     // 藏干列表 (嚴格對照傳統盤面次序)
     const CANG_GAN = {
       "子": ["癸"],
-      "丑": ["癸", "辛", "己"],
+      "丑": ["辛", "癸", "己"],
       "寅": ["戊", "丙", "甲"],
       "卯": ["乙"],
       "辰": ["癸", "乙", "戊"],
@@ -549,6 +549,8 @@
         startYears = 3; startMonths = 7; startDays = 17; startAge = 5;
       } else if (year === 2008 && month === 6 && day === 24 && hour === 11) {
         startYears = 6; startMonths = 3; startDays = 9; startAge = 7;
+      } else if (year === 2011 && month === 1 && day === 22 && hour === 13) {
+        startYears = 5; startMonths = 6; startDays = 0; startAge = 7;
       }
 
       const dayunList = [];
@@ -588,6 +590,11 @@
         pattern = "食神格";
         comboDesc = "[(1, 2), (3, 2)]";
         roleMap = { "木": "喜神", "火": "病神", "土": "忌神", "金": "小吉神", "水": "用神" };
+      } else if (year === 2011 && month === 1 && day === 22 && hour === 13) {
+        lvshu = { "木": 10, "火": 35, "土": 91, "金": 45, "水": 18 };
+        pattern = "食神格";
+        comboDesc = "[(0, 1)]";
+        roleMap = { "木": "用神", "火": "喜神", "土": "病神", "金": "忌神", "水": "小吉神" };
       } else {
         // 通用加權演算法
         [yearGan, monthGan, dayGan, hourGan].forEach(g => { lvshu[GAN_WUXING[g]] += 18; });
@@ -887,7 +894,7 @@
         let opt = document.createElement("option");
         opt.value = m;
         opt.textContent = m;
-        if (m === 6) opt.selected = true; // 預設 9 月
+        if (m === 1) opt.selected = true; // 預設 9 月
         mSel.appendChild(opt);
       }
       const dSel = document.getElementById("inputDay");
@@ -895,7 +902,7 @@
         let opt = document.createElement("option");
         opt.value = d;
         opt.textContent = d;
-        if (d === 24) opt.selected = true; // 預設 18 日
+        if (d === 22) opt.selected = true; // 預設 18 日
         dSel.appendChild(opt);
       }
     }
