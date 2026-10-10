@@ -3,165 +3,249 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>八字命盤排盤系統</title>
+  <title>八字排盤系統 (官方引擎代理)</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background-color: #f7f5f0;
+      color: #2a2521;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
-      padding: 12px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
     }
-    .header-bar {
+    .container {
       width: 100%;
-      max-width: 960px;
-      background: #ffffff;
-      border: 1px solid #e0dacf;
+      max-width: 920px;
+    }
+    .header-card {
+      background: #fff;
+      border: 1px solid #dcd5ca;
       border-radius: 8px;
-      padding: 12px 18px;
-      margin-bottom: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .header-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      margin-bottom: 12px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
     }
-    .header-title {
-      font-size: 16px;
+    .app-title {
+      font-size: 17px;
       font-weight: bold;
-      color: #5c3a21;
+      color: #8b2500;
+    }
+    .form-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      align-items: center;
+    }
+    .form-item {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      font-size: 14px;
     }
-    .header-hint {
-      font-size: 13px;
-      color: #777;
+    .form-item label { color: #555; font-weight: 500; }
+    .form-item input, .form-item select {
+      padding: 5px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      background: #fff;
+      outline: none;
     }
-    .btn-embed {
+    .btn-calc {
       background: #8b2500;
       color: #fff;
       border: none;
-      padding: 6px 14px;
+      padding: 6px 18px;
       border-radius: 4px;
-      font-size: 13px;
+      font-size: 14px;
+      font-weight: bold;
       cursor: pointer;
-      font-weight: 500;
+      margin-left: auto;
       transition: background 0.15s;
     }
-    .btn-embed:hover {
-      background: #a82e00;
-    }
-    .iframe-wrapper {
-      width: 100%;
-      max-width: 960px;
-      background: #ffffff;
-      border: 1px solid #d4ccbd;
+    .btn-calc:hover { background: #aa2d00; }
+
+    /* 結果呈現區 */
+    .result-container {
+      background: #fff;
+      border: 1px solid #dcd5ca;
       border-radius: 8px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      overflow: hidden;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      min-height: 400px;
       display: flex;
       flex-direction: column;
-      height: 900px;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-
-    /* 彈窗樣式 */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6);
-      z-index: 1000;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      overflow-x: auto;
     }
-    .modal-overlay.active { display: flex; }
-    .modal-box {
-      background: #fff;
-      border-radius: 8px;
-      max-width: 620px;
+    .loading-spinner {
+      font-size: 15px;
+      color: #888;
+      display: none;
+    }
+    .loading-spinner.active { display: block; }
+
+    /* 來源標註頁尾 */
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+      margin-top: 20px;
+      padding-top: 12px;
+      border-top: 1px solid #e0dacf;
       width: 100%;
-      padding: 22px;
-      position: relative;
     }
-    .modal-close {
-      position: absolute;
-      top: 10px; right: 14px;
-      background: none; border: none;
-      font-size: 20px; cursor: pointer; color: #888;
+    .footer a {
+      color: #8b2500;
+      text-decoration: none;
+      font-weight: 500;
     }
-    .code-block {
-      background: #1e1e1e;
-      color: #9cdcfe;
-      padding: 12px;
-      border-radius: 6px;
-      font-family: monospace;
-      font-size: 13px;
-      white-space: pre-wrap;
-      word-break: break-all;
-      margin: 10px 0;
-    }
-    .btn-copy {
-      background: #5c3a21;
-      color: #fff;
-      border: none;
-      padding: 6px 14px;
-      font-size: 13px;
-      border-radius: 4px;
-      cursor: pointer;
-      float: right;
+    .footer a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
 
-  <div class="header-bar">
-    <div class="header-title">☯ 八字命盤與無敵律數系統</div>
-    <div class="header-hint">（直連官方引擎，100% 正確零誤差）</div>
-    <button class="btn-embed" onclick="openEmbedModal()">＜/＞ 取得嵌入代碼</button>
-  </div>
-
-  <div class="iframe-wrapper">
-    <iframe 
-      id="fateFrame" 
-      src="https://myfate.herokuapp.com/" 
-      title="八字命盤系統">
-    </iframe>
-  </div>
-
-  <!-- 彈窗 -->
-  <div class="modal-overlay" id="embedModal">
-    <div class="modal-box">
-      <button class="modal-close" onclick="closeEmbedModal()">✕</button>
-      <h3 style="margin-bottom:10px; color:#5c3a21;">＜/＞ 嵌入到您的任何網頁</h3>
-      <p style="font-size:14px; color:#666; margin-bottom:10px;">
-        在您希望呈現八字排盤的目標網站中，貼上以下代碼即可使用：
-      </p>
-      <div class="code-block" id="iframeCodeText">&lt;iframe src="https://scottie1016.github.io/" width="100%" height="920px" frameborder="0" style="border:none; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.08);"&gt;&lt;/iframe&gt;</div>
-      <button class="btn-copy" onclick="copyIframeCode()">複製代碼</button>
+<div class="container">
+  <!-- 控制面板 -->
+  <div class="header-card">
+    <div class="header-top">
+      <div class="app-title">☯ 專業八字命盤排盤系統</div>
+    </div>
+    <div class="form-grid">
+      <div class="form-item">
+        <label>性別：</label>
+        <select id="userGender">
+          <option value="男">男 (乾造)</option>
+          <option value="女" selected>女 (坤造)</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>西元：</label>
+        <input type="number" id="inputYear" value="1975" min="1900" max="2050" style="width: 72px;"> 年
+      </div>
+      <div class="form-item">
+        <select id="inputMonth" style="width: 62px;"></select> 月
+      </div>
+      <div class="form-item">
+        <select id="inputDay" style="width: 62px;"></select> 日
+      </div>
+      <div class="form-item">
+        <label>時辰：</label>
+        <select id="inputHour">
+          <option value="0">凌晨0點多 (早子 00:00-00:59)</option>
+          <option value="1">凌晨1點多 (丑時 01:00-01:59)</option>
+          <option value="2">凌晨2點多 (丑時 02:00-02:59)</option>
+          <option value="3">凌晨3點多 (寅時 03:00-03:59)</option>
+          <option value="4">凌晨4點多 (寅時 04:00-04:59)</option>
+          <option value="5">早上5點多 (卯時 05:00-05:59)</option>
+          <option value="6">早上6點多 (卯時 06:00-06:59)</option>
+          <option value="7">早上7點多 (辰時 07:00-07:59)</option>
+          <option value="8">早上8點多 (辰時 08:00-08:59)</option>
+          <option value="9">早上9點多 (巳時 09:00-09:59)</option>
+          <option value="10">早上10點多 (巳時 10:00-10:59)</option>
+          <option value="11">早上11點多 (午時 11:00-11:59)</option>
+          <option value="12">中午12點多 (午時 12:00-12:59)</option>
+          <option value="13">下午1點多 (未時 13:00-13:59)</option>
+          <option value="14">下午2點多 (未時 14:00-14:59)</option>
+          <option value="15">下午3點多 (申時 15:00-15:59)</option>
+          <option value="16" selected>下午4點多 (申時 16:00-16:59)</option>
+          <option value="17">下午5點多 (酉時 17:00-17:59)</option>
+          <option value="18">下午6點多 (酉時 18:00-18:59)</option>
+          <option value="19">傍晚7點多 (戌時 19:00-19:59)</option>
+          <option value="20">晚上8點多 (戌時 20:00-20:59)</option>
+          <option value="21">晚上9點多 (亥時 21:00-21:59)</option>
+          <option value="22">晚上10點多 (亥時 22:00-22:59)</option>
+          <option value="23">晚上11點多 (夜子 23:00-23:59)</option>
+        </select>
+      </div>
+      <button class="btn-calc" onclick="fetchBaziData()">⚡ 排盤更新</button>
     </div>
   </div>
 
-  <script>
-    function openEmbedModal() { document.getElementById("embedModal").classList.add("active"); }
-    function closeEmbedModal() { document.getElementById("embedModal").classList.remove("active"); }
-    function copyIframeCode() {
-      const t = document.getElementById("iframeCodeText").innerText;
-      navigator.clipboard.writeText(t).then(() => alert("已複製嵌入代碼！"));
+  <!-- 命盤呈現區域 -->
+  <div class="result-container" id="resultContainer">
+    <div class="loading-spinner" id="loadingSpinner">⏳ 正在與官方計算引擎同步計算中...</div>
+    <div id="chartContent"></div>
+  </div>
+
+  <!-- 來源聲明 -->
+  <div class="footer">
+    資料來源聲明：本排盤系統之演算法與實律數據運算自 <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer">myfate.herokuapp.com</a> 官方伺服器。
+  </div>
+</div>
+
+<script>
+  // 部署完成 Render 後，將此網址替換為您的 Render 專屬後端網址 (例如: https://bazi-api-xxxx.onrender.com)
+  const PROXY_API_URL = "https://your-bazi-api.onrender.com/api/bazi";
+
+  function initOptions() {
+    const mSel = document.getElementById("inputMonth");
+    for (let m = 1; m <= 12; m++) {
+      let opt = document.createElement("option");
+      opt.value = m; opt.textContent = m;
+      if (m === 7) opt.selected = true;
+      mSel.appendChild(opt);
     }
-  </script>
+    const dSel = document.getElementById("inputDay");
+    for (let d = 1; d <= 31; d++) {
+      let opt = document.createElement("option");
+      opt.value = d; opt.textContent = d;
+      if (d === 28) opt.selected = true;
+      dSel.appendChild(opt);
+    }
+  }
+
+  async function fetchBaziData() {
+    const gender = document.getElementById("userGender").value;
+    const year = document.getElementById("inputYear").value;
+    const month = document.getElementById("inputMonth").value;
+    const day = document.getElementById("inputDay").value;
+    const hour = document.getElementById("inputHour").value;
+
+    const spinner = document.getElementById("loadingSpinner");
+    const content = document.getElementById("chartContent");
+
+    spinner.classList.add("active");
+    content.innerHTML = "";
+
+    try {
+      const url = `${PROXY_API_URL}?year=${year}&month=${month}&day=${day}&hour=${hour}&gender=${encodeURIComponent(gender)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      spinner.classList.remove("active");
+
+      if (data.html) {
+        content.innerHTML = data.html;
+      } else {
+        content.innerHTML = `<div style="color:red;">獲取命盤失敗，請稍後重試。</div>`;
+      }
+    } catch (err) {
+      spinner.classList.remove("active");
+      content.innerHTML = `
+        <div style="text-align:center; padding: 20px; color:#666;">
+          <p>⚠️ 尚未連線到後端 Proxy 服務。</p>
+          <p style="font-size:13px; margin-top:8px;">請先將 <code>main.py</code> 部署至 Render.com 並替換本頁面的 <code>PROXY_API_URL</code>。</p>
+        </div>
+      `;
+    }
+  }
+
+  initOptions();
+</script>
+
 </body>
 </html>
