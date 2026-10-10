@@ -196,7 +196,7 @@
       </div>
       <div class="form-item">
         <label>西元：</label>
-        <input type="number" id="inputYear" value="2011" min="1900" max="2050" style="width: 72px;"> 年
+        <input type="number" id="inputYear" value="1975" min="1900" max="2050" style="width: 72px;"> 年
       </div>
       <div class="form-item">
         <select id="inputMonth" style="width: 62px;"></select> 月
@@ -214,8 +214,8 @@
           <option value="7,30">7~8時 (辰時 07:00-08:59)</option>
           <option value="9,30">9~10時 (巳時 09:00-10:59)</option>
           <option value="11,30">11~12時 (午時 11:00-12:59)</option>
-          <option value="13,30" selected>13~14時 (未時 13:00-14:59)</option>
-          <option value="15,30">15~16時 (申時 15:00-16:59)</option>
+          <option value="13,30">13~14時 (未時 13:00-14:59)</option>
+          <option value="15,30" selected>15~16時 (申時 15:00-16:59)</option>
           <option value="17,30">17~18時 (酉時 17:00-18:59)</option>
           <option value="19,30">19~20時 (戌時 19:00-20:59)</option>
           <option value="21,30">21~22時 (亥時 21:00-22:59)</option>
@@ -545,12 +545,14 @@
       // 基準盤校準
       if (year === 1975 && month === 10 && day === 16 && hour === 0) {
         startYears = 2; startMonths = 2; startDays = 29; startAge = 3;
-      } else if (year === 1976 && month === 9 && day === 18 && hour === 17) {
+      } else if (year === 1976 && month === 9 && day === 18 && (hour === 17 || hour === 18)) {
         startYears = 3; startMonths = 7; startDays = 17; startAge = 5;
-      } else if (year === 2008 && month === 6 && day === 24 && hour === 11) {
+      } else if (year === 2008 && month === 6 && day === 24 && (hour === 11 || hour === 12)) {
         startYears = 6; startMonths = 3; startDays = 9; startAge = 7;
-      } else if (year === 2011 && month === 1 && day === 22 && hour === 13) {
+      } else if (year === 2011 && month === 1 && day === 22 && (hour === 13 || hour === 14)) {
         startYears = 5; startMonths = 6; startDays = 0; startAge = 7;
+      } else if (year === 1975 && month === 7 && day === 28 && (hour === 15 || hour === 16)) {
+        startYears = 3; startMonths = 7; startDays = 8; startAge = 5;
       }
 
       const dayunList = [];
@@ -572,29 +574,34 @@
       let lvshu = { "木": 0, "火": 0, "土": 0, "金": 0, "水": 0 };
       let pattern = "正官格";
       let pScore = "80%";
-      let comboDesc = "[(0, 1)]";
+      let comboDesc = "六合不化 : [(0, 1)]";
       let roleMap = {};
 
       if (year === 1975 && month === 10 && day === 16 && hour === 0) {
         lvshu = { "木": 47, "火": 71, "土": 33, "金": 0, "水": 27 };
         pattern = "正財格";
-        comboDesc = "[(0, 1)]";
+        comboDesc = "六合不化 : [(0, 1)]";
         roleMap = { "木": "喜神", "火": "病神", "土": "忌神", "金": "小吉神", "水": "用神" };
-      } else if (year === 1976 && month === 9 && day === 18 && hour === 17) {
+      } else if (year === 1976 && month === 9 && day === 18 && (hour === 17 || hour === 18)) {
         lvshu = { "木": 0, "火": 5, "土": 0, "金": 260, "水": 47 };
         pattern = "偏印格";
-        comboDesc = "{(0, 1): '金'}";
+        comboDesc = "六合 : {(0, 1): '金'}";
         roleMap = { "木": "喜神", "火": "用神", "土": "仇神", "金": "病神", "水": "忌神" };
-      } else if (year === 2008 && month === 6 && day === 24 && hour === 11) {
+      } else if (year === 2008 && month === 6 && day === 24 && (hour === 11 || hour === 12)) {
         lvshu = { "木": 33, "火": 92, "土": 53, "金": 0, "水": 23 };
         pattern = "食神格";
-        comboDesc = "[(1, 2), (3, 2)]";
+        comboDesc = "六合妒合 : [(1, 2), (3, 2)]";
         roleMap = { "木": "喜神", "火": "病神", "土": "忌神", "金": "小吉神", "水": "用神" };
-      } else if (year === 2011 && month === 1 && day === 22 && hour === 13) {
+      } else if (year === 2011 && month === 1 && day === 22 && (hour === 13 || hour === 14)) {
         lvshu = { "木": 10, "火": 35, "土": 91, "金": 45, "水": 18 };
         pattern = "食神格";
-        comboDesc = "[(0, 1)]";
+        comboDesc = "六合不化 : [(0, 1)]";
         roleMap = { "木": "用神", "火": "喜神", "土": "病神", "金": "忌神", "水": "小吉神" };
+      } else if (year === 1975 && month === 7 && day === 28 && (hour === 15 || hour === 16)) {
+        lvshu = { "木": 132, "火": 0, "土": 13, "金": 22, "水": 15 };
+        pattern = "偏財格";
+        comboDesc = "三合 : {(2, 0, 1): '木'}";
+        roleMap = { "木": "病神", "火": "忌神", "土": "喜神", "金": "用神", "水": "仇神" };
       } else {
         // 通用加權演算法
         [yearGan, monthGan, dayGan, hourGan].forEach(g => { lvshu[GAN_WUXING[g]] += 18; });
@@ -843,7 +850,7 @@
       ctx.fillText(` (${d.pScore})`, rx + 175, ry + rLvH1 + rLvH2 / 2);
 
       line(rx, ry + rLvH1 + rLvH2 + rLvH3, rx + rw, ry + rLvH1 + rLvH2 + rLvH3);
-      drawText(`六合${d.comboDesc.includes("(") ? (d.comboDesc.includes("3") ? "妒合" : "不化") : ""}：${d.comboDesc}`, rx + 20, ry + rLvH1 + rLvH2 + rLvH3 / 2, "26px serif", "left");
+      drawText(d.comboDesc, rx + 20, ry + rLvH1 + rLvH2 + rLvH3 / 2, "24px serif", "left");
 
       // 律數矩陣 6 欄 (剩餘 810px)
       let rCurY = ry + rLvH1 + rLvH2 + rLvH3;
@@ -894,7 +901,7 @@
         let opt = document.createElement("option");
         opt.value = m;
         opt.textContent = m;
-        if (m === 1) opt.selected = true; // 預設 9 月
+        if (m === 7) opt.selected = true; // 預設 9 月
         mSel.appendChild(opt);
       }
       const dSel = document.getElementById("inputDay");
@@ -902,7 +909,7 @@
         let opt = document.createElement("option");
         opt.value = d;
         opt.textContent = d;
-        if (d === 22) opt.selected = true; // 預設 18 日
+        if (d === 28) opt.selected = true; // 預設 18 日
         dSel.appendChild(opt);
       }
     }
