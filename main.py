@@ -3,7 +3,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 from bs4 import BeautifulSoup
-import re
 
 app = FastAPI()
 
@@ -70,180 +69,117 @@ def build_myfate_payload(soup, year: int, month: int, day: int, hour: int, gende
 
     return payload
 
-def extract_two_cards_html(resp_text: str) -> str:
+STYLE_BLOCK = """
+<style>
+  .two-tables-wrapper {
+    width: 100% !important;
+    max-width: 860px !important;
+    margin: 0 auto !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+    color: #2b2520;
+    text-align: left;
+    box-sizing: border-box;
+  }
+  .table-box {
+    background: #ffffff;
+    border: 1px solid #d4ccbd;
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table-box-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #8b2500;
+    border-bottom: 2px solid #8b2500;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .table-box table {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-collapse: collapse !important;
+    background: #ffffff !important;
+    border: 1px solid #c9bfb0 !important;
+    margin: 4px 0 !important;
+  }
+  .table-box th, .table-box td {
+    border: 1px solid #c9bfb0 !important;
+    padding: 9px 8px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    font-size: 14px !important;
+  }
+  .table-box th {
+    background-color: #f7f3ea !important;
+    color: #5a4228 !important;
+    font-weight: bold !important;
+  }
+  .table-box td {
+    background-color: #ffffff !important;
+  }
+</style>
+"""
+
+def extract_strictly_two_tables(resp_text: str) -> str:
     """
-    精確只提取原網站的「兩張核心大表」：
-    1. 八字命盤表 (含基本資訊、四柱主副星藏干與大運)
-    2. 無敵律數表 (含格局、三合六合與實律用神統計)
-    徹底過濾作者落落長的免責說明、宣傳文章與外站連結
+    極簡純淨過濾：僅提取原網站的兩張核心大表 (八字命盤表、無敵律數表)，
+    徹底去除所有作者自述、文字段落、廣告與說明！
     """
     soup = BeautifulSoup(resp_text, "html.parser")
-
-    # 1. 移除無關全域標籤
-    for tag in soup.find_all(["script", "style", "nav", "header", "footer", "form", "iframe", "ins"]):
-        tag.decompose()
-
-    # 2. 移除原網站首頁重複大標題
-    for a in soup.find_all("a", href="/"):
-        if "免費八字命盤" in a.text:
-            a.decompose()
-
-    # 3. 移除分享連結、作者宣傳雜文
-    for p in soup.find_all(["p", "a", "span", "h2", "h3", "h4"]):
-        if p.string and any(k in p.string for k in [
-            "分享連結", "初放的資料會慢慢縮減", "心情看板", "數位游牧", 
-            "VPN 推薦", "快速學會日本語", "說明", "神煞的說明", 
-            "日主強弱的算法", "網站規劃", "粉絲專頁", "其他服務", "凱心健康團隊"
-        ]):
-            p.decompose()
-
-    # 4. 尋找基本資料文字 (如「坤造、陰女、肖兔、西元 1975 年生」)
-    basic_info_list = []
-    for p in soup.find_all("p"):
-        txt = p.text.strip()
-        if any(k in txt for k in ["坤造", "乾造", "陰女", "陽女", "陰男", "陽男", "肖", "西元", "民國"]):
-            if "初放的資料" not in txt and "分享連結" not in txt and txt not in basic_info_list:
-                basic_info_list.append(txt)
-
-    # 5. 尋找律數格局文字 (如「格局：偏財格 (80%)」、「三合：...」)
-    lvshu_info_list = []
-    for p in soup.find_all(["p", "div"]):
-        txt = p.text.strip()
-        if any(k in txt for k in ["格局", "偏財格", "正財格", "三合", "六合", "半合"]):
-            if "初放的資料" not in txt and txt not in lvshu_info_list:
-                lvshu_info_list.append(txt)
-
-    # 6. 分類表格
     all_tables = soup.find_all("table")
-    bazi_tables = []
-    lvshu_tables = []
+
+    bazi_table = None
+    lvshu_table = None
 
     for t in all_tables:
-        t_text = t.text
-        if any(k in t_text for k in ["時柱", "日柱", "月柱", "年柱", "主星", "天干", "地支", "藏干", "副星", "大運", "歲"]):
-            bazi_tables.append(str(t))
-        elif any(k in t_text for k in ["實律", "五常", "五行", "律數", "十神", "取用神", "仇神", "喜神", "忌神", "用神", "病神"]):
-            lvshu_tables.append(str(t))
-        else:
-            if not bazi_tables:
-                bazi_tables.append(str(t))
-            else:
-                lvshu_tables.append(str(t))
+        txt = t.text
+        # 表一：八字命盤
+        if any(k in txt for k in ["時柱", "日柱", "月柱", "年柱", "主星", "天干", "地支", "藏"]):
+            if not bazi_table:
+                bazi_table = t
+        # 表二：無敵律數
+        elif any(k in txt for k in ["實律", "五常", "五行", "十神", "取用神", "仇神", "病神"]):
+            if not lvshu_table:
+                lvshu_table = t
 
-    basic_info_html = "<br/>".join(basic_info_list) if basic_info_list else ""
-    lvshu_info_html = "<br/>".join(lvshu_info_list) if lvshu_info_list else ""
-    bazi_tables_html = "\n".join(bazi_tables)
-    lvshu_tables_html = "\n".join(lvshu_tables)
+    # 容錯：若關鍵字未精準命中，直接取首尾兩張表
+    if not bazi_table and len(all_tables) >= 1:
+        bazi_table = all_tables[0]
+    if not lvshu_table and len(all_tables) >= 2:
+        lvshu_table = all_tables[-1]
 
-    # 7. 組合雙大表卡片 HTML 與專業典雅排版
+    # 清理表格內部可能帶有的不必要樣式屬性
+    if bazi_table:
+        for attr in ["style", "class", "width"]:
+            bazi_table.attrs.pop(attr, None)
+    if lvshu_table:
+        for attr in ["style", "class", "width"]:
+            lvshu_table.attrs.pop(attr, None)
+
+    bazi_html = str(bazi_table) if bazi_table else "<div style='color:#888;'>未找到八字命盤表格</div>"
+    lvshu_html = str(lvshu_table) if lvshu_table else "<div style='color:#888;'>未找到無敵律數表格</div>"
+
     html_output = f"""
-    <div class="bazi-two-cards-container">
-      <style>
-        .bazi-two-cards-container {{
-          width: 100% !important;
-          max-width: 900px !important;
-          margin: 0 auto !important;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
-          color: #2b2520;
-          line-height: 1.6;
-          box-sizing: border-box;
-          text-align: left;
-        }}
-        .bazi-card {{
-          background: #ffffff;
-          border: 1px solid #d4ccbd;
-          border-radius: 8px;
-          padding: 16px 20px;
-          margin-bottom: 22px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-          overflow-x: auto;
-          -webkit-overflow-scrolling: touch;
-        }}
-        .bazi-card-header {{
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border-bottom: 2px solid #8b2500;
-          padding-bottom: 8px;
-          margin-bottom: 12px;
-        }}
-        .bazi-card-title {{
-          font-size: 17px;
-          font-weight: bold;
-          color: #8b2500;
-        }}
-        .bazi-card-badge {{
-          font-size: 12px;
-          background: #f5ebe1;
-          color: #8b2500;
-          padding: 3px 8px;
-          border-radius: 4px;
-          font-weight: bold;
-        }}
-        .bazi-info-meta {{
-          font-size: 14px;
-          color: #4a3e35;
-          margin-bottom: 14px;
-          background: #faf7f2;
-          padding: 9px 14px;
-          border-radius: 6px;
-          border-left: 3px solid #8b2500;
-          font-weight: 500;
-          line-height: 1.7;
-        }}
-        .bazi-card table {{
-          width: 100% !important;
-          max-width: 100% !important;
-          border-collapse: collapse !important;
-          margin: 10px 0 16px 0 !important;
-          background: #ffffff !important;
-          border: 1px solid #c9bfb0 !important;
-        }}
-        .bazi-card th, .bazi-card td {{
-          border: 1px solid #c9bfb0 !important;
-          padding: 8px 10px !important;
-          text-align: center !important;
-          vertical-align: middle !important;
-          font-size: 14px !important;
-        }}
-        .bazi-card th {{
-          background-color: #f7f3ea !important;
-          color: #5a4228 !important;
-          font-weight: bold !important;
-        }}
-        .bazi-card td {{
-          background-color: #ffffff !important;
-        }}
-        .bazi-card p {{
-          margin: 6px 0;
-          font-size: 14px;
-        }}
-        .bazi-card h4 {{
-          font-size: 15px;
-          color: #5a4228;
-          margin: 14px 0 6px 0;
-          font-weight: bold;
-        }}
-      </style>
-
+    <div class="two-tables-wrapper">
+      {STYLE_BLOCK}
+      
       <!-- 第一張大表：八字四柱命盤 -->
-      <div class="bazi-card">
-        <div class="bazi-card-header">
-          <div class="bazi-card-title">☯ 八字四柱命盤</div>
-          <div class="bazi-card-badge">正宗排盤與大運</div>
-        </div>
-        {f'<div class="bazi-info-meta">{basic_info_html}</div>' if basic_info_html else ''}
-        {bazi_tables_html}
+      <div class="table-box">
+        <div class="table-box-title">☯ 八字命盤</div>
+        {bazi_html}
       </div>
 
       <!-- 第二張大表：無敵律數分析 -->
-      <div class="bazi-card">
-        <div class="bazi-card-header">
-          <div class="bazi-card-title">⚖️ 無敵律數分析</div>
-          <div class="bazi-card-badge">五行實律與用神</div>
-        </div>
-        {f'<div class="bazi-info-meta">{lvshu_info_html}</div>' if lvshu_info_html else ''}
-        {lvshu_tables_html}
+      <div class="table-box">
+        <div class="table-box-title">⚖️ 無敵律數</div>
+        {lvshu_html}
       </div>
     </div>
     """
@@ -253,8 +189,8 @@ def extract_two_cards_html(resp_text: str) -> str:
 def home():
     return {
         "status": "online",
-        "version": "3.0",
-        "service": "Bazi Proxy API (Dual-Card Clean Layout v3.0)",
+        "version": "3.1",
+        "service": "Bazi Proxy API (Strict Dual-Table Mode v3.1)",
         "source": "https://myfate.herokuapp.com/",
         "debug_url": "/debug-form"
     }
@@ -279,13 +215,13 @@ def debug_form():
         post_res = session.post(action_url, data=payload, headers=headers, timeout=12)
         post_res.encoding = post_res.apparent_encoding or "utf-8"
         
-        formatted_html = extract_two_cards_html(post_res.text)
+        formatted_html = extract_strictly_two_tables(post_res.text)
 
         return f"""
         <html>
-        <head><meta charset="utf-8"><title>Bazi Proxy Debug v3.0</title></head>
+        <head><meta charset="utf-8"><title>Bazi Proxy Debug v3.1</title></head>
         <body style="font-family:sans-serif; padding:20px; line-height:1.6; max-width:960px; margin:auto; background:#f7f5f0;">
-            <h2>✅ Render Proxy 伺服器在線 (版本 v3.0 - 兩大核心卡片專屬呈現)</h2>
+            <h2>✅ Render Proxy 伺服器在線 (版本 v3.1 - 極簡雙大表模式)</h2>
             <hr/>
             {formatted_html}
         </body>
@@ -321,8 +257,8 @@ def get_bazi(year: int, month: int, day: int, hour: int, gender: str = "女"):
         resp = session.post(action_url, data=payload, headers=headers, timeout=12)
         resp.encoding = resp.apparent_encoding or "utf-8"
 
-        # 4. 精確只提取兩張核心大表
-        formatted_content = extract_two_cards_html(resp.text)
+        # 4. 極簡提取：僅保留純淨的兩張大表
+        formatted_content = extract_strictly_two_tables(resp.text)
 
         return {
             "status": "success",
