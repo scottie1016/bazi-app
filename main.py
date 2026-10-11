@@ -16,33 +16,19 @@ app.add_middleware(
 TARGET_URL = "https://myfate.herokuapp.com/"
 
 def build_myfate_payload(soup, year: int, month: int, day: int, hour: int, gender: str):
-    """
-    100% 對齊原網站表單定義：
-    Calendar: 1 (陽曆), 0 (農曆)
-    Sex: 0 (女), 1 (男)
-    Year: 根據 (year - 1900) 精確索引取值，徹底解決字串比對失敗退回 1900 的問題
-    Month: options[month - 1]
-    Day: options[day - 1]
-    Hour: options[hour]
-    """
     form = soup.find("form")
     if not form:
         return {}
 
     payload = {}
 
-    # 1. 抓取所有 Hidden 欄位 (CSRF 等)
     for h in form.find_all("input", type="hidden"):
         if h.get("name"):
             payload[h["name"]] = h.get("value", "")
 
-    # 2. 曆法 Calendar (1=陽曆, 0=農曆)
     payload["Calendar"] = "1"
-
-    # 3. 性別 Sex (0=女, 1=男)
     payload["Sex"] = "1" if gender in ["男", "乾造", "1"] else "0"
 
-    # 4. 年份 Year (原網站從 1900 年開始，精確索引為 year - 1900)
     year_sel = form.find("select", {"name": "Year"})
     if year_sel:
         opts = year_sel.find_all("option")
@@ -55,7 +41,6 @@ def build_myfate_payload(soup, year: int, month: int, day: int, hour: int, gende
                     payload["Year"] = opt.get("value") or opt.text.strip()
                     break
 
-    # 5. 月份 Month
     month_sel = form.find("select", {"name": "Month"})
     if month_sel:
         opts = month_sel.find_all("option")
@@ -65,7 +50,6 @@ def build_myfate_payload(soup, year: int, month: int, day: int, hour: int, gende
         else:
             payload["Month"] = str(month)
 
-    # 6. 日期 Day
     day_sel = form.find("select", {"name": "Day"})
     if day_sel:
         opts = day_sel.find_all("option")
@@ -75,7 +59,6 @@ def build_myfate_payload(soup, year: int, month: int, day: int, hour: int, gende
         else:
             payload["Day"] = str(day)
 
-    # 7. 時辰 Hour
     hour_sel = form.find("select", {"name": "Hour"})
     if hour_sel:
         opts = hour_sel.find_all("option")
@@ -86,21 +69,66 @@ def build_myfate_payload(soup, year: int, month: int, day: int, hour: int, gende
 
     return payload
 
+STYLE_BLOCK = """
+<style>
+.bazi-result-wrapper {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+    width: 100%;
+    color: #2a2521;
+    line-height: 1.6;
+}
+.bazi-result-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 20px 0;
+    background: #ffffff;
+    border: 1px solid #dcd5ca;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.bazi-result-wrapper th, 
+.bazi-result-wrapper td {
+    border: 1px solid #dcd5ca;
+    padding: 8px 12px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+}
+.bazi-result-wrapper th {
+    background-color: #f7f3eb;
+    color: #5c3a21;
+    font-weight: bold;
+}
+.bazi-result-wrapper td {
+    background-color: #ffffff;
+}
+.bazi-result-wrapper h3, 
+.bazi-result-wrapper h4 {
+    color: #8b2500;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 18px 0 8px 0;
+    border-left: 4px solid #8b2500;
+    padding-left: 8px;
+}
+.bazi-result-wrapper p {
+    font-size: 14px;
+    margin: 6px 0;
+}
+</style>
+"""
+
 @app.get("/")
 def home():
     return {
         "status": "online",
-        "version": "2.6",
-        "service": "Bazi Proxy API (Fixed Year Index v2.6)",
+        "version": "2.7",
+        "service": "Bazi Proxy API (Complete Formatted Layout v2.7)",
         "source": "https://myfate.herokuapp.com/",
         "debug_url": "/debug-form"
     }
 
 @app.get("/debug-form", response_class=HTMLResponse)
 def debug_form():
-    """
-    即時線上診斷
-    """
     try:
         session = requests.Session()
         headers = {
@@ -115,28 +143,25 @@ def debug_form():
             act = form.get("action")
             action_url = act if act.startswith("http") else TARGET_URL.rstrip("/") + "/" + act.lstrip("/")
 
-        # 產生 1975-07-28 16時 女 的精確 Payload
         payload = build_myfate_payload(soup, 1975, 7, 28, 16, "女")
-        
-        # 實測發送
         post_res = session.post(action_url, data=payload, headers=headers, timeout=10)
         post_res.encoding = post_res.apparent_encoding or "utf-8"
-        has_table = any(k in post_res.text for k in ["八字", "主星", "日主", "命造", "律數"])
         
-        status_color = "green" if (post_res.status_code == 200 and has_table) else "red"
-        status_desc = "✅ 成功取得命盤！" if (post_res.status_code == 200 and has_table) else f"HTTP {post_res.status_code} (長度 {len(post_res.text)} bytes)"
+        res_soup = BeautifulSoup(post_res.text, "html.parser")
+        for tag in res_soup.find_all(["script", "style", "nav", "header", "footer", "form", "iframe", "ins"]):
+            tag.decompose()
+        
+        container = res_soup.find("div", class_="container") or res_soup.find("body") or res_soup
+        formatted_html = f"<div class='bazi-result-wrapper'>{STYLE_BLOCK}{str(container)}</div>"
 
         return f"""
         <html>
-        <head><meta charset="utf-8"><title>Bazi Proxy Debug v2.6</title></head>
+        <head><meta charset="utf-8"><title>Bazi Proxy Debug v2.7</title></head>
         <body style="font-family:sans-serif; padding:20px; line-height:1.6; max-width:960px; margin:auto;">
-            <h2>✅ Render Proxy 伺服器在線 (版本 v2.6)</h2>
+            <h2>✅ Render Proxy 伺服器在線 (版本 v2.7)</h2>
             <hr/>
-            <h3>🧪 即時實測結果 (1975-07-28 16時 女)：</h3>
-            <p><b>送出 Payload：</b> <code>{payload}</code></p>
-            <p><b>執行狀態：</b> <b style="color:{status_color}; font-size:16px;">{status_desc}</b></p>
-            <hr/>
-            <p><a href="/api/bazi?year=1975&month=7&day=28&hour=16&gender=女">👉 點此直接在瀏覽器執行 API 獲取排盤結果</a></p>
+            <h3>排盤結果預覽 (1975-07-28 16時 女)：</h3>
+            {formatted_html}
         </body>
         </html>
         """
@@ -170,32 +195,28 @@ def get_bazi(year: int, month: int, day: int, hour: int, gender: str = "女"):
         resp = session.post(action_url, data=payload, headers=headers, timeout=12)
         resp.encoding = resp.apparent_encoding or "utf-8"
 
-        # 4. 解析命盤內容
+        # 4. 解析完整排盤結果 (保留所有命盤表格與排版，去除無關廣告與表單)
         res_soup = BeautifulSoup(resp.text, "html.parser")
-        for tag in res_soup.find_all(["script", "style"]):
+        
+        for tag in res_soup.find_all(["script", "style", "nav", "header", "footer", "form", "iframe", "ins"]):
             tag.decompose()
 
-        chart_div = None
-        for table in res_soup.find_all("table"):
-            if any(k in table.text for k in ["八字", "主星", "日主", "命造", "律數"]):
-                chart_div = table.parent
-                break
-        if not chart_div:
-            chart_div = res_soup.find("div", class_="result-container") or res_soup.find("div", class_="container")
+        # 移除外站廣告或多餘無關宣傳文章
+        for elem in res_soup.find_all(True):
+            if elem.string and any(k in elem.string for k in ["心情看板", "數位游牧", "VPN 推薦", "快速學會日本語"]):
+                elem.decompose()
 
-        if chart_div and any(k in chart_div.text for k in ["八字", "主星", "日主", "命造", "律數"]):
-            return {
-                "status": "success",
-                "source": "https://myfate.herokuapp.com/",
-                "submitted_payload": payload,
-                "html": str(chart_div)
-            }
-        else:
-            return {
-                "status": "error",
-                "message": f"原網站回應未包含命盤數據 (HTTP {resp.status_code})",
-                "submitted_payload": payload,
-                "raw_response_snippet": resp.text[:1500]
-            }
+        # 尋找內容容器 (保留八字命盤、大運、律數等所有結果)
+        container = res_soup.find("div", class_="container") or res_soup.find("body") or res_soup
+
+        # 注入美化樣式 (讓表格具備邊框、欄位對齊、典雅風格)
+        formatted_content = f"<div class='bazi-result-wrapper'>{STYLE_BLOCK}{str(container)}</div>"
+
+        return {
+            "status": "success",
+            "source": "https://myfate.herokuapp.com/",
+            "submitted_payload": payload,
+            "html": formatted_content
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
