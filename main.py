@@ -27,7 +27,6 @@ def home():
 
 @app.get("/debug-form", response_class=HTMLResponse)
 def debug_form():
-    """在瀏覽器呈現 myfate 原網站的表單欄位與當前連線狀態"""
     try:
         session = requests.Session()
         headers = {
@@ -77,7 +76,7 @@ def get_bazi(year: int, month: int, day: int, hour: int, gender: str = "女"):
 
         payload = {}
         
-        # 抓取所有 hidden 欄位 (包含 CSRF 或 session token)
+        # 抓取 hidden 欄位 (CSRF 等)
         for h in soup.find_all("input", type="hidden"):
             if h.get("name"):
                 payload[h.get("name")] = h.get("value", "")
@@ -101,7 +100,7 @@ def get_bazi(year: int, month: int, day: int, hour: int, gender: str = "女"):
                 break
         payload["Sex"] = sex_val
 
-        # 年份 Year (動態精確比對原網站 option)
+        # 年份 Year (自動動態比對原網站 option，精準消除空格差異)
         year_select = soup.find("select", {"name": "Year"}) or soup.find("select", {"id": "Year"})
         selected_year_val = None
         if year_select:
@@ -157,7 +156,6 @@ def get_bazi(year: int, month: int, day: int, hour: int, gender: str = "女"):
                         break
         payload["Hour"] = selected_hour_val
         
-        # 提交按鈕：僅在帶有 name 屬性時附帶
         submit_btn = soup.find("button", type="submit") or soup.find("input", type="submit")
         if submit_btn and submit_btn.get("name"):
             payload[submit_btn.get("name")] = submit_btn.get("value", "命盤分析")
@@ -170,14 +168,12 @@ def get_bazi(year: int, month: int, day: int, hour: int, gender: str = "女"):
         for tag in res_soup.find_all(["script", "style"]):
             tag.decompose()
 
-        # 檢查是否有八字命盤表格
         chart_div = None
         for table in res_soup.find_all("table"):
             if any(k in table.text for k in ["八字", "主星", "日主", "命造", "律數"]):
                 chart_div = table.parent
                 break
 
-        # 若原網站仍回傳日期錯誤提示
         if "請檢查日期" in resp.text:
             return {
                 "status": "error",
