@@ -238,16 +238,25 @@
       border-radius: 4px;
       font-size: 12.5px;
     }
+    /* 神煞與星宿直書樣式 (嚴格直排 Top-to-Bottom，手機絕不橫躺) */
+    .vert-text, .badge-ss, .god-cell, .yun-cell, .vert-label, .fu-item {
+      writing-mode: vertical-rl;
+      -webkit-writing-mode: vertical-rl;
+      text-orientation: upright;
+      -webkit-text-orientation: upright;
+      letter-spacing: 2px;
+      line-height: 1.15;
+    }
     .badge-ss {
       display: inline-block;
-      background: #f1ebd9;
-      border: 1px solid #d5cbba;
-      color: #382e22;
-      padding: 2px 6px;
+      margin: 3px 2px;
+      padding: 4px 3px;
+      font-size: 13px;
       border-radius: 3px;
-      font-size: 12px;
-      margin: 2px 3px 2px 0;
-      white-space: nowrap;
+      border: 1px solid #d5cbba;
+      background: #f1ebd9;
+      color: #382e22;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
     }
     .badge-ss.gui {
       background: #fcedd8;
@@ -259,6 +268,73 @@
       background: #fce8e8;
       border-color: #dfb0b0;
       color: #8c2323;
+      font-weight: 500;
+    }
+    .god-cell {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1a1611;
+      padding: 4px 0;
+      margin: 0 auto;
+      display: inline-block;
+    }
+    .yun-cell {
+      font-size: 15px;
+      font-weight: bold;
+      color: #2b2319;
+      display: inline-block;
+    }
+    .vert-label {
+      font-size: 15px;
+      font-weight: bold;
+      color: #2b2319;
+      display: inline-block;
+    }
+    .ganzhi-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 0;
+    }
+    .ganzhi-box .gan, .ganzhi-box .zhi {
+      font-size: 26px;
+      font-weight: bold;
+      line-height: 1.18;
+      color: #1a1611;
+    }
+    .cang-cell {
+      font-size: 13.5px;
+      color: #2b2319;
+      letter-spacing: 2px;
+      padding: 6px 4px !important;
+    }
+    .fu-box {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 100%;
+      min-height: 38px;
+    }
+    .fu-item {
+      font-size: 13px;
+      color: #2b2319;
+      letter-spacing: 1px;
+    }
+    .ss-pillar-box {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 6px;
+      padding: 6px 2px;
+      min-height: 180px;
+    }
+    .ss-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
     }
     .ss-name-cell {
       font-weight: bold;
@@ -385,10 +461,17 @@
       <span>💡 高解析度向量繪製：所有格線與欄位嚴格對齊，手機長按圖片或點上方按鈕可直接下載。</span>
     </div>
 
-    <!-- 命盤神煞與十二運解析區塊 (對齊 myfate.herokuapp.com 樣式) -->
-        <!-- 命盤神煞與十二運解析區塊 (以 Canvas 向量圖呈現，手機絕不跑版折行) -->
-    <div id="shenshaSection" class="shensha-section" style="margin-top: 18px; width: 100%; display: flex; flex-direction: column; align-items: center;">
-      <canvas id="shenshaCanvas" width="800" height="1460" style="width: 100%; max-width: 640px; height: auto; display: block; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.12);"></canvas>
+    <div class="action-btn-row" style="display:flex; justify-content:center; gap:12px; margin: 14px 0 18px; flex-wrap:wrap;">
+      <button class="btn-save" onclick="downloadImage()">💾 下載命盤律數圖 (上方)</button>
+      <button class="btn-save" onclick="downloadShenshaImage()" style="background:#5c3a21;">📜 下載神煞對照圖 (下方)</button>
+    </div>
+
+    <!-- 命盤神煞與十二運解析區塊 (100% 依原版直書樣式，直排 Top-to-Bottom 呈現) -->
+    <div id="shenshaSection" class="shensha-section" style="margin-top: 10px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+      <!-- 手機自適應直書卡片 -->
+      <div id="shenshaHtmlCard" class="shensha-card" style="width: 100%; max-width: 640px; box-sizing: border-box; background:#fff; border:1.5px solid #2b2319; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.08); overflow:hidden; margin-bottom: 20px;"></div>
+      <!-- 高解析度向量繪製畫布 (供長按儲存或下載) -->
+      <canvas id="shenshaCanvas" width="800" height="1460" style="width: 100%; max-width: 640px; height: auto; display: none; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.12);"></canvas>
     </div>
 
   </div>
@@ -1319,6 +1402,157 @@
       ["福德", "事事容易順心，有此神煞可增加吉祥程度。"]
     ];
 
+    
+    /* ========================================================
+     * 神煞與十二運自適應直書卡片渲染模組 (100% 依原版直書樣式)
+     * ======================================================== */
+    function renderShenshaHtmlTable(d) {
+      const card = document.getElementById("shenshaHtmlCard");
+      if (!card) return;
+
+      const { changSheng, pillarShenSha } = calculateChangShengAndShenSha(d);
+      let shichen = (d.hour >= 23) ? "夜子" : (d.hour < 1 ? "早子" : DIZHI[Math.floor((d.hour + 1) / 2)]);
+
+      function getSSBadgeClass(sName) {
+        if (["天乙貴人", "天德貴人", "月德貴人", "福德", "龍德", "將星"].includes(sName)) {
+          return "badge-ss gui";
+        }
+        if (["血刃", "飛刃", "五鬼", "流霞", "紅鸞", "桃花", "祿神"].includes(sName)) {
+          return "badge-ss xiong";
+        }
+        return "badge-ss";
+      }
+
+      function renderPillarSS(ssList, pKey) {
+        if (!ssList || ssList.length === 0) return `<div class="ss-pillar-box"><span style="color:#999;font-size:12px;">無</span></div>`;
+
+        let cols = [];
+        if (pKey === "hour") {
+          let colRight = ["桃花", "福德", "空亡", "月德貴人"].filter(s => ssList.includes(s));
+          let colLeft = ["紅鸞", "桃花", "天乙貴人", "天德貴人"].filter(s => ssList.includes(s));
+          if (colRight.length === 0 && colLeft.length === 0) {
+            let mid = Math.ceil(ssList.length / 2);
+            colRight = ssList.slice(0, mid);
+            colLeft = ssList.slice(mid);
+          }
+          cols = [colRight, colLeft];
+        } else if (pKey === "month") {
+          let colRight = ["月德貴人", "天德貴人", "龍德"].filter(s => ssList.includes(s));
+          let colLeft = ["飛刃", "流霞", "墓庫"].filter(s => ssList.includes(s));
+          if (colRight.length === 0 && colLeft.length === 0) {
+            let mid = Math.ceil(ssList.length / 2);
+            colRight = ssList.slice(0, mid);
+            colLeft = ssList.slice(mid);
+          }
+          cols = [colRight, colLeft];
+        } else if (pKey === "day") {
+          cols = [ssList];
+        } else if (pKey === "year") {
+          cols = [ssList];
+        } else {
+          if (ssList.length <= 3) {
+            cols = [ssList];
+          } else {
+            let mid = Math.ceil(ssList.length / 2);
+            cols = [ssList.slice(0, mid), ssList.slice(mid)];
+          }
+        }
+
+        let html = `<div class="ss-pillar-box">`;
+        cols.forEach(items => {
+          html += `<div class="ss-col">`;
+          items.forEach(sName => {
+            html += `<span class="${getSSBadgeClass(sName)}">${sName}</span>`;
+          });
+          html += `</div>`;
+        });
+        html += `</div>`;
+        return html;
+      }
+
+      const pData = [
+        { k: "hour", pd: d.pillars.hour },
+        { k: "day", pd: d.pillars.day },
+        { k: "month", pd: d.pillars.month },
+        { k: "year", pd: d.pillars.year }
+      ];
+
+      let tbl1 = `
+        <div class="box-title" style="background:#faeed1; padding:10px 14px; font-weight:bold; font-size:18px; border-bottom:1.5px solid #2b2319; color:#1a1611;">八字命盤</div>
+        <div class="shensha-meta" style="padding:10px 14px 8px; font-size:14px; color:#2b2319; line-height:1.6; border-bottom:1px solid #dcd5ca; background:#fff;">
+          <div>${d.name}、${d.yyDesc}、肖${d.shengxiao}、西元 ${d.year} 年生</div>
+          <div>民　國　${d.minguoYear}　年　${d.month}　月　${d.day}　日　${d.hour}　時　生</div>
+          <div>農　曆　${d.minguoYear}　年　${d.lunar.month}　月　${d.lunar.day}　日　${shichen}　時　生</div>
+        </div>
+        <table class="shensha-pillar-table" style="margin-bottom:0; width:100%; border-collapse:collapse;">
+          <tbody>
+            <tr>
+              ${pData.map(p => `<td style="vertical-align:middle; text-align:center; padding:8px 4px;"><div class="god-cell">${p.pd.god}</div></td>`).join("")}
+              <td class="col-label" style="text-align:center; vertical-align:middle;"><div class="vert-label">主星</div></td>
+            </tr>
+            <tr>
+              ${pData.map(p => `<td style="vertical-align:middle; text-align:center; padding:8px 4px;"><div class="ganzhi-box"><div class="gan">${p.pd.gan}</div><div class="zhi">${p.pd.zhi}</div></div></td>`).join("")}
+              <td class="col-label" style="text-align:center; vertical-align:middle;"><div class="vert-label">八字</div></td>
+            </tr>
+            <tr style="background:#faeed1;">
+              ${pData.map(p => `<td class="cang-cell" style="vertical-align:middle; text-align:center;">${p.pd.cangs.join(" ")}</td>`).join("")}
+              <td class="col-label" style="text-align:center; vertical-align:middle; font-weight:bold;">藏</td>
+            </tr>
+            <tr style="background:#faeed1;">
+              ${pData.map(p => `<td style="vertical-align:middle; text-align:center; padding:6px 2px;"><div class="fu-box">${p.pd.fuGods.map(fg => `<div class="fu-item">${fg}</div>`).join("")}</div></td>`).join("")}
+              <td class="col-label" style="text-align:center; vertical-align:middle;"><div class="vert-label">副星</div></td>
+            </tr>
+            <tr>
+              ${pData.map(p => `<td style="vertical-align:middle; text-align:center; padding:8px 4px;"><div class="yun-cell">${changSheng[p.k]}</div></td>`).join("")}
+              <td class="col-label" style="text-align:center; vertical-align:middle; font-weight:bold;">運</td>
+            </tr>
+            <tr>
+              ${pData.map(p => `<td style="vertical-align:top; text-align:center; padding:6px 2px; background:#fff;">${renderPillarSS(pillarShenSha[p.k], p.k)}</td>`).join("")}
+              <td class="col-label" style="vertical-align:middle; text-align:center;"><div class="vert-label">神煞</div></td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      const allPillarSS = [];
+      ["year", "month", "day", "hour"].forEach(k => {
+        (pillarShenSha[k] || []).forEach(s => {
+          if (!allPillarSS.includes(s)) allPillarSS.push(s);
+        });
+      });
+
+      let activeList = [];
+      MYFATE_SHENSHA_LIST.forEach(([s_name, s_desc]) => {
+        if (allPillarSS.includes(s_name)) {
+          activeList.push([s_name, s_desc]);
+        }
+      });
+      if (activeList.length === 0) activeList = MYFATE_SHENSHA_LIST;
+
+      let tbl2 = `
+        <div style="margin-top: 16px;">
+          <table class="shensha-desc-table" style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="background:#faeed1;">
+                <th style="width: 100px; padding:8px; border:1px solid #dcd5ca; text-align:center;">神煞</th>
+                <th style="text-align: left; padding:8px 14px; border:1px solid #dcd5ca;">說明</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${activeList.map(([sName, sDesc]) => `
+                <tr>
+                  <td class="ss-name-cell" style="text-align:center; padding:8px 4px; border:1px solid #dcd5ca; font-weight:bold;">${sName}</td>
+                  <td style="text-align:left; padding:8px 12px; line-height:1.5; border:1px solid #dcd5ca; font-size:13.5px; color:#2b2319;">${sDesc}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      card.innerHTML = tbl1 + tbl2;
+    }
+
     function drawShenshaCanvas(d) {
       const canvas = document.getElementById("shenshaCanvas");
       if (!canvas) return;
@@ -1619,7 +1853,18 @@
 
       const d = computeBazi(year, month, day, h, m, gender, rawName);
       drawBaziImage(d);
+      renderShenshaHtmlTable(d);
       drawShenshaCanvas(d);
+    }
+
+        function downloadShenshaImage() {
+      const canvas = document.getElementById("shenshaCanvas");
+      if (!canvas) return;
+      const name = document.getElementById("userName").value || "無名氏";
+      const link = document.createElement("a");
+      link.download = `八字神煞命盤_${name}_${document.getElementById("inputYear").value}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
     }
 
     function downloadImage() {
