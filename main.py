@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 from bs4 import BeautifulSoup
+import re
 
 app = FastAPI()
 
@@ -78,51 +79,89 @@ STYLE_BLOCK = """
     line-height: 1.6;
 }
 .bazi-result-wrapper table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 12px 0 20px 0;
-    background: #ffffff;
-    border: 1px solid #dcd5ca;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 14px 0 22px 0 !important;
+    background: #ffffff !important;
+    border: 1px solid #dcd5ca !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 .bazi-result-wrapper th, 
 .bazi-result-wrapper td {
-    border: 1px solid #dcd5ca;
-    padding: 8px 12px;
-    text-align: center;
-    vertical-align: middle;
-    font-size: 14px;
+    border: 1px solid #dcd5ca !important;
+    padding: 9px 12px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    font-size: 14px !important;
 }
 .bazi-result-wrapper th {
-    background-color: #f7f3eb;
-    color: #5c3a21;
-    font-weight: bold;
+    background-color: #f7f3eb !important;
+    color: #5c3a21 !important;
+    font-weight: bold !important;
 }
 .bazi-result-wrapper td {
-    background-color: #ffffff;
+    background-color: #ffffff !important;
 }
 .bazi-result-wrapper h3, 
 .bazi-result-wrapper h4 {
-    color: #8b2500;
-    font-size: 16px;
-    font-weight: bold;
-    margin: 18px 0 8px 0;
-    border-left: 4px solid #8b2500;
-    padding-left: 8px;
+    color: #8b2500 !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    margin: 20px 0 10px 0 !important;
+    border-left: 4px solid #8b2500 !important;
+    padding-left: 8px !important;
 }
 .bazi-result-wrapper p {
-    font-size: 14px;
-    margin: 6px 0;
+    font-size: 14px !important;
+    margin: 6px 0 !important;
 }
 </style>
 """
+
+def extract_clean_bazi_html(resp_text: str) -> str:
+    res_soup = BeautifulSoup(resp_text, "html.parser")
+    
+    # 1. 移除無關元素 (腳本、樣式、表單、導航列、頁尾、iframe)
+    for tag in res_soup.find_all(["script", "style", "nav", "header", "footer", "form", "iframe", "ins"]):
+        tag.decompose()
+
+    # 2. 移除原網站首頁重複大標題 (<a href="/">免費八字命盤</a>)
+    for a in res_soup.find_all("a", href="/"):
+        if "免費八字命盤" in a.text:
+            p = a.parent
+            if p and p.name in ["h1", "h2", "h3", "div"]:
+                p.decompose()
+            else:
+                a.decompose()
+
+    # 3. 移除外站廣告或多餘無關宣傳文章
+    for heading in res_soup.find_all(["h2", "h3", "h4", "p"]):
+        if heading.string and any(k in heading.string for k in ["心情看板", "數位游牧", "VPN 推薦", "快速學會日本語"]):
+            heading.decompose()
+
+    # 4. 抓取包含所有排盤表格與內容的 container (八字四柱、大運、律數)
+    results = []
+    for c in res_soup.find_all("div", class_="container"):
+        if c.find("table") or any(k in c.text for k in ["八字", "主星", "日主", "命造", "律數"]):
+            results.append(str(c))
+
+    if not results:
+        for t in res_soup.find_all("table"):
+            results.append(str(t.parent if t.parent else t))
+
+    if not results:
+        body = res_soup.find("body")
+        results = [str(body)] if body else [str(res_soup)]
+
+    full_inner_html = "\n".join(results)
+    return f"<div class='bazi-result-wrapper'>{STYLE_BLOCK}{full_inner_html}</div>"
 
 @app.get("/")
 def home():
     return {
         "status": "online",
-        "version": "2.7",
-        "service": "Bazi Proxy API (Complete Formatted Layout v2.7)",
+        "version": "2.8",
+        "service": "Bazi Proxy API (Complete Four-Pillars & LvShu Layout v2.8)",
         "source": "https://myfate.herokuapp.com/",
         "debug_url": "/debug-form"
     }
@@ -144,21 +183,16 @@ def debug_form():
             action_url = act if act.startswith("http") else TARGET_URL.rstrip("/") + "/" + act.lstrip("/")
 
         payload = build_myfate_payload(soup, 1975, 7, 28, 16, "女")
-        post_res = session.post(action_url, data=payload, headers=headers, timeout=10)
+        post_res = session.post(action_url, data=payload, headers=headers, timeout=12)
         post_res.encoding = post_res.apparent_encoding or "utf-8"
         
-        res_soup = BeautifulSoup(post_res.text, "html.parser")
-        for tag in res_soup.find_all(["script", "style", "nav", "header", "footer", "form", "iframe", "ins"]):
-            tag.decompose()
-        
-        container = res_soup.find("div", class_="container") or res_soup.find("body") or res_soup
-        formatted_html = f"<div class='bazi-result-wrapper'>{STYLE_BLOCK}{str(container)}</div>"
+        formatted_html = extract_clean_bazi_html(post_res.text)
 
         return f"""
         <html>
-        <head><meta charset="utf-8"><title>Bazi Proxy Debug v2.7</title></head>
+        <head><meta charset="utf-8"><title>Bazi Proxy Debug v2.8</title></head>
         <body style="font-family:sans-serif; padding:20px; line-height:1.6; max-width:960px; margin:auto;">
-            <h2>✅ Render Proxy 伺服器在線 (版本 v2.7)</h2>
+            <h2>✅ Render Proxy 伺服器在線 (版本 v2.8 - 完整命盤與排版)</h2>
             <hr/>
             <h3>排盤結果預覽 (1975-07-28 16時 女)：</h3>
             {formatted_html}
@@ -195,22 +229,8 @@ def get_bazi(year: int, month: int, day: int, hour: int, gender: str = "女"):
         resp = session.post(action_url, data=payload, headers=headers, timeout=12)
         resp.encoding = resp.apparent_encoding or "utf-8"
 
-        # 4. 解析完整排盤結果 (保留所有命盤表格與排版，去除無關廣告與表單)
-        res_soup = BeautifulSoup(resp.text, "html.parser")
-        
-        for tag in res_soup.find_all(["script", "style", "nav", "header", "footer", "form", "iframe", "ins"]):
-            tag.decompose()
-
-        # 移除外站廣告或多餘無關宣傳文章
-        for elem in res_soup.find_all(True):
-            if elem.string and any(k in elem.string for k in ["心情看板", "數位游牧", "VPN 推薦", "快速學會日本語"]):
-                elem.decompose()
-
-        # 尋找內容容器 (保留八字命盤、大運、律數等所有結果)
-        container = res_soup.find("div", class_="container") or res_soup.find("body") or res_soup
-
-        # 注入美化樣式 (讓表格具備邊框、欄位對齊、典雅風格)
-        formatted_content = f"<div class='bazi-result-wrapper'>{STYLE_BLOCK}{str(container)}</div>"
+        # 4. 解析完整排盤結果 (保留所有命盤表格與排版)
+        formatted_content = extract_clean_bazi_html(resp.text)
 
         return {
             "status": "success",
