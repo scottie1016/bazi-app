@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>八字排盤系統 (官方引擎代理)</title>
+  <title>八字命盤排盤系統</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -18,7 +18,7 @@
     }
     .container {
       width: 100%;
-      max-width: 920px;
+      max-width: 960px;
     }
     .header-card {
       background: #fff;
@@ -43,22 +43,13 @@
     }
     .server-status {
       font-size: 13px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      background: #f0f0f0;
       color: #666;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 6px;
     }
-    .server-status.online {
-      background: #e8f5e9;
-      color: #2e7d32;
-    }
-    .server-status.waking {
-      background: #fff3e0;
-      color: #e65100;
-    }
+    .server-status.online { color: #2e7d32; font-weight: bold; }
+    .server-status.waking { color: #e65100; font-weight: bold; }
     .form-grid {
       display: flex;
       flex-wrap: wrap;
@@ -96,54 +87,27 @@
 
     /* 結果呈現區 */
     .result-container {
-      background: #fff;
+      background: #ece5d6;
       border: 1px solid #dcd5ca;
       border-radius: 8px;
-      padding: 20px;
+      padding: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
       min-height: 400px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: block;
+      text-align: left;
       overflow-x: auto;
     }
+    #chartContent { width: 100%; }
     .loading-spinner {
       font-size: 15px;
       color: #666;
       display: none;
       text-align: center;
       line-height: 1.8;
+      padding: 40px 0;
     }
     .loading-spinner.active { display: block; }
 
-    .error-card {
-      text-align: left;
-      background: #fff5f5;
-      border: 1px solid #ffcdd2;
-      border-radius: 6px;
-      padding: 16px;
-      max-width: 600px;
-      width: 100%;
-      font-size: 14px;
-    }
-    .error-card h4 {
-      color: #c62828;
-      margin-bottom: 8px;
-      font-size: 15px;
-    }
-    .error-card code {
-      display: block;
-      background: #2b2b2b;
-      color: #f8f8f2;
-      padding: 8px 12px;
-      border-radius: 4px;
-      font-size: 12px;
-      margin: 8px 0;
-      word-break: break-all;
-    }
-
-    /* 來源標註頁尾 */
     .footer {
       text-align: center;
       font-size: 13px;
@@ -153,14 +117,7 @@
       border-top: 1px solid #e0dacf;
       width: 100%;
     }
-    .footer a {
-      color: #8b2500;
-      text-decoration: none;
-      font-weight: 500;
-    }
-    .footer a:hover {
-      text-decoration: underline;
-    }
+    .footer a { color: #8b2500; text-decoration: none; font-weight: 500; }
   </style>
 </head>
 <body>
@@ -175,6 +132,10 @@
       </div>
     </div>
     <div class="form-grid">
+      <div class="form-item">
+        <label>姓名：</label>
+        <input type="text" id="userName" placeholder="請輸入姓名" value="Scottie" style="width: 86px;">
+      </div>
       <div class="form-item">
         <label>性別：</label>
         <select id="userGender">
@@ -229,40 +190,30 @@
   <div class="result-container" id="resultContainer">
     <div class="loading-spinner" id="loadingSpinner">
       <div style="font-size:24px; margin-bottom:8px;">⏳</div>
-      <div>正在連線 Render 後端並同步官方計算中...</div>
-      <div style="font-size:12px; color:#888; margin-top:4px;">（若伺服器處於閒置休眠狀態，首次啟動需等候約 30~50 秒，請稍候）</div>
+      <div>正在連線後端同步計算排盤中...</div>
     </div>
     <div id="chartContent"></div>
   </div>
 
-  <!-- 來源聲明 -->
   <div class="footer">
     資料來源聲明：本排盤系統之演算法與實律數據運算自 <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer">myfate.herokuapp.com</a> 官方伺服器。
   </div>
 </div>
 
 <script>
-  // 您的 Render 專屬後端網址
   const RENDER_BASE = "https://bazi-app-e7uy.onrender.com";
   const PROXY_API_URL = `${RENDER_BASE}/api/bazi`;
 
   function initOptions() {
-    // 產生 1900 到 2050 年份下拉選單 (精確對齊官方 民國/西元年)
     const ySel = document.getElementById("inputYear");
     for (let y = 1900; y <= 2050; y++) {
       let opt = document.createElement("option");
       opt.value = y;
-      let label = "";
-      if (y >= 1912) {
-        label = `民國 ${y - 1911} (西元${y}) 年`;
-      } else {
-        label = `民前 ${1912 - y} (西元${y}) 年`;
-      }
+      let label = (y >= 1912) ? `民國 ${y - 1911} (西元${y}) 年` : `民前 ${1912 - y} (西元${y}) 年`;
       opt.textContent = label;
-      if (y === 1975) opt.selected = true; // 預設 1975
+      if (y === 1975) opt.selected = true;
       ySel.appendChild(opt);
     }
-
     const mSel = document.getElementById("inputMonth");
     for (let m = 1; m <= 12; m++) {
       let opt = document.createElement("option");
@@ -279,7 +230,6 @@
     }
   }
 
-  // 自動檢測並喚醒 Render 伺服器
   async function checkServerStatus() {
     const statusBox = document.getElementById("serverStatus");
     const statusText = document.getElementById("statusText");
@@ -300,6 +250,7 @@
   }
 
   async function fetchBaziData() {
+    const name = document.getElementById("userName").value.trim() || "無名氏";
     const gender = document.getElementById("userGender").value;
     const year = document.getElementById("inputYear").value;
     const month = document.getElementById("inputMonth").value;
@@ -312,7 +263,7 @@
     spinner.classList.add("active");
     content.innerHTML = "";
 
-    const requestUrl = `${PROXY_API_URL}?year=${year}&month=${month}&day=${day}&hour=${hour}&gender=${encodeURIComponent(gender)}`;
+    const requestUrl = `${PROXY_API_URL}?year=${year}&month=${month}&day=${day}&hour=${hour}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`;
 
     try {
       const res = await fetch(requestUrl);
@@ -325,27 +276,11 @@
       if (data.html) {
         content.innerHTML = data.html;
       } else {
-        content.innerHTML = `<div style="color:red; text-align:center;">獲取命盤失敗，回傳資料格式異常。</div>`;
+        content.innerHTML = `<div style="color:red; text-align:center;">獲取命盤失敗，請稍後重試。</div>`;
       }
     } catch (err) {
       spinner.classList.remove("active");
-      content.innerHTML = `
-        <div class="error-card">
-          <h4>⚠️ 連線至後端 Proxy 失敗</h4>
-          <p>錯誤資訊：<b>${err.message}</b></p>
-          <p style="margin-top:6px;">請求網址：</p>
-          <code>${requestUrl}</code>
-          <p style="font-size:13px; color:#555; margin-top:8px;">
-            <b>可能原因：</b><br>
-            1. <b>免費主機休眠喚醒中</b>：Render 免費版閒置時會自動暫停，請點擊下方按鈕或等候 30~50 秒後再試一次。<br>
-            2. <b>瀏覽器快取未更新</b>：若您剛在 GitHub 更新檔案，請嘗試按 <code>Ctrl+F5</code>（或手機清除快取重新載入）。
-          </p>
-          <div style="margin-top:12px; text-align:center;">
-            <button onclick="fetchBaziData()" style="padding:6px 16px; background:#8b2500; color:#fff; border:none; border-radius:4px; cursor:pointer;">重試連線</button>
-            <a href="${RENDER_BASE}" target="_blank" style="margin-left:12px; font-size:13px; color:#1565c0;">手動開啟後端喚醒頁面</a>
-          </div>
-        </div>
-      `;
+      content.innerHTML = `<div style="color:#c62828; text-align:center; padding:20px;">⚠️ 連線失敗：${err.message}</div>`;
     }
   }
 
