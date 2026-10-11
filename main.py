@@ -74,14 +74,30 @@ STYLE_BLOCK = """
 <style>
 .bazi-result-wrapper {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
-    width: 100%;
+    width: 100% !important;
+    text-align: left !important;
     color: #2a2521;
     line-height: 1.6;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+.bazi-result-wrapper .container,
+.bazi-result-wrapper .row,
+.bazi-result-wrapper [class*="col-"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
 }
 .bazi-result-wrapper table {
     width: 100% !important;
+    max-width: 100% !important;
     border-collapse: collapse !important;
-    margin: 14px 0 22px 0 !important;
+    margin: 12px 0 20px 0 !important;
     background: #ffffff !important;
     border: 1px solid #dcd5ca !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -89,10 +105,10 @@ STYLE_BLOCK = """
 .bazi-result-wrapper th, 
 .bazi-result-wrapper td {
     border: 1px solid #dcd5ca !important;
-    padding: 9px 12px !important;
+    padding: 8px 6px !important;
     text-align: center !important;
     vertical-align: middle !important;
-    font-size: 14px !important;
+    font-size: 13.5px !important;
 }
 .bazi-result-wrapper th {
     background-color: #f7f3eb !important;
@@ -107,13 +123,15 @@ STYLE_BLOCK = """
     color: #8b2500 !important;
     font-size: 16px !important;
     font-weight: bold !important;
-    margin: 20px 0 10px 0 !important;
+    margin: 18px 0 8px 0 !important;
     border-left: 4px solid #8b2500 !important;
     padding-left: 8px !important;
+    text-align: left !important;
 }
 .bazi-result-wrapper p {
     font-size: 14px !important;
     margin: 6px 0 !important;
+    text-align: left !important;
 }
 </style>
 """
@@ -121,28 +139,24 @@ STYLE_BLOCK = """
 def extract_clean_bazi_html(resp_text: str) -> str:
     res_soup = BeautifulSoup(resp_text, "html.parser")
     
-    # 1. 移除無關元素 (腳本、樣式、表單、導航列、頁尾、iframe)
+    # 1. 移除無關全域標籤
     for tag in res_soup.find_all(["script", "style", "nav", "header", "footer", "form", "iframe", "ins"]):
         tag.decompose()
 
-    # 2. 移除原網站首頁重複大標題 (<a href="/">免費八字命盤</a>)
+    # 2. 移除原網站首頁重複大標題
     for a in res_soup.find_all("a", href="/"):
         if "免費八字命盤" in a.text:
-            p = a.parent
-            if p and p.name in ["h1", "h2", "h3", "div"]:
-                p.decompose()
-            else:
-                a.decompose()
+            a.decompose()
 
-    # 3. 移除外站廣告或多餘無關宣傳文章
-    for heading in res_soup.find_all(["h2", "h3", "h4", "p"]):
-        if heading.string and any(k in heading.string for k in ["心情看板", "數位游牧", "VPN 推薦", "快速學會日本語"]):
-            heading.decompose()
+    # 3. 移除分享連結、作者宣傳雜文
+    for p in res_soup.find_all(["p", "a", "span", "h2", "h3"]):
+        if p.string and any(k in p.string for k in ["分享連結", "初放的資料會慢慢縮減", "心情看板", "數位游牧", "VPN 推薦", "快速學會日本語"]):
+            p.decompose()
 
-    # 4. 抓取包含所有排盤表格與內容的 container (八字四柱、大運、律數)
+    # 4. 抓取包含所有排盤表格的區塊
     results = []
     for c in res_soup.find_all("div", class_="container"):
-        if c.find("table") or any(k in c.text for k in ["八字", "主星", "日主", "命造", "律數"]):
+        if c.find("table") or any(k in c.text for k in ["八字", "主星", "日主", "命造", "律數", "坤造", "乾造"]):
             results.append(str(c))
 
     if not results:
@@ -160,8 +174,8 @@ def extract_clean_bazi_html(resp_text: str) -> str:
 def home():
     return {
         "status": "online",
-        "version": "2.8",
-        "service": "Bazi Proxy API (Complete Four-Pillars & LvShu Layout v2.8)",
+        "version": "2.9",
+        "service": "Bazi Proxy API (Fixed Alignment & Full Chart v2.9)",
         "source": "https://myfate.herokuapp.com/",
         "debug_url": "/debug-form"
     }
@@ -190,9 +204,9 @@ def debug_form():
 
         return f"""
         <html>
-        <head><meta charset="utf-8"><title>Bazi Proxy Debug v2.8</title></head>
+        <head><meta charset="utf-8"><title>Bazi Proxy Debug v2.9</title></head>
         <body style="font-family:sans-serif; padding:20px; line-height:1.6; max-width:960px; margin:auto;">
-            <h2>✅ Render Proxy 伺服器在線 (版本 v2.8 - 完整命盤與排版)</h2>
+            <h2>✅ Render Proxy 伺服器在線 (版本 v2.9 - 左側對齊與完整命盤)</h2>
             <hr/>
             <h3>排盤結果預覽 (1975-07-28 16時 女)：</h3>
             {formatted_html}
@@ -229,7 +243,7 @@ def get_bazi(year: int, month: int, day: int, hour: int, gender: str = "女"):
         resp = session.post(action_url, data=payload, headers=headers, timeout=12)
         resp.encoding = resp.apparent_encoding or "utf-8"
 
-        # 4. 解析完整排盤結果 (保留所有命盤表格與排版)
+        # 4. 解析完整排盤結果
         formatted_content = extract_clean_bazi_html(resp.text)
 
         return {
