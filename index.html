@@ -93,6 +93,41 @@
     .btn-calc:hover { background: #ab2525; }
 
     /* 圖像呈現區域 (自動縮放，保證任何螢幕與手機上絕對不走樣) */
+    
+    /* 預設空狀態提示卡片 */
+    .empty-placeholder {
+      width: 100%;
+      max-width: 920px;
+      background: #ffffff;
+      border: 2px dashed #d0c8b8;
+      border-radius: 8px;
+      padding: 56px 24px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .empty-icon {
+      font-size: 46px;
+      color: #8b1e1e;
+      line-height: 1;
+    }
+    .empty-title {
+      font-size: 19px;
+      font-weight: bold;
+      color: #3e332a;
+    }
+    .empty-desc {
+      font-size: 14px;
+      color: #7a7065;
+      max-width: 520px;
+      line-height: 1.6;
+    }
+
     .chart-wrapper {
       width: 100%;
       max-width: 920px;
@@ -181,7 +216,7 @@
     <div class="card-top">
       <div class="app-title">☯ 八字命盤與無敵律數系統</div>
       <div class="action-btns">
-        <button class="btn btn-save" onclick="downloadImage()">💾 下載命盤圖</button>
+        <button class="btn btn-save" id="btnSave" onclick="downloadImage()" style="display: none;">💾 下載命盤圖</button>
         <button class="btn btn-embed" onclick="openEmbedModal()">＜/＞ 取得嵌入代碼</button>
       </div>
     </div>
@@ -229,8 +264,15 @@
     </div>
   </div>
 
-  <!-- 圖像渲染畫布容器 -->
-  <div class="chart-wrapper">
+  <!-- 預設提示區域 (尚未排盤前顯示，不預先顯示任何人的數據) -->
+  <div id="emptyPlaceholder" class="empty-placeholder">
+    <div class="empty-icon">☯</div>
+    <div class="empty-title">請輸入生辰資料開始排盤</div>
+    <div class="empty-desc">請於上方設定姓名、性別、出生年月日時辰，點擊「⚡ 排盤更新」即可即時產生命盤圖表與無敵律數大表。</div>
+  </div>
+
+  <!-- 圖像渲染畫布容器 (預設隱藏，點擊排盤後顯示) -->
+  <div class="chart-wrapper" id="chartWrapper" style="display: none;">
     <canvas id="baziCanvas" width="1760" height="1160"></canvas>
     <div class="hint-bar">
       <span>💡 高解析度向量繪製：所有格線與欄位嚴格對齊，手機長按圖片或點上方按鈕可直接下載。</span>
@@ -914,6 +956,14 @@
     }
 
     function calculateAndDraw() {
+      const placeholder = document.getElementById("emptyPlaceholder");
+      const wrapper = document.getElementById("chartWrapper");
+      if (placeholder) placeholder.style.display = "none";
+      if (wrapper) wrapper.style.display = "flex";
+
+      const saveBtn = document.getElementById("btnSave");
+      if (saveBtn) saveBtn.style.display = "inline-block";
+
       const rawName = document.getElementById("userName").value;
       const gender = document.getElementById("userGender").value;
       const year = parseInt(document.getElementById("inputYear").value);
@@ -926,6 +976,11 @@
     }
 
     function downloadImage() {
+      const wrapper = document.getElementById("chartWrapper");
+      if (!wrapper || wrapper.style.display === "none") {
+        alert("請先點擊「⚡ 排盤更新」生成命盤後再下載！");
+        return;
+      }
       const canvas = document.getElementById("baziCanvas");
       const name = document.getElementById("userName").value || "無名氏";
       const link = document.createElement("a");
@@ -942,7 +997,10 @@
     }
 
     initSelectors();
-    window.addEventListener("load", calculateAndDraw);
+    // 預設不顯示任何人的數據，使用者點擊「排盤更新」或輸入後才顯示
+    document.getElementById("userName").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") calculateAndDraw();
+    });
   </script>
 </body>
 </html>
