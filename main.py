@@ -3,8 +3,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 from bs4 import BeautifulSoup
-import re
-import html
 
 app = FastAPI()
 
@@ -17,9 +15,15 @@ app.add_middleware(
 
 TARGET_URL = "https://myfate.herokuapp.com/"
 
-def extract_exact_payload(soup, year: int, month: int, day: int, hour: int, gender: str):
+def build_myfate_payload(soup, year: int, month: int, day: int, hour: int, gender: str):
     """
-    100% 動態依照原網站當前 HTML 標籤提取真實的 name 與 value，不再猜測大小寫或欄位名稱
+    100% 對齊原網站表單定義：
+    Calendar: 1 (陽曆), 0 (農曆)
+    Sex: 0 (女), 1 (男)
+    Year: 根據 (year - 1900) 精確索引取值，徹底解決字串比對失敗退回 1900 的問題
+    Month: options[month - 1]
+    Day: options[day - 1]
+    Hour: options[hour]
     """
     form = soup.find("form")
     if not form:
@@ -32,72 +36,53 @@ def extract_exact_payload(soup, year: int, month: int, day: int, hour: int, gend
         if h.get("name"):
             payload[h["name"]] = h.get("value", "")
 
-    # 2. 抓取 Radio 欄位 (曆法 & 性別)
-    for r in form.find_all("input", type="radio"):
-        name = r.get("name")
-        if not name: continue
-        val = r.get("value", "")
+    # 2. 曆法 Calendar (1=陽曆, 0=農曆)
+    payload["Calendar"] = "1"
 
-        parent_text = r.parent.text if r.parent else ""
-        if not parent_text and r.get("id"):
-            lbl = form.find("label", {"for": r["id"]})
-            if lbl: parent_text = lbl.text
+    # 3. 性別 Sex (0=女, 1=男)
+    payload["Sex"] = "1" if gender in ["男", "乾造", "1"] else "0"
 
-        # 曆法：抓取包含「陽」的 radio 真實名稱與值
-        if "陽" in parent_text:
-            payload[name] = val
-        
-        # 性別：抓取包含目標性別的 radio 真實名稱與值
-        target_gender = "男" if gender in ["男", "乾造", "1"] else "女"
-        if target_gender in parent_text:
-            payload[name] = val
-
-    # 3. 抓取 Select 下拉選單 (年、月、日、時)
-    selects = form.find_all("select")
-    for idx, sel in enumerate(selects):
-        name = sel.get("name")
-        if not name: continue
-        options = sel.find_all("option")
-        if not options: continue
-
-        is_year = re.search(r"year|年|^y$", name, re.I) or idx == 0
-        is_month = re.search(r"month|月|^m$", name, re.I) or idx == 1
-        is_day = re.search(r"day|日|^d$", name, re.I) or idx == 2
-        is_hour = re.search(r"hour|時|^h$", name, re.I) or idx == 3
-
-        if is_year and not (is_month or is_day or is_hour):
-            chosen = None
-            for opt in options:
-                txt = opt.text.strip()
-                val = opt.get("value", txt)
-                if str(year) in txt or str(year) in val:
-                    chosen = val
+    # 4. 年份 Year (原網站從 1900 年開始，精確索引為 year - 1900)
+    year_sel = form.find("select", {"name": "Year"})
+    if year_sel:
+        opts = year_sel.find_all("option")
+        y_idx = year - 1900
+        if 0 <= y_idx < len(opts):
+            payload["Year"] = opts[y_idx].get("value") or opts[y_idx].text.strip()
+        else:
+            for opt in opts:
+                if str(year) in opt.text:
+                    payload["Year"] = opt.get("value") or opt.text.strip()
                     break
-            payload[name] = chosen or (options[0].get("value", options[0].text.strip()))
-        elif is_month and not (is_day or is_hour):
-            chosen = str(month)
-            for opt in options:
-                txt = opt.text.strip()
-                val = opt.get("value", txt)
-                if txt == str(month) or val == str(month):
-                    chosen = val
-                    break
-            payload[name] = chosen
-        elif is_day and not is_hour:
-            chosen = str(day)
-            for opt in options:
-                txt = opt.text.strip()
-                val = opt.get("value", txt)
-                if txt == str(day) or val == str(day):
-                    chosen = val
-                    break
-            payload[name] = chosen
-        elif is_hour:
-            if 0 <= hour < len(options):
-                opt = options[hour]
-                payload[name] = opt.get("value", opt.text.strip())
-            else:
-                payload[name] = options[0].get("value", options[0].text.strip())
+
+    # 5. 月份 Month
+    month_sel = form.find("select", {"name": "Month"})
+    if month_sel:
+        opts = month_sel.find_all("option")
+        m_idx = month - 1
+        if 0 <= m_idx < len(opts):
+            payload["Month"] = opts[m_idx].get("value") or opts[m_idx].text.strip()
+        else:
+            payload["Month"] = str(month)
+
+    # 6. 日期 Day
+    day_sel = form.find("select", {"name": "Day"})
+    if day_sel:
+        opts = day_sel.find_all("option")
+        d_idx = day - 1
+        if 0 <= d_idx < len(opts):
+            payload["Day"] = opts[d_idx].get("value") or opts[d_idx].text.strip()
+        else:
+            payload["Day"] = str(day)
+
+    # 7. 時辰 Hour
+    hour_sel = form.find("select", {"name": "Hour"})
+    if hour_sel:
+        opts = hour_sel.find_all("option")
+        if 0 <= hour < len(opts):
+            payload["Hour"] = opts[hour].get("value") or opts[hour].text.strip()
+        else:
+            payload["Hour"] = str(hour)
 
     return payload
 
@@ -105,8 +90,8 @@ def extract_exact_payload(soup, year: int, month: int, day: int, hour: int, gend
 def home():
     return {
         "status": "online",
-        "version": "2.5",
-        "service": "Bazi Proxy API (Smart DOM Inspection v2.5)",
+        "version": "2.6",
+        "service": "Bazi Proxy API (Fixed Year Index v2.6)",
         "source": "https://myfate.herokuapp.com/",
         "debug_url": "/debug-form"
     }
@@ -114,7 +99,7 @@ def home():
 @app.get("/debug-form", response_class=HTMLResponse)
 def debug_form():
     """
-    即時線上診斷：顯示原網站真實欄位結構與實測結果
+    即時線上診斷
     """
     try:
         session = requests.Session()
@@ -130,45 +115,28 @@ def debug_form():
             act = form.get("action")
             action_url = act if act.startswith("http") else TARGET_URL.rstrip("/") + "/" + act.lstrip("/")
 
-        # 動態精確抓取
-        exact_p = extract_exact_payload(soup, 1975, 7, 28, 16, "女")
+        # 產生 1975-07-28 16時 女 的精確 Payload
+        payload = build_myfate_payload(soup, 1975, 7, 28, 16, "女")
         
-        # 測試兩種情況：有 submit 按鈕 與 無 submit 按鈕
-        test_cases = [dict(exact_p)]
-        p_with_sub = dict(exact_p)
-        p_with_sub["submit"] = "命盤分析"
-        test_cases.append(p_with_sub)
-
-        test_html = ""
-        for i, tc in enumerate(test_cases):
-            try:
-                r = session.post(action_url, data=tc, headers=headers, timeout=6)
-                has_bazi = any(k in r.text for k in ["八字", "主星", "日主", "命造", "律數"])
-                color = "green" if (r.status_code == 200 and has_bazi) else "red"
-                res_desc = "✅ 成功取得排盤！" if (r.status_code == 200 and has_bazi) else f"HTTP {r.status_code} (長度 {len(r.text)} bytes)"
-                test_html += f"<li><b>測試 #{i+1}:</b> <code>{tc}</code><br/>狀態: <b style='color:{color}'>{res_desc}</b></li>"
-            except Exception as ex:
-                test_html += f"<li>測試 #{i+1}: 錯誤 {str(ex)}</li>"
-
-        # 標籤總覽
-        summary_tags = []
-        for inp in form.find_all(["input", "select", "button"]):
-            summary_tags.append(f"{inp.name.upper()} name='{inp.get('name')}' type='{inp.get('type')}' value='{inp.get('value')}'")
-        summary_text = html.escape("\n".join(summary_tags))
+        # 實測發送
+        post_res = session.post(action_url, data=payload, headers=headers, timeout=10)
+        post_res.encoding = post_res.apparent_encoding or "utf-8"
+        has_table = any(k in post_res.text for k in ["八字", "主星", "日主", "命造", "律數"])
+        
+        status_color = "green" if (post_res.status_code == 200 and has_table) else "red"
+        status_desc = "✅ 成功取得命盤！" if (post_res.status_code == 200 and has_table) else f"HTTP {post_res.status_code} (長度 {len(post_res.text)} bytes)"
 
         return f"""
         <html>
-        <head><meta charset="utf-8"><title>Bazi Proxy Debug v2.5</title></head>
+        <head><meta charset="utf-8"><title>Bazi Proxy Debug v2.6</title></head>
         <body style="font-family:sans-serif; padding:20px; line-height:1.6; max-width:960px; margin:auto;">
-            <h2>✅ Render Proxy 伺服器在線 (版本 v2.5 - 智慧動態欄位鏡像)</h2>
+            <h2>✅ Render Proxy 伺服器在線 (版本 v2.6)</h2>
             <hr/>
             <h3>🧪 即時實測結果 (1975-07-28 16時 女)：</h3>
-            <ul>{test_html}</ul>
+            <p><b>送出 Payload：</b> <code>{payload}</code></p>
+            <p><b>執行狀態：</b> <b style="color:{status_color}; font-size:16px;">{status_desc}</b></p>
             <hr/>
-            <h3>🔍 原網站真實表單欄位名稱清單：</h3>
-            <pre style="background:#1e1e1e; color:#4ec9b0; padding:15px; border-radius:6px; font-size:13px;">{summary_text}</pre>
-            <hr/>
-            <p><a href="/api/bazi?year=1975&month=7&day=28&hour=16&gender=女">👉 點此直接執行 API 獲取排盤結果</a></p>
+            <p><a href="/api/bazi?year=1975&month=7&day=28&hour=16&gender=女">👉 點此直接在瀏覽器執行 API 獲取排盤結果</a></p>
         </body>
         </html>
         """
@@ -195,60 +163,39 @@ def get_bazi(year: int, month: int, day: int, hour: int, gender: str = "女"):
             act = form.get("action")
             action_url = act if act.startswith("http") else TARGET_URL.rstrip("/") + "/" + act.lstrip("/")
 
-        # 2. 自動精確提取表單欄位
-        payload = extract_exact_payload(soup, year, month, day, hour, gender)
-        
-        # 準備嘗試名單 (有/無 submit 按鈕)
-        candidates = [dict(payload)]
-        p_sub = dict(payload)
-        p_sub["submit"] = "命盤分析"
-        candidates.append(p_sub)
+        # 2. 精確產生對齊 Payload
+        payload = build_myfate_payload(soup, year, month, day, hour, gender)
 
-        success_chart = None
-        successful_payload = None
-        last_resp_text = ""
-        last_status_code = 200
+        # 3. 發送請求至 myfate
+        resp = session.post(action_url, data=payload, headers=headers, timeout=12)
+        resp.encoding = resp.apparent_encoding or "utf-8"
 
-        # 3. 發送請求
-        for cand in candidates:
-            try:
-                resp = session.post(action_url, data=cand, headers=headers, timeout=10)
-                resp.encoding = resp.apparent_encoding or "utf-8"
-                last_status_code = resp.status_code
-                last_resp_text = resp.text
+        # 4. 解析命盤內容
+        res_soup = BeautifulSoup(resp.text, "html.parser")
+        for tag in res_soup.find_all(["script", "style"]):
+            tag.decompose()
 
-                if resp.status_code == 200 and any(k in resp.text for k in ["八字", "主星", "日主", "命造", "律數"]):
-                    res_soup = BeautifulSoup(resp.text, "html.parser")
-                    for tag in res_soup.find_all(["script", "style"]):
-                        tag.decompose()
+        chart_div = None
+        for table in res_soup.find_all("table"):
+            if any(k in table.text for k in ["八字", "主星", "日主", "命造", "律數"]):
+                chart_div = table.parent
+                break
+        if not chart_div:
+            chart_div = res_soup.find("div", class_="result-container") or res_soup.find("div", class_="container")
 
-                    for table in res_soup.find_all("table"):
-                        if any(k in table.text for k in ["八字", "主星", "日主", "命造", "律數"]):
-                            success_chart = table.parent
-                            break
-                    if not success_chart:
-                        success_chart = res_soup.find("div", class_="result-container") or res_soup.find("div", class_="container")
-                    
-                    if success_chart:
-                        successful_payload = cand
-                        break
-            except Exception:
-                continue
-
-        # 4. 回傳結果
-        if success_chart:
+        if chart_div and any(k in chart_div.text for k in ["八字", "主星", "日主", "命造", "律數"]):
             return {
                 "status": "success",
                 "source": "https://myfate.herokuapp.com/",
-                "submitted_payload": successful_payload,
-                "html": str(success_chart)
+                "submitted_payload": payload,
+                "html": str(chart_div)
             }
         else:
             return {
                 "status": "error",
-                "message": f"原網站回應未包含命盤數據 (HTTP {last_status_code})",
-                "attempted_payload": payload,
-                "raw_response_snippet": last_resp_text[:1500]
+                "message": f"原網站回應未包含命盤數據 (HTTP {resp.status_code})",
+                "submitted_payload": payload,
+                "raw_response_snippet": resp.text[:1500]
             }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
