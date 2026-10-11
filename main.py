@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 from bs4 import BeautifulSoup
+import re
 
 app = FastAPI()
 
@@ -17,33 +18,44 @@ TARGET_URL = "https://myfate.herokuapp.com/"
 
 def generate_candidates(soup, year: int, month: int, day: int, hour: int, gender: str):
     """
-    動態產生可能被 myfate 接受的表單組合，自動處理空格、性別代碼(0/1/2)、時辰格式等
+    精確產生目標日期的表單組合，絕對排除無關年份 (如 1900)
     """
     base_payload = {}
     for inp in soup.find_all("input", type="hidden"):
         if inp.get("name"):
             base_payload[inp["name"]] = inp.get("value", "")
 
-    # 年份可能值
-    year_options = []
-    year_select = soup.find("select", {"name": "Year"}) or soup.find("select", {"id": "Year"})
+    # 1. 年份：精確提取包含目標年份的選項
+    m = year - 1911 if year >= 1912 else 1912 - year
+    prefix = "民國" if year >= 1912 else "民前"
+
+    raw_years = []
+    year_select = soup.find("select", {"name": re.compile(r"year", re.I)}) or soup.find("select", {"id": re.compile(r"year", re.I)})
     if year_select:
         for opt in year_select.find_all("option"):
             txt = opt.text.strip()
-            val = opt.get("value") if opt.has_attr("value") else txt
-            if f"西元{year}" in txt or f"西元 {year}" in txt or str(year) in txt:
-                year_options.append(val)
-                year_options.append(txt)
-    m = year - 1911 if year >= 1912 else 1912 - year
-    prefix = "民國" if year >= 1912 else "民前"
-    year_options.extend([f"{prefix}{m} (西元{year})", f"{prefix} {m} (西元{year})", str(year)])
-    
-    seen_y = set()
-    uniq_years = [y for y in year_options if y and not (y in seen_y or seen_y.add(y))]
+            val = opt.get("value", txt)
+            if str(year) in txt or str(year) in val or (str(m) in txt and prefix in txt):
+                raw_years.append(val)
+                raw_years.append(txt)
 
-    # 時辰可能值
+    # 備選加入標準格式 (含空格與無空格)
+    raw_years.extend([
+        f"{prefix} {m} (西元{year})",
+        f"{prefix}{m} (西元{year})",
+        str(year)
+    ])
+    
+    # 嚴格過濾：必須包含目標年份或民國年號，絕對不允許 1900 等無關年份
+    seen_y = set()
+    uniq_years = []
+    for y in raw_years:
+        if y and (str(year) in y or str(m) in y) and not (y in seen_y or seen_y.add(y)):
+            uniq_years.append(y)
+
+    # 2. 時辰：精確提取該時辰
     hour_options = []
-    hour_select = soup.find("select", {"name": "Hour"}) or soup.find("select", {"id": "Hour"})
+    hour_select = soup.find("select", {"name": re.compile(r"hour", re.I)}) or soup.find("select", {"id": re.compile(r"hour", re.I)})
     if hour_select:
         opts = hour_select.find_all("option")
         if 0 <= hour < len(opts):
@@ -55,34 +67,36 @@ def generate_candidates(soup, year: int, month: int, day: int, hour: int, gender
     seen_h = set()
     uniq_hours = [h for h in hour_options if h and not (h in seen_h or seen_h.add(h))]
 
-    # 性別可能代碼 (女常見為 0, 2, 1; 男常見為 1, 0)
+    # 3. 性別：0, 1, 2, 中文
     is_male = gender in ["男", "乾造", "1"]
-    sex_options = ["1", "0", "男"] if is_male else ["0", "2", "1", "女"]
+    sex_options = ["1", "0", "男"] if is_male else ["0", "1", "2", "女"]
 
-    # 組合候選
+    # 4. 曆法：1 (陽曆), 0
+    cal_options = ["1", "0"]
+
+    # 5. 組合候選名單
     candidates = []
-    for y in uniq_years[:2]:
-        for h in uniq_hours[:2]:
-            for s in sex_options[:3]:
-                for with_submit in [False, True]:
+    for y in uniq_years:
+        for h in uniq_hours:
+            for s in sex_options:
+                for cal in cal_options:
                     p = dict(base_payload)
-                    p["Calendar"] = "1"
+                    p["Calendar"] = cal
                     p["Sex"] = s
                     p["Year"] = y
                     p["Month"] = str(month)
                     p["Day"] = str(day)
                     p["Hour"] = h
-                    if with_submit:
-                        p["submit"] = "命盤分析"
                     candidates.append(p)
+
     return candidates
 
 @app.get("/")
 def home():
     return {
         "status": "online",
-        "version": "2.2",
-        "service": "Bazi Proxy API (Resilient Auto-Fallback)",
+        "version": "2.3",
+        "service": "Bazi Proxy API (Targeted Match v2.3)",
         "source": "https://myfate.herokuapp.com/",
         "debug_url": "/debug-form"
     }
@@ -90,7 +104,7 @@ def home():
 @app.get("/debug-form", response_class=HTMLResponse)
 def debug_form():
     """
-    除錯診斷頁面：可看到原網站真實表單，並自動實測各組 Payload 回應
+    即時線上診斷頁面
     """
     try:
         session = requests.Session()
@@ -100,43 +114,51 @@ def debug_form():
         resp = session.get(TARGET_URL, headers=headers, timeout=10)
         soup = BeautifulSoup(resp.text, "html.parser")
         form = soup.find("form")
-        form_html = form.prettify() if form else "未找到 form 標籤"
-
+        
         action_url = TARGET_URL
         if form and form.get("action"):
             act = form.get("action")
             action_url = act if act.startswith("http") else TARGET_URL.rstrip("/") + "/" + act.lstrip("/")
 
-        # 自動實測前 6 組候選
+        # 實測 1975-07-28 16時 女
         candidates = generate_candidates(soup, 1975, 7, 28, 16, "女")
         test_results_html = ""
-        for i, cand in enumerate(candidates[:6]):
+        success_found = False
+
+        for i, cand in enumerate(candidates[:10]):
             try:
                 r = session.post(action_url, data=cand, headers=headers, timeout=6)
-                has_table = "table" in r.text or "八字" in r.text or "主星" in r.text
-                status_color = "green" if (r.status_code == 200 and has_table) else "red"
+                has_table = any(k in r.text for k in ["八字", "主星", "日主", "命造", "律數"])
+                if r.status_code == 200 and has_table:
+                    status_text = "✅ 成功 (HTTP 200 包含命盤！)"
+                    status_color = "green"
+                    success_found = True
+                else:
+                    status_text = f"HTTP {r.status_code} (無命盤)"
+                    status_color = "red"
+                
                 test_results_html += f"""
-                <li style="margin-bottom:8px;">
+                <li style="margin-bottom:8px; font-size:13px;">
                     <b>組合 #{i+1}:</b> <code>{cand}</code><br/>
-                    狀態: <span style="color:{status_color}; font-weight:bold;">HTTP {r.status_code}</span> | 
-                    是否含排盤: <b>{'✅ 是' if has_table else '❌ 否'}</b> | 回應長度: {len(r.text)} bytes
+                    結果: <span style="color:{status_color}; font-weight:bold;">{status_text}</span> | 長度: {len(r.text)} bytes
                 </li>
                 """
+                if success_found:
+                    break
             except Exception as e:
                 test_results_html += f"<li>組合 #{i+1}: 錯誤 - {str(e)}</li>"
 
         return f"""
         <html>
-        <head><meta charset="utf-8"><title>Bazi Proxy Debug Form v2.2</title></head>
+        <head><meta charset="utf-8"><title>Bazi Proxy Debug Form v2.3</title></head>
         <body style="font-family:sans-serif; padding:20px; line-height:1.6; max-width:960px; margin:auto;">
-            <h2>✅ Render Proxy 伺服器在線 (版本 v2.2 - 自動重試與彈性容錯)</h2>
+            <h2>✅ Render Proxy 伺服器在線 (版本 v2.3 - 精確年份鎖定)</h2>
             <p>目標來源：<a href="{TARGET_URL}" target="_blank">{TARGET_URL}</a></p>
             <hr/>
             <h3>🧪 即時診斷測試 (1975-07-28 16時 女)：</h3>
             <ul>{test_results_html}</ul>
             <hr/>
-            <h3>原網站 Form 標籤與欄位：</h3>
-            <pre style="background:#f4f4f4; padding:15px; border-radius:6px; overflow:auto; max-height:400px; font-size:12px;">{form_html}</pre>
+            <p><a href="/api/bazi?year=1975&month=7&day=28&hour=16&gender=女">👉 點此直接在瀏覽器執行 API 獲取命盤</a></p>
         </body>
         </html>
         """
@@ -163,7 +185,7 @@ def get_bazi(year: int, month: int, day: int, hour: int, gender: str = "女"):
             act = form.get("action")
             action_url = act if act.startswith("http") else TARGET_URL.rstrip("/") + "/" + act.lstrip("/")
 
-        # 2. 取得候選 Payload 組合
+        # 2. 取得候選 Payload 組合 (已嚴格鎖定目標年份)
         candidates = generate_candidates(soup, year, month, day, hour, gender)
         
         success_chart = None
