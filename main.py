@@ -1,292 +1,337 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>八字命盤排盤系統</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: #f7f5f0;
-      color: #2a2521;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .container {
-      width: 100%;
-      max-width: 960px;
-    }
-    .header-card {
-      background: #fff;
-      border: 1px solid #dcd5ca;
-      border-radius: 8px;
-      padding: 16px 20px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    }
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 8px;
-    }
-    .app-title {
-      font-size: 17px;
-      font-weight: bold;
-      color: #8b2500;
-    }
-    .server-status {
-      font-size: 13px;
-      color: #666;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .server-status.online { color: #2e7d32; font-weight: bold; }
-    .server-status.waking { color: #e65100; font-weight: bold; }
-    .form-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px 14px;
-      align-items: center;
-    }
-    .form-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 14px;
-    }
-    .form-item label { color: #555; font-weight: 500; }
-    .form-item input, .form-item select {
-      padding: 5px 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
-      background: #fff;
-      outline: none;
-    }
-    .btn-calc {
-      background: #8b2500;
-      color: #fff;
-      border: none;
-      padding: 6px 18px;
-      border-radius: 4px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-left: auto;
-      transition: background 0.15s;
-    }
-    .btn-calc:hover { background: #aa2d00; }
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
+import requests
+from bs4 import BeautifulSoup
+import re
 
-    /* 結果呈現區 */
-    .result-container {
-      background: #ece5d6;
-      border: 1px solid #dcd5ca;
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-      min-height: 400px;
-      display: block;
-      text-align: left;
-      overflow-x: auto;
-    }
-    #chartContent { width: 100%; }
-    .loading-spinner {
-      font-size: 15px;
-      color: #666;
-      display: none;
-      text-align: center;
-      line-height: 1.8;
-      padding: 40px 0;
-    }
-    .loading-spinner.active { display: block; }
+app = FastAPI()
 
-    .footer {
-      text-align: center;
-      font-size: 13px;
-      color: #777;
-      margin-top: 20px;
-      padding-top: 12px;
-      border-top: 1px solid #e0dacf;
-      width: 100%;
-    }
-    .footer a { color: #8b2500; text-decoration: none; font-weight: 500; }
-  </style>
-</head>
-<body>
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-<div class="container">
-  <!-- 控制面板 -->
-  <div class="header-card">
-    <div class="header-top">
-      <div class="app-title">☯ 專業八字命盤排盤系統</div>
-      <div class="server-status" id="serverStatus">
-        <span id="statusDot">●</span> <span id="statusText">伺服器狀態檢測中...</span>
+TARGET_URL = "https://myfate.herokuapp.com/"
+
+def build_myfate_payload(soup, year: int, month: int, day: int, hour: int, gender: str):
+    form = soup.find("form")
+    if not form:
+        return {}
+
+    payload = {}
+
+    for h in form.find_all("input", type="hidden"):
+        if h.get("name"):
+            payload[h["name"]] = h.get("value", "")
+
+    payload["Calendar"] = "1"
+    payload["Sex"] = "1" if gender in ["男", "乾造", "1"] else "0"
+
+    year_sel = form.find("select", {"name": "Year"})
+    if year_sel:
+        opts = year_sel.find_all("option")
+        y_idx = year - 1900
+        if 0 <= y_idx < len(opts):
+            payload["Year"] = opts[y_idx].get("value") or opts[y_idx].text.strip()
+        else:
+            for opt in opts:
+                if str(year) in opt.text:
+                    payload["Year"] = opt.get("value") or opt.text.strip()
+                    break
+
+    month_sel = form.find("select", {"name": "Month"})
+    if month_sel:
+        opts = month_sel.find_all("option")
+        m_idx = month - 1
+        if 0 <= m_idx < len(opts):
+            payload["Month"] = opts[m_idx].get("value") or opts[m_idx].text.strip()
+        else:
+            payload["Month"] = str(month)
+
+    day_sel = form.find("select", {"name": "Day"})
+    if day_sel:
+        opts = day_sel.find_all("option")
+        d_idx = day - 1
+        if 0 <= d_idx < len(opts):
+            payload["Day"] = opts[d_idx].get("value") or opts[d_idx].text.strip()
+        else:
+            payload["Day"] = str(day)
+
+    hour_sel = form.find("select", {"name": "Hour"})
+    if hour_sel:
+        opts = hour_sel.find_all("option")
+        if 0 <= hour < len(opts):
+            payload["Hour"] = opts[hour].get("value") or opts[hour].text.strip()
+        else:
+            payload["Hour"] = str(hour)
+
+    return payload
+
+def extract_pure_two_tables(resp_text: str, user_name: str = "無名氏") -> str:
+    """
+    極致純淨過濾：徹底排除原網站頂部整大段冗長文字與廣告！
+    僅保留照片 (09dea5f5.jpeg) 中的兩張核心大表：
+    1. 左側：【八字命盤】(四柱大表 + 大運表)
+    2. 右側：【無敵律數 (參考)】(格局標紅、合化、五行實律大表)
+    3. 右下角動態顯示輸入者的名字 (不寫死固定名稱)
+    """
+    soup = BeautifulSoup(resp_text, "html.parser")
+
+    # 1. 移除無關全域標籤
+    for tag in soup.find_all(["script", "style", "nav", "header", "footer", "form", "iframe", "ins"]):
+        tag.decompose()
+
+    # 2. 移除原網站首頁連結與雜文
+    for a in soup.find_all("a", href="/"):
+        if "免費八字命盤" in a.text:
+            a.decompose()
+
+    # 3. 識別所有表格
+    all_tables = soup.find_all("table")
+    bazi_table = None
+    dayun_table = None
+    lvshu_table = None
+
+    for t in all_tables:
+        txt = t.text
+        if any(k in txt for k in ["時柱", "日柱", "月柱", "年柱", "主星", "天干", "地支", "藏"]):
+            if not bazi_table: bazi_table = t
+        elif any(k in txt for k in ["實律", "五常", "五行", "十神", "取用神", "仇神", "病神"]):
+            if not lvshu_table: lvshu_table = t
+        elif any(k in txt for k in ["大運", "歲"]):
+            if not dayun_table: dayun_table = t
+
+    if not bazi_table and len(all_tables) >= 1: bazi_table = all_tables[0]
+    if not lvshu_table and len(all_tables) >= 2: lvshu_table = all_tables[-1]
+
+    # 4. 僅提取極短格局與合化標籤行 (嚴格限制長度小於 40 字，絕不引入任何大段文字)
+    pattern_line = ""
+    combo_line = ""
+    for elem in soup.find_all(["p", "div", "h4", "span"]):
+        txt = elem.text.strip()
+        if len(txt) > 40: continue
+        if "格局" in txt and not pattern_line:
+            pattern_line = txt
+        elif any(k in txt for k in ["三合", "六合", "半合"]) and not combo_line:
+            combo_line = txt
+
+    if pattern_line:
+        pattern_line = re.sub(r"(格局[：:]\s*)([^\s(]+)", r"\1<span class='pattern-red'>\2</span>", pattern_line)
+
+    # 5. 清理表格多餘屬性，統一套用宣紙深褐邊框樣式
+    for t in [bazi_table, dayun_table, lvshu_table]:
+        if t:
+            for attr in ["style", "class", "width", "border", "cellspacing", "cellpadding"]:
+                t.attrs.pop(attr, None)
+
+    bazi_tab_html = str(bazi_table) if bazi_table else ""
+    dayun_tab_html = str(dayun_table) if dayun_table else ""
+    lvshu_tab_html = str(lvshu_table) if lvshu_table else ""
+
+    display_name = user_name.strip() if user_name and user_name.strip() else "無名氏"
+
+    html_output = f"""
+    <div class="bazi-photo-container">
+      <style>
+        .bazi-photo-container {{
+          font-family: "Songti TC", "BiauKai", "SimSun", "PingFang TC", "Microsoft JhengHei", serif;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 16px;
+          justify-content: center;
+          align-items: flex-start;
+          background: #ece5d6;
+          padding: 16px;
+          border-radius: 8px;
+          color: #1a1611;
+          width: 100%;
+          max-width: 960px;
+          margin: 0 auto;
+          box-sizing: border-box;
+          text-align: left;
+        }}
+        .bazi-photo-box {{
+          background: #faeed1;
+          border: 2px solid #2b2319;
+          box-shadow: 2px 2px 8px rgba(0,0,0,0.12);
+          box-sizing: border-box;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }}
+        .box-left {{
+          flex: 1 1 480px;
+          max-width: 530px;
+        }}
+        .box-right {{
+          flex: 1 1 360px;
+          max-width: 410px;
+        }}
+        .box-title {{
+          font-size: 17px;
+          font-weight: bold;
+          padding: 8px 12px;
+          border-bottom: 1px solid #2b2319;
+          background: #faeed1;
+          color: #1a1611;
+        }}
+        .pattern-row {{
+          font-size: 15px;
+          padding: 8px 12px 4px 12px;
+          font-weight: 500;
+        }}
+        .pattern-red {{
+          color: #c92a2a;
+          font-weight: bold;
+        }}
+        .combo-row {{
+          font-size: 14px;
+          padding: 4px 12px 8px 12px;
+          border-bottom: 1px solid #2b2319;
+        }}
+        .bazi-photo-box table {{
+          width: 100% !important;
+          border-collapse: collapse !important;
+          background: #faeed1 !important;
+          border: none !important;
+          margin: 0 !important;
+        }}
+        .bazi-photo-box th, .bazi-photo-box td {{
+          border: 1px solid #2b2319 !important;
+          padding: 6px 4px !important;
+          text-align: center !important;
+          vertical-align: middle !important;
+          font-size: 14px !important;
+          color: #1a1611 !important;
+        }}
+        .bazi-photo-box th {{
+          font-weight: bold !important;
+          background: #faeed1 !important;
+        }}
+        /* 八字大字 */
+        .box-left table tr:nth-child(3) td,
+        .box-left table tr:nth-child(4) td {{
+          font-size: 26px !important;
+          font-weight: bold !important;
+          line-height: 1.2 !important;
+        }}
+        /* 實律數值大字 */
+        .box-right table tr:nth-child(4) td {{
+          font-size: 18px !important;
+          font-weight: bold !important;
+        }}
+        .author-sig {{
+          text-align: right;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          font-size: 24px;
+          font-weight: bold;
+          color: #1a5fb4;
+          padding: 8px 16px 6px 0;
+          letter-spacing: 0.5px;
+        }}
+      </style>
+
+      <!-- 第一張大表：八字四柱命盤 -->
+      <div class="bazi-photo-box box-left">
+        <div class="box-title">八字命盤</div>
+        {bazi_tab_html}
+        {dayun_tab_html}
+      </div>
+
+      <!-- 第二張大表：無敵律數 (參考) -->
+      <div class="bazi-photo-box box-right">
+        <div class="box-title">無敵律數 (參考)</div>
+        {f'<div class="pattern-row">{pattern_line}</div>' if pattern_line else ''}
+        {f'<div class="combo-row">{combo_line}</div>' if combo_line else ''}
+        {lvshu_tab_html}
+        <div class="author-sig">{display_name}</div>
       </div>
     </div>
-    <div class="form-grid">
-      <div class="form-item">
-        <label>姓名：</label>
-        <input type="text" id="userName" placeholder="請輸入姓名" value="Scottie" style="width: 86px;">
-      </div>
-      <div class="form-item">
-        <label>性別：</label>
-        <select id="userGender">
-          <option value="男">男 (乾造)</option>
-          <option value="女" selected>女 (坤造)</option>
-        </select>
-      </div>
-      <div class="form-item">
-        <label>年份：</label>
-        <select id="inputYear" style="width: 175px;"></select>
-      </div>
-      <div class="form-item">
-        <select id="inputMonth" style="width: 62px;"></select> 月
-      </div>
-      <div class="form-item">
-        <select id="inputDay" style="width: 62px;"></select> 日
-      </div>
-      <div class="form-item">
-        <label>時辰：</label>
-        <select id="inputHour">
-          <option value="0">凌晨0點多 (早子 00:00-00:59)</option>
-          <option value="1">凌晨1點多 (丑時 01:00-01:59)</option>
-          <option value="2">凌晨2點多 (丑時 02:00-02:59)</option>
-          <option value="3">凌晨3點多 (寅時 03:00-03:59)</option>
-          <option value="4">凌晨4點多 (寅時 04:00-04:59)</option>
-          <option value="5">早上5點多 (卯時 05:00-05:59)</option>
-          <option value="6">早上6點多 (卯時 06:00-06:59)</option>
-          <option value="7">早上7點多 (辰時 07:00-07:59)</option>
-          <option value="8">早上8點多 (辰時 08:00-08:59)</option>
-          <option value="9">早上9點多 (巳時 09:00-09:59)</option>
-          <option value="10">早上10點多 (巳時 10:00-10:59)</option>
-          <option value="11">早上11點多 (午時 11:00-11:59)</option>
-          <option value="12">中午12點多 (午時 12:00-12:59)</option>
-          <option value="13">下午1點多 (未時 13:00-13:59)</option>
-          <option value="14">下午2點多 (未時 14:00-14:59)</option>
-          <option value="15">下午3點多 (申時 15:00-15:59)</option>
-          <option value="16" selected>下午4點多 (申時 16:00-16:59)</option>
-          <option value="17">下午5點多 (酉時 17:00-17:59)</option>
-          <option value="18">下午6點多 (酉時 18:00-18:59)</option>
-          <option value="19">傍晚7點多 (戌時 19:00-19:59)</option>
-          <option value="20">晚上8點多 (戌時 20:00-20:59)</option>
-          <option value="21">晚上9點多 (亥時 21:00-21:59)</option>
-          <option value="22">晚上10點多 (亥時 22:00-22:59)</option>
-          <option value="23">晚上11點多 (夜子 23:00-23:59)</option>
-        </select>
-      </div>
-      <button class="btn-calc" onclick="fetchBaziData()">⚡ 排盤更新</button>
-    </div>
-  </div>
+    """
+    return html_output
 
-  <!-- 命盤呈現區域 -->
-  <div class="result-container" id="resultContainer">
-    <div class="loading-spinner" id="loadingSpinner">
-      <div style="font-size:24px; margin-bottom:8px;">⏳</div>
-      <div>正在連線後端同步計算排盤中...</div>
-    </div>
-    <div id="chartContent"></div>
-  </div>
-
-  <div class="footer">
-    資料來源聲明：本排盤系統之演算法與實律數據運算自 <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer">myfate.herokuapp.com</a> 官方伺服器。
-  </div>
-</div>
-
-<script>
-  const RENDER_BASE = "https://bazi-app-e7uy.onrender.com";
-  const PROXY_API_URL = `${RENDER_BASE}/api/bazi`;
-
-  function initOptions() {
-    const ySel = document.getElementById("inputYear");
-    for (let y = 1900; y <= 2050; y++) {
-      let opt = document.createElement("option");
-      opt.value = y;
-      let label = (y >= 1912) ? `民國 ${y - 1911} (西元${y}) 年` : `民前 ${1912 - y} (西元${y}) 年`;
-      opt.textContent = label;
-      if (y === 1975) opt.selected = true;
-      ySel.appendChild(opt);
+@app.get("/")
+def home():
+    return {
+        "status": "online",
+        "version": "5.0",
+        "service": "Bazi Proxy API (Pure Dual-Table & Dynamic Name v5.0)",
+        "source": "https://myfate.herokuapp.com/",
+        "debug_url": "/debug-form"
     }
-    const mSel = document.getElementById("inputMonth");
-    for (let m = 1; m <= 12; m++) {
-      let opt = document.createElement("option");
-      opt.value = m; opt.textContent = m;
-      if (m === 7) opt.selected = true;
-      mSel.appendChild(opt);
-    }
-    const dSel = document.getElementById("inputDay");
-    for (let d = 1; d <= 31; d++) {
-      let opt = document.createElement("option");
-      opt.value = d; opt.textContent = d;
-      if (d === 28) opt.selected = true;
-      dSel.appendChild(opt);
-    }
-  }
 
-  async function checkServerStatus() {
-    const statusBox = document.getElementById("serverStatus");
-    const statusText = document.getElementById("statusText");
-    statusBox.className = "server-status waking";
-    statusText.textContent = "伺服器連線中...";
+@app.get("/debug-form", response_class=HTMLResponse)
+def debug_form(name: str = "Scottie"):
+    try:
+        session = requests.Session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        resp = session.get(TARGET_URL, headers=headers, timeout=10)
+        soup = BeautifulSoup(resp.text, "html.parser")
+        form = soup.find("form")
+        
+        action_url = TARGET_URL
+        if form and form.get("action"):
+            act = form.get("action")
+            action_url = act if act.startswith("http") else TARGET_URL.rstrip("/") + "/" + act.lstrip("/")
 
-    try {
-      const res = await fetch(`${RENDER_BASE}/`, { method: "GET" });
-      if (res.ok) {
-        statusBox.className = "server-status online";
-        statusText.textContent = "● 後端伺服器在線";
-      } else {
-        statusText.textContent = `伺服器回應異常 (${res.status})`;
-      }
-    } catch (e) {
-      statusText.textContent = "伺服器喚醒中，請稍候...";
-    }
-  }
+        payload = build_myfate_payload(soup, 1975, 7, 28, 16, "女")
+        post_res = session.post(action_url, data=payload, headers=headers, timeout=12)
+        post_res.encoding = post_res.apparent_encoding or "utf-8"
+        
+        formatted_html = extract_pure_two_tables(post_res.text, name)
 
-  async function fetchBaziData() {
-    const name = document.getElementById("userName").value.trim() || "無名氏";
-    const gender = document.getElementById("userGender").value;
-    const year = document.getElementById("inputYear").value;
-    const month = document.getElementById("inputMonth").value;
-    const day = document.getElementById("inputDay").value;
-    const hour = document.getElementById("inputHour").value;
+        return f"""
+        <html>
+        <head><meta charset="utf-8"><title>Bazi Proxy Debug v5.0</title></head>
+        <body style="font-family:sans-serif; padding:16px; background:#e4ddcd; margin:auto;">
+            <h2 style="text-align:center; color:#5c3a21;">✅ Render Proxy 伺服器在線 (版本 v5.0 - 純淨雙大表 + 動態姓名)</h2>
+            <hr style="margin-bottom:20px;"/>
+            {formatted_html}
+        </body>
+        </html>
+        """
+    except Exception as e:
+        return f"<html><body><h3>連線失敗：</h3><pre>{str(e)}</pre></body></html>"
 
-    const spinner = document.getElementById("loadingSpinner");
-    const content = document.getElementById("chartContent");
+@app.get("/api/bazi")
+def get_bazi(year: int, month: int, day: int, hour: int, gender: str = "女", name: str = "無名氏"):
+    try:
+        session = requests.Session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Referer": TARGET_URL,
+            "Origin": TARGET_URL.rstrip("/")
+        }
+        
+        # 1. 抓取首頁解析原始表單
+        home_res = session.get(TARGET_URL, headers=headers, timeout=12)
+        soup = BeautifulSoup(home_res.text, "html.parser")
+        form = soup.find("form")
+        
+        action_url = TARGET_URL
+        if form and form.get("action"):
+            act = form.get("action")
+            action_url = act if act.startswith("http") else TARGET_URL.rstrip("/") + "/" + act.lstrip("/")
 
-    spinner.classList.add("active");
-    content.innerHTML = "";
+        # 2. 精確產生對齊 Payload
+        payload = build_myfate_payload(soup, year, month, day, hour, gender)
 
-    const requestUrl = `${PROXY_API_URL}?year=${year}&month=${month}&day=${day}&hour=${hour}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`;
+        # 3. 發送請求至 myfate
+        resp = session.post(action_url, data=payload, headers=headers, timeout=12)
+        resp.encoding = resp.apparent_encoding or "utf-8"
 
-    try {
-      const res = await fetch(requestUrl);
-      if (!res.ok) {
-        throw new Error(`伺服器回應錯誤 HTTP ${res.status}: ${res.statusText}`);
-      }
-      const data = await res.json();
-      spinner.classList.remove("active");
+        # 4. 極致純淨提取：僅保留純粹兩張大表，徹底排除冗長段落，動態帶入姓名
+        formatted_content = extract_pure_two_tables(resp.text, name)
 
-      if (data.html) {
-        content.innerHTML = data.html;
-      } else {
-        content.innerHTML = `<div style="color:red; text-align:center;">獲取命盤失敗，請稍後重試。</div>`;
-      }
-    } catch (err) {
-      spinner.classList.remove("active");
-      content.innerHTML = `<div style="color:#c62828; text-align:center; padding:20px;">⚠️ 連線失敗：${err.message}</div>`;
-    }
-  }
-
-  initOptions();
-  checkServerStatus();
-</script>
-
-</body>
-</html>
+        return {
+            "status": "success",
+            "source": "https://myfate.herokuapp.com/",
+            "submitted_payload": payload,
+            "html": formatted_content
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
