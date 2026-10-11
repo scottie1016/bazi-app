@@ -471,7 +471,7 @@
       <!-- 手機自適應直書卡片 -->
       <div id="shenshaHtmlCard" class="shensha-card" style="width: 100%; max-width: 640px; box-sizing: border-box; background:#fff; border:1.5px solid #2b2319; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.08); overflow:hidden; margin-bottom: 20px;"></div>
       <!-- 高解析度向量繪製畫布 (供長按儲存或下載) -->
-      <canvas id="shenshaCanvas" width="800" height="1460" style="width: 100%; max-width: 640px; height: auto; display: none; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.12);"></canvas>
+      <canvas id="shenshaCanvas" width="800" height="1600" style="width: 100%; max-width: 640px; height: auto; display: none; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.12);"></canvas>
     </div>
 
   </div>
@@ -1561,9 +1561,34 @@
       // 取得十二運與四柱神煞資料
       const { changSheng, pillarShenSha } = calculateChangShengAndShenSha(d);
 
-      // 畫布基礎尺寸: 800 x 1460 (100% 對齊預覽圖版面)
+      // 篩選出該命盤實際出現的神煞
+      const allPillarSS = [];
+      ["year", "month", "day", "hour"].forEach(k => {
+        (pillarShenSha[k] || []).forEach(s => {
+          if (!allPillarSS.includes(s)) allPillarSS.push(s);
+        });
+      });
+
+      let activeList = [];
+      MYFATE_SHENSHA_LIST.forEach(([s_name, s_desc]) => {
+        if (allPillarSS.includes(s_name)) {
+          activeList.push([s_name, s_desc]);
+        }
+      });
+      if (activeList.length === 0) activeList = MYFATE_SHENSHA_LIST;
+
+      const lx = 40, ly = 30, lw = 720;
+      const rH1 = 44, rH2 = 36, rH3 = 36, rH4 = 36;
+      const zhuH = 68, ganzhiH = 160, cangH = 38, fuH = 74, yunH = 46, ssH = 260;
+      const table1H = rH1 + rH2 + rH3 + rH4 + zhuH + ganzhiH + cangH + fuH + yunH + ssH;
+      const table2Y = ly + table1H + 24;
+      const r2H = 40;
+      const table2H = 44 + activeList.length * r2H;
+      const totalCanvasHeight = table2Y + table2H + 40;
+
+      // 畫布基礎尺寸: 800 x totalCanvasHeight (動態調整高度，確保最後的「空亡」、「福德」100% 完整呈現，絕不截斷！)
       canvas.width = 800;
-      canvas.height = 1460;
+      canvas.height = totalCanvasHeight;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#ffffff";
@@ -1612,24 +1637,11 @@
       // ==========================================
       // 表格 1：八字命盤 (x: 40, y: 30, w: 720)
       // ==========================================
-      const lx = 40, ly = 30, lw = 720;
       const labelColW = 50;
       const mainPillarsW = lw - labelColW; // 670px
       const pillarColW = mainPillarsW / 4; // 167.5px
       const labelColX = lx + mainPillarsW; // 710px
 
-      const rH1 = 44; // 八字命盤 (完全拿掉「算命軟體」!)
-      const rH2 = 36; // 姓名...
-      const rH3 = 36; // 民國...
-      const rH4 = 36; // 農曆...
-      const zhuH = 68; // 主星 (直書!)
-      const ganzhiH = 160; // 八字大字
-      const cangH = 38; // 藏
-      const fuH = 74; // 副星 (直書! 比肩、食神、偏財 獨立直排)
-      const yunH = 46; // 運 (十二長生)
-      const ssH = 260; // 神煞 (完全依原圖直排縱向)
-
-      const table1H = rH1 + rH2 + rH3 + rH4 + zhuH + ganzhiH + cangH + fuH + yunH + ssH;
       fillRect(lx, ly, lw, table1H, paperBg);
       strokeRect(lx, ly, lw, table1H, 2, borderColor);
 
@@ -1787,28 +1799,7 @@
       // 表格 2：【神煞說明對照表】 (x: 40, y: table2Y, w: 720)
       // 100% 依 myfate.herokuapp.com 官方原文順序與字樣！
       // ==========================================
-      const table2Y = ly + table1H + 24;
       const nameW = 150;
-      const r2H = 40;
-
-      // 篩選出該命盤實際出現的神煞
-      const allPillarSS = [];
-      ["year", "month", "day", "hour"].forEach(k => {
-        (pillarShenSha[k] || []).forEach(s => {
-          if (!allPillarSS.includes(s)) allPillarSS.push(s);
-        });
-      });
-
-      // 依照 myfate 原版順序排序顯示
-      let activeList = [];
-      MYFATE_SHENSHA_LIST.forEach(([s_name, s_desc]) => {
-        if (allPillarSS.includes(s_name)) {
-          activeList.push([s_name, s_desc]);
-        }
-      });
-      if (activeList.length === 0) activeList = MYFATE_SHENSHA_LIST;
-
-      const table2H = 44 + activeList.length * r2H;
       fillRect(lx, table2Y, lw, table2H, paperBg);
       strokeRect(lx, table2Y, lw, table2H, 1, borderLight);
 
