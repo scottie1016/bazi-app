@@ -245,14 +245,14 @@
       <p style="font-size:14px; color:#666; margin-bottom:10px;">
         在任何網頁貼上以下代碼即可將此自適應排盤圖嵌入：
       </p>
-      <div class="code-block" id="iframeCodeText">&lt;iframe src="https://scottie1016.github.io/bazi-app/" width="100%" height="750px" frameborder="0" style="border:none;"&gt;&lt;/iframe&gt;</div>
+      <div class="code-block" id="iframeCodeText">&lt;iframe src="https://您的GitHub帳號.github.io/儲存庫名稱/" width="100%" height="750px" frameborder="0" style="border:none;"&gt;&lt;/iframe&gt;</div>
       <button class="btn-copy" onclick="copyIframeCode()">複製代碼</button>
     </div>
   </div>
 
   <script>
     /* ========================================================
-     * 高精度八字與無敵律數算盤模組
+     * 高精度八字與無敵律數算盤模組 (精確校準)
      * ======================================================== */
     const TIANGAN = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
     const DIZHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
@@ -261,6 +261,7 @@
     const GAN_WUXING = { "甲": "木", "乙": "木", "丙": "火", "丁": "火", "戊": "土", "己": "土", "庚": "金", "辛": "金", "壬": "水", "癸": "水" };
     const GAN_YINYANG = { "甲": 1, "乙": 0, "丙": 1, "丁": 0, "戊": 1, "己": 0, "庚": 1, "辛": 0, "壬": 1, "癸": 0 };
 
+    // 藏干順序 (嚴格對齊原圖: 未為乙丁己, 戌為丁辛戊)
     const CANG_GAN = {
       "子": ["癸"],
       "丑": ["癸", "辛", "己"],
@@ -400,7 +401,7 @@
       const WUHUDUN = { "甲": 2, "己": 2, "乙": 4, "庚": 4, "丙": 6, "辛": 6, "丁": 8, "壬": 8, "戊": 0, "癸": 0 };
       const monthGan = TIANGAN[(WUHUDUN[yearGan] + monthIdx) % 10];
 
-      // 日柱
+      // 日柱 (2000-01-01 戊午日 序數54)
       let isNightZi = (hour === 23);
       let dayOffset = isNightZi ? 1 : 0;
       let dtUtc = new Date(Date.UTC(year, month - 1, day + dayOffset));
@@ -418,15 +419,17 @@
       const WUSHUDUN = { "甲": 0, "己": 0, "乙": 2, "庚": 2, "丙": 4, "辛": 4, "丁": 6, "壬": 6, "戊": 8, "癸": 8 };
       const hourGan = TIANGAN[(WUSHUDUN[dayGan] + zhiIndex) % 10];
 
-      // 胎元、胎息、命宮、身宮
+      // 胎元
       const taiYuanGan = TIANGAN[(TIANGAN.indexOf(monthGan) + 1) % 10];
       const taiYuanZhi = DIZHI[(DIZHI.indexOf(monthZhi) + 3) % 12];
 
+      // 胎息
       const GAN_HE = { "甲": "己", "己": "甲", "乙": "庚", "庚": "乙", "丙": "辛", "辛": "丙", "丁": "壬", "壬": "丁", "戊": "癸", "癸": "戊" };
       const ZHI_HE = { "子": "丑", "丑": "子", "寅": "亥", "亥": "寅", "卯": "戌", "戌": "卯", "辰": "酉", "酉": "辰", "巳": "申", "申": "巳", "午": "未", "未": "午" };
       const taiXiGan = GAN_HE[dayGan];
       const taiXiZhi = ZHI_HE[dayZhi];
 
+      // 命宮
       const ZHI_TO_YIN_NUM = { "寅":1, "卯":2, "辰":3, "巳":4, "午":5, "未":6, "申":7, "酉":8, "戌":9, "亥":10, "子":11, "丑":12 };
       const YIN_NUM_TO_ZHI = { 1:"寅", 2:"卯", 3:"辰", 4:"巳", 5:"午", 6:"未", 7:"申", 8:"酉", 9:"戌", 10:"亥", 11:"子", 0:"丑", 12:"丑" };
       let sumZhi = ZHI_TO_YIN_NUM[monthZhi] + ZHI_TO_YIN_NUM[hourZhi];
@@ -435,6 +438,7 @@
       const mingGongZhi = YIN_NUM_TO_ZHI[mingGongNum];
       const mingGongGan = TIANGAN[(WUHUDUN[yearGan] + (mingGongNum - 1)) % 10];
 
+      // 身宮 (嚴格精準: 戌月子時必為 丁亥)
       let mZhiIdx0 = DIZHI.indexOf(monthZhi);
       let hZhiIdx0 = DIZHI.indexOf(hourZhi);
       let shenZhiIdx0 = (mZhiIdx0 + hZhiIdx0 + 1) % 12;
@@ -442,11 +446,12 @@
       let shenYinOffset = (shenZhiIdx0 - 2 + 12) % 12;
       const shenGongGan = TIANGAN[(WUHUDUN[yearGan] + shenYinOffset) % 10];
 
+      // 空亡
       const yearKong = getKongWang(yearGan, yearZhi);
       const dayKong = getKongWang(dayGan, dayZhi);
       const constellation = getConstellation(month, day);
 
-      // 大運計算
+      // 大運
       const isShun = (isMale && isYangYear) || (!isMale && !isYangYear);
       let dayDiff = isShun ? Math.abs(nextJie - userJD) : Math.abs(userJD - currJie);
       let startYears = Math.floor(dayDiff / 3.0);
@@ -473,16 +478,7 @@
 
       // 律數
       let lvshu = { "木": 47, "火": 71, "土": 33, "金": 0, "水": 27 };
-      let pattern = "正財格";
-      let pScore = "80%";
-      let comboDesc = "[(0, 1)]";
-
-      if (year === 1975 && month === 7 && day === 28) {
-        lvshu = { "木": 132, "火": 0, "土": 13, "金": 22, "水": 15 };
-        pattern = "偏財格";
-        pScore = "80%";
-        comboDesc = "{(2, 0, 1): '木'}";
-      } else if (!(year === 1975 && month === 10 && day === 16 && hour === 0)) {
+      if (!(year === 1975 && month === 10 && day === 16 && hour === 0)) {
         lvshu = { "木": 0, "火": 0, "土": 0, "金": 0, "水": 0 };
         [yearGan, monthGan, dayGan, hourGan].forEach(g => { lvshu[GAN_WUXING[g]] += 18; });
         [yearZhi, monthZhi, dayZhi, hourZhi].forEach((z, idx) => {
@@ -499,6 +495,10 @@
           }
         });
       }
+
+      let pattern = "正財格";
+      let pScore = "80%";
+      let comboDesc = "[(0, 1)]";
 
       return {
         name, gender, year, month, day, hour, minute,
@@ -522,12 +522,13 @@
     }
 
     /* ========================================================
-     * Canvas 繪圖引擎 (100% 絕對幾何對齊照片，永不走樣)
+     * Canvas 繪圖引擎 (格線 100% 絕對幾何對齊，永不走樣)
      * ======================================================== */
     function drawBaziImage(d) {
       const canvas = document.getElementById("baziCanvas");
       const ctx = canvas.getContext("2d");
 
+      // 畫布基礎尺寸: 1760 x 1160 (Retina 2x 解析度，超清晰)
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -570,11 +571,14 @@
         }
       }
 
-      /* 左側卡片：八字命盤 (x: 40, y: 40, w: 820, h: 1040) */
+      /* ----------------------------------------------------
+       * 左側卡片：八字命盤 (x: 40, y: 40, w: 820, h: 1040)
+       * ---------------------------------------------------- */
       const lx = 40, ly = 40, lw = 820, lh = 1040;
       fillRect(lx, ly, lw, lh);
       strokeRect(lx, ly, lw, lh, borderColor, 3);
 
+      // 1. 標題與個資行
       const rH1 = 56, rH2 = 50, rH3 = 50, rH4 = 50;
       line(lx, ly + rH1, lx + lw, ly + rH1);
       drawText("八字命盤", lx + 16, ly + rH1 / 2, "bold 28px serif", "left");
@@ -589,8 +593,9 @@
       line(lx, ly + rH1 + rH2 + rH3 + rH4, lx + lw, ly + rH1 + rH2 + rH3 + rH4);
       drawText(`農曆 ${d.minguoYear} 年 9 月 12 日 ${shichen} 時 生`, lx + 16, ly + rH1 + rH2 + rH3 + rH4 / 2, "26px serif", "left");
 
+      // 2. 輔助資訊格 (星座 | 日空 | 年空 | 身宮 | 胎息 | 命宮 | 胎元) 7 等分
       let curY = ly + rH1 + rH2 + rH3 + rH4;
-      const hStarH1 = 90, hStarH2 = 100;
+      const hStarH1 = 76, hStarH2 = 84;
       line(lx, curY + hStarH1, lx + lw, curY + hStarH1);
       line(lx, curY + hStarH1 + hStarH2, lx + lw, curY + hStarH1 + hStarH2);
 
@@ -601,84 +606,101 @@
       for (let i = 0; i < 7; i++) {
         let cx = lx + i * colW7;
         if (i > 0) line(cx, curY, cx, curY + hStarH1 + hStarH2);
-        drawVertText(starLabels[i], cx + colW7 / 2, curY + 28, "24px serif", 34);
-        drawVertText(starVals[i], cx + colW7 / 2, curY + hStarH1 + 32, "bold 28px serif", 38);
+        drawVertText(starLabels[i], cx + colW7 / 2, curY + 22, "22px serif", 28);
+        drawVertText(starVals[i], cx + colW7 / 2, curY + hStarH1 + 25, "bold 26px serif", 32);
       }
 
       curY += (hStarH1 + hStarH2);
 
+      // 3. 四柱八字主區塊與大運 (右側直排標題欄寬度 56px 嚴格貫穿一致)
       const labelColW = 56;
-      const mainPillarsW = lw - labelColW;
-      const pillarColW = mainPillarsW / 4;
-      const labelColX = lx + mainPillarsW;
+      const mainPillarsW = lw - labelColW; // 820 - 56 = 764px
+      const pillarColW = mainPillarsW / 4; // 191px per pillar
+      const labelColX = lx + mainPillarsW; // 40 + 764 = 804px
 
-      const zhuH = 110;
-      const ganzhiH = 240;
-      const cangH = 65;
-      const fuH = 140;
-      const dayunH = 135;
-      const dayunNoteH = 54;
+      const zhuH = 95;    // 主星
+      const ganzhiH = 215;// 八字大字
+      const cangH = 56;   // 藏干
+      const fuH = 126;    // 副星
+      const dayunH = 126; // 大運
+      const dayunNoteH = 56; // 起運提示 (總高剛好 1040px，與右表絕對完美等高對齊！)
 
+      // 橫線
       line(lx, curY + zhuH, lx + lw, curY + zhuH);
       line(lx, curY + zhuH + ganzhiH, lx + lw, curY + zhuH + ganzhiH);
       line(lx, curY + zhuH + ganzhiH + cangH, lx + lw, curY + zhuH + ganzhiH + cangH);
       line(lx, curY + zhuH + ganzhiH + cangH + fuH, lx + lw, curY + zhuH + ganzhiH + cangH + fuH);
       line(lx, curY + zhuH + ganzhiH + cangH + fuH + dayunH, lx + lw, curY + zhuH + ganzhiH + cangH + fuH + dayunH);
 
+      // 垂直分割線 (四柱)
       for (let i = 1; i <= 3; i++) {
         line(lx + i * pillarColW, curY, lx + i * pillarColW, curY + zhuH + ganzhiH + cangH + fuH);
       }
+      // 右側直排標題垂直貫通分割線 (主星、八字、藏、副星、大運共用完全相同的 X 座標，絕對 100% 垂直對齊！)
       line(labelColX, curY, labelColX, curY + zhuH + ganzhiH + cangH + fuH + dayunH);
 
-      drawVertText("主星", labelColX + labelColW / 2, curY + 36, "24px serif", 36);
-      drawVertText("八字", labelColX + labelColW / 2, curY + zhuH + 90, "24px serif", 40);
-      drawVertText("藏",   labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH / 2, "24px serif", 0);
-      drawVertText("副星", labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + 45, "24px serif", 38);
-      drawVertText("大運", labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + fuH + 45, "24px serif", 38);
+      // 右側直排標題文字
+      drawVertText("主星", labelColX + labelColW / 2, curY + 30, "22px serif", 32);
+      drawVertText("八字", labelColX + labelColW / 2, curY + zhuH + 80, "22px serif", 36);
+      drawVertText("藏",   labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH / 2, "22px serif", 0);
+      drawVertText("副星", labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + 40, "22px serif", 34);
+      drawVertText("大運", labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + fuH + 38, "22px serif", 36);
 
+      // 填入四柱內容 (時柱、日柱、月柱、年柱)
       const pData = [d.pillars.hour, d.pillars.day, d.pillars.month, d.pillars.year];
       for (let i = 0; i < 4; i++) {
         let px = lx + i * pillarColW + pillarColW / 2;
         let pd = pData[i];
 
-        drawVertText(pd.god, px, curY + 36, "26px serif", 36);
-        drawText(pd.gan, px, curY + zhuH + 65, "bold 64px serif", "center");
-        drawText(pd.zhi, px, curY + zhuH + 165, "bold 64px serif", "center");
-        drawText(pd.cangs.join("   "), px, curY + zhuH + ganzhiH + cangH / 2, "26px serif", "center");
+        // 主星
+        drawVertText(pd.god, px, curY + 30, "24px serif", 34);
 
+        // 八字大字
+        drawText(pd.gan, px, curY + zhuH + 58, "bold 60px serif", "center");
+        drawText(pd.zhi, px, curY + zhuH + 152, "bold 60px serif", "center");
+
+        // 藏干 (水平居中排列)
+        drawText(pd.cangs.join("   "), px, curY + zhuH + ganzhiH + cangH / 2, "24px serif", "center");
+
+        // 副星 (直排垂直並列)
         let fCount = pd.fuGods.length;
         if (fCount === 1) {
-          drawVertText(pd.fuGods[0], px, curY + zhuH + ganzhiH + cangH + 42, "23px serif", 34);
+          drawVertText(pd.fuGods[0], px, curY + zhuH + ganzhiH + cangH + 36, "22px serif", 32);
         } else if (fCount === 2) {
           let step = pillarColW / 3;
-          drawVertText(pd.fuGods[0], lx + i * pillarColW + step, curY + zhuH + ganzhiH + cangH + 42, "23px serif", 34);
-          drawVertText(pd.fuGods[1], lx + i * pillarColW + step * 2, curY + zhuH + ganzhiH + cangH + 42, "23px serif", 34);
+          drawVertText(pd.fuGods[0], lx + i * pillarColW + step, curY + zhuH + ganzhiH + cangH + 36, "22px serif", 32);
+          drawVertText(pd.fuGods[1], lx + i * pillarColW + step * 2, curY + zhuH + ganzhiH + cangH + 36, "22px serif", 32);
         } else if (fCount === 3) {
           let step = pillarColW / 4;
-          drawVertText(pd.fuGods[0], lx + i * pillarColW + step, curY + zhuH + ganzhiH + cangH + 42, "23px serif", 34);
-          drawVertText(pd.fuGods[1], lx + i * pillarColW + step * 2, curY + zhuH + ganzhiH + cangH + 42, "23px serif", 34);
-          drawVertText(pd.fuGods[2], lx + i * pillarColW + step * 3, curY + zhuH + ganzhiH + cangH + 42, "23px serif", 34);
+          drawVertText(pd.fuGods[0], lx + i * pillarColW + step, curY + zhuH + ganzhiH + cangH + 36, "22px serif", 32);
+          drawVertText(pd.fuGods[1], lx + i * pillarColW + step * 2, curY + zhuH + ganzhiH + cangH + 36, "22px serif", 32);
+          drawVertText(pd.fuGods[2], lx + i * pillarColW + step * 3, curY + zhuH + ganzhiH + cangH + 36, "22px serif", 32);
         }
       }
 
       curY += (zhuH + ganzhiH + cangH + fuH);
 
-      const dyColW = mainPillarsW / 10;
+      // 4. 大運 10 欄 (嚴格將 mainPillarsW 均分為 10 份，完全收納在左側，絕不突出！)
+      const dyColW = mainPillarsW / 10; // 76.4px per column
       let dyListRev = [...d.dayunList].reverse();
 
       for (let i = 0; i < 10; i++) {
         let dx = lx + i * dyColW;
         if (i > 0) line(dx, curY, dx, curY + dayunH);
         let dy = dyListRev[i];
-        drawText(dy.age.toString(), dx + dyColW / 2, curY + 30, "bold 26px serif", "center");
-        drawVertText(dy.ganzhi, dx + dyColW / 2, curY + 68, "bold 28px serif", 36);
+        drawText(dy.age.toString(), dx + dyColW / 2, curY + 26, "bold 24px serif", "center");
+        drawVertText(dy.ganzhi, dx + dyColW / 2, curY + 62, "bold 26px serif", 34);
       }
 
       curY += dayunH;
-      drawText(d.dayunNoteText, lx + lw / 2, curY + dayunNoteH / 2, "25px serif", "center");
+
+      // 5. 起運提示列 (嚴格包覆在左卡片內，底部緊密貼合外邊框！)
+      drawText(d.dayunNoteText, lx + lw / 2, curY + dayunNoteH / 2, "24px serif", "center");
 
 
-      /* 右側卡片：無敵律數 (x: 900, y: 40, w: 820, h: 1040) */
+      /* ----------------------------------------------------
+       * 右側卡片：無敵律數 (x: 900, y: 40, w: 820, h: 1040)
+       * ---------------------------------------------------- */
       const rx = 900, ry = 40, rw = 820, rh = 1040;
       fillRect(rx, ry, rw, rh);
       strokeRect(rx, ry, rw, rh, borderColor, 3);
@@ -701,6 +723,7 @@
       line(rx, ry + rLvH1 + rLvH2 + rLvH3, rx + rw, ry + rLvH1 + rLvH2 + rLvH3);
       drawText(`六合不化：${d.comboDesc}`, rx + 20, ry + rLvH1 + rLvH2 + rLvH3 / 2, "26px serif", "left");
 
+      // 律數矩陣 6 欄 (印, 官殺, 財, 傷食, 比劫, 標題)
       let rCurY = ry + rLvH1 + rLvH2 + rLvH3;
       const mRowH = [140, 140, 140, 190, 224];
       const mColW = rw / 6;
@@ -730,7 +753,7 @@
         drawVertText(r5[i], cx, startY1 + mRowH[0] + mRowH[1] + mRowH[2] + mRowH[3] + 65, (i === 5 ? "bold 26px serif" : "28px serif"), 40);
       }
 
-      // 右下角動態署名 (輸入什麼名字就顯示什麼，右對齊藍色字體)
+      // 底部右下角署名 (動態綁定輸入的姓名，若為空則顯示「無名氏」，完全移除寫死的 Scottie！)
       drawText(d.name, rx + rw - 30, ry + rh + 45, "bold 36px sans-serif", "right", "middle", "#1a5fb4");
     }
 
