@@ -18,14 +18,14 @@ TARGET_URL = "https://myfate.herokuapp.com/"
 
 def generate_candidates(soup, year: int, month: int, day: int, hour: int, gender: str):
     """
-    精確產生目標日期的表單組合，絕對排除無關年份 (如 1900)
+    精確產生目標日期的表單組合，絕對排除無關年份 (如 1900)，並涵蓋 submit 按鈕
     """
     base_payload = {}
     for inp in soup.find_all("input", type="hidden"):
         if inp.get("name"):
             base_payload[inp["name"]] = inp.get("value", "")
 
-    # 1. 年份：精確提取包含目標年份的選項
+    # 1. 年份：精確鎖定目標年份
     m = year - 1911 if year >= 1912 else 1912 - year
     prefix = "民國" if year >= 1912 else "民前"
 
@@ -74,20 +74,23 @@ def generate_candidates(soup, year: int, month: int, day: int, hour: int, gender
     # 4. 曆法：1 (陽曆), 0
     cal_options = ["1", "0"]
 
-    # 5. 組合候選名單
+    # 5. 組合候選名單 (涵蓋有/無 submit 按鈕)
     candidates = []
-    for y in uniq_years:
-        for h in uniq_hours:
-            for s in sex_options:
+    for y in uniq_years[:2]:
+        for h in uniq_hours[:2]:
+            for s in sex_options[:2]:
                 for cal in cal_options:
-                    p = dict(base_payload)
-                    p["Calendar"] = cal
-                    p["Sex"] = s
-                    p["Year"] = y
-                    p["Month"] = str(month)
-                    p["Day"] = str(day)
-                    p["Hour"] = h
-                    candidates.append(p)
+                    for with_sub in [True, False]:
+                        p = dict(base_payload)
+                        p["Calendar"] = cal
+                        p["Sex"] = s
+                        p["Year"] = y
+                        p["Month"] = str(month)
+                        p["Day"] = str(day)
+                        p["Hour"] = h
+                        if with_sub:
+                            p["submit"] = "命盤分析"
+                        candidates.append(p)
 
     return candidates
 
@@ -95,8 +98,8 @@ def generate_candidates(soup, year: int, month: int, day: int, hour: int, gender
 def home():
     return {
         "status": "online",
-        "version": "2.3",
-        "service": "Bazi Proxy API (Targeted Match v2.3)",
+        "version": "2.4",
+        "service": "Bazi Proxy API (Targeted Match v2.4)",
         "source": "https://myfate.herokuapp.com/",
         "debug_url": "/debug-form"
     }
@@ -150,9 +153,9 @@ def debug_form():
 
         return f"""
         <html>
-        <head><meta charset="utf-8"><title>Bazi Proxy Debug Form v2.3</title></head>
+        <head><meta charset="utf-8"><title>Bazi Proxy Debug Form v2.4</title></head>
         <body style="font-family:sans-serif; padding:20px; line-height:1.6; max-width:960px; margin:auto;">
-            <h2>✅ Render Proxy 伺服器在線 (版本 v2.3 - 精確年份鎖定)</h2>
+            <h2>✅ Render Proxy 伺服器在線 (版本 v2.4)</h2>
             <p>目標來源：<a href="{TARGET_URL}" target="_blank">{TARGET_URL}</a></p>
             <hr/>
             <h3>🧪 即時診斷測試 (1975-07-28 16時 女)：</h3>
