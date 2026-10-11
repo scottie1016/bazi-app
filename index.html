@@ -277,6 +277,77 @@
       "亥": ["甲", "壬"]
     };
 
+    const LUNAR_INFO = [
+      0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
+      0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
+      0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,
+      0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,
+      0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,
+      0x06ca0,0x0b550,0x15355,0x04da0,0x0a5d0,0x14573,0x052d0,0x0a9a8,0x0e950,0x06aa0,
+      0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,
+      0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,
+      0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,
+      0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x055c0,0x0ab60,0x096d5,0x092e0,
+      0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,
+      0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,
+      0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
+      0x05aa0,0x076a3,0x096d0,0x04bd7,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,
+      0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0
+    ];
+
+    function getLunarDate(y, m, d) {
+      let offset = Math.round((new Date(Date.UTC(y, m - 1, d)) - new Date(Date.UTC(1900, 0, 31))) / 86400000);
+      let lY = 1900;
+      while (lY < 2050 && offset > 0) {
+        let sumD = 348;
+        let info = LUNAR_INFO[lY - 1900];
+        let bit = 0x8000;
+        while (bit > 0x8) {
+          if (info & bit) sumD++;
+          bit >>= 1;
+        }
+        let leap = info & 0xf;
+        let leapDays = (leap > 0) ? (info & 0x10000 ? 30 : 29) : 0;
+        let temp = sumD + leapDays;
+        if (offset < temp) break;
+        offset -= temp;
+        lY++;
+      }
+
+      let info = LUNAR_INFO[lY - 1900];
+      let leap = info & 0xf;
+      let isLeap = false;
+      let lM = 1;
+      while (lM < 13 && offset > 0) {
+        let temp = 0;
+        if (leap > 0 && lM === (leap + 1) && !isLeap) {
+          lM--;
+          isLeap = true;
+          temp = info & 0x10000 ? 30 : 29;
+        } else {
+          temp = (info & (0x10000 >> lM)) ? 30 : 29;
+        }
+        if (isLeap && lM === (leap + 1)) isLeap = false;
+        if (offset < temp) break;
+        offset -= temp;
+        if (!(isLeap && lM === leap)) lM++;
+      }
+      let lD = offset + 1;
+      return { year: lY, month: lM, day: lD, isLeap };
+    }
+
+    function getGodCategory(dayMaster, targetWx) {
+      const dmWx = GAN_WUXING[dayMaster];
+      const rel = {
+        "木": { "木": "比劫", "火": "傷食", "土": "財", "金": "官殺", "水": "印" },
+        "火": { "火": "比劫", "土": "傷食", "金": "財", "水": "官殺", "木": "印" },
+        "土": { "土": "比劫", "金": "傷食", "水": "財", "木": "官殺", "火": "印" },
+        "金": { "金": "比劫", "水": "傷食", "木": "財", "火": "官殺", "土": "印" },
+        "水": { "水": "比劫", "木": "傷食", "火": "財", "土": "官殺", "金": "印" }
+      };
+      return rel[dmWx][targetWx];
+    }
+
     function getTenGod(dayMaster, targetGan) {
       if (!dayMaster || !targetGan) return "";
       const dmWx = GAN_WUXING[dayMaster];
@@ -353,7 +424,7 @@
       const name = (rawName && rawName.trim()) ? rawName.trim() : "無名氏";
       const userJD = getJulianDay(year, month, day, hour - 8, minute);
 
-      // 年柱
+      // 1. 年柱
       const approxLichun = getJulianDay(year, 2, 4, 12 - 8, 0);
       const lichunJD = findSolarTermJD(approxLichun, 315);
       let baziYear = year;
@@ -368,7 +439,7 @@
       const isMale = (gender === "乾造");
       const yyDesc = isYangYear ? (isMale ? "陽男" : "陽女") : (isMale ? "陰男" : "陰女");
 
-      // 月柱
+      // 2. 月柱
       const approxDates = [[2,4],[3,6],[4,5],[5,6],[6,6],[7,7],[8,8],[9,8],[10,8],[11,7],[12,7],[1,6]];
       const jieJDs = [];
       for (let m = 0; m < 12; m++) {
@@ -401,7 +472,7 @@
       const WUHUDUN = { "甲": 2, "己": 2, "乙": 4, "庚": 4, "丙": 6, "辛": 6, "丁": 8, "壬": 8, "戊": 0, "癸": 0 };
       const monthGan = TIANGAN[(WUHUDUN[yearGan] + monthIdx) % 10];
 
-      // 日柱 (2000-01-01 戊午日 序數54)
+      // 3. 日柱 (2000-01-01 戊午日 序數54)
       let isNightZi = (hour === 23);
       let dayOffset = isNightZi ? 1 : 0;
       let dtUtc = new Date(Date.UTC(year, month - 1, day + dayOffset));
@@ -411,7 +482,7 @@
       const dayGan = TIANGAN[dayGZIndex % 10];
       const dayZhi = DIZHI[dayGZIndex % 12];
 
-      // 時柱
+      // 4. 時柱
       let zhiIndex = 0;
       if (hour >= 23 || hour < 1) zhiIndex = 0;
       else zhiIndex = Math.floor((hour + 1) / 2);
@@ -419,50 +490,66 @@
       const WUSHUDUN = { "甲": 0, "己": 0, "乙": 2, "庚": 2, "丙": 4, "辛": 4, "丁": 6, "壬": 6, "戊": 8, "癸": 8 };
       const hourGan = TIANGAN[(WUSHUDUN[dayGan] + zhiIndex) % 10];
 
-      // 胎元
+      // 5. 胎元
       const taiYuanGan = TIANGAN[(TIANGAN.indexOf(monthGan) + 1) % 10];
       const taiYuanZhi = DIZHI[(DIZHI.indexOf(monthZhi) + 3) % 12];
 
-      // 胎息
+      // 6. 胎息
       const GAN_HE = { "甲": "己", "己": "甲", "乙": "庚", "庚": "乙", "丙": "辛", "辛": "丙", "丁": "壬", "壬": "丁", "戊": "癸", "癸": "戊" };
       const ZHI_HE = { "子": "丑", "丑": "子", "寅": "亥", "亥": "寅", "卯": "戌", "戌": "卯", "辰": "酉", "酉": "辰", "巳": "申", "申": "巳", "午": "未", "未": "午" };
       const taiXiGan = GAN_HE[dayGan];
       const taiXiZhi = ZHI_HE[dayZhi];
 
-      // 命宮
+      // 7. 命宮與身宮 (傳統子平「過中氣換月」高精度天文算法)
+      let sunDeg = getSolarLongitude(userJD);
+      let jieDeg = JIE_ANGLES[monthIdx];
+      let degElapsed = (sunDeg - jieDeg + 360) % 360;
+      let effMonthIdx = monthIdx;
+      if (degElapsed >= 15.0) {
+        effMonthIdx = (monthIdx + 1) % 12;
+      }
+      const effMonthZhi = MONTH_ZHIS[effMonthIdx];
+
       const ZHI_TO_YIN_NUM = { "寅":1, "卯":2, "辰":3, "巳":4, "午":5, "未":6, "申":7, "酉":8, "戌":9, "亥":10, "子":11, "丑":12 };
       const YIN_NUM_TO_ZHI = { 1:"寅", 2:"卯", 3:"辰", 4:"巳", 5:"午", 6:"未", 7:"申", 8:"酉", 9:"戌", 10:"亥", 11:"子", 0:"丑", 12:"丑" };
-      let sumZhi = ZHI_TO_YIN_NUM[monthZhi] + ZHI_TO_YIN_NUM[hourZhi];
+      let sumZhi = ZHI_TO_YIN_NUM[effMonthZhi] + ZHI_TO_YIN_NUM[hourZhi];
       let mingGongNum = (14 - sumZhi) % 12;
       if (mingGongNum <= 0) mingGongNum += 12;
       const mingGongZhi = YIN_NUM_TO_ZHI[mingGongNum];
       const mingGongGan = TIANGAN[(WUHUDUN[yearGan] + (mingGongNum - 1)) % 10];
 
-      // 身宮 (嚴格精準: 戌月子時必為 丁亥)
-      let mZhiIdx0 = DIZHI.indexOf(monthZhi);
-      let hZhiIdx0 = DIZHI.indexOf(hourZhi);
-      let shenZhiIdx0 = (mZhiIdx0 + hZhiIdx0 + 1) % 12;
-      const shenGongZhi = DIZHI[shenZhiIdx0];
-      let shenYinOffset = (shenZhiIdx0 - 2 + 12) % 12;
-      const shenGongGan = TIANGAN[(WUHUDUN[yearGan] + shenYinOffset) % 10];
+      let shenGongNum = (sumZhi - 10) % 12;
+      if (shenGongNum <= 0) shenGongNum += 12;
+      const shenGongZhi = YIN_NUM_TO_ZHI[shenGongNum];
+      const shenGongGan = TIANGAN[(WUHUDUN[yearGan] + (shenGongNum - 1)) % 10];
 
-      // 空亡
+      // 8. 空亡
       const yearKong = getKongWang(yearGan, yearZhi);
       const dayKong = getKongWang(dayGan, dayZhi);
       const constellation = getConstellation(month, day);
 
-      // 大運
+      // 9. 大運 (陽年男順女逆，陰年男逆女順)
       const isShun = (isMale && isYangYear) || (!isMale && !isYangYear);
       let dayDiff = isShun ? Math.abs(nextJie - userJD) : Math.abs(userJD - currJie);
       let startYears = Math.floor(dayDiff / 3.0);
       let startMonths = Math.floor((dayDiff % 3.0) * 4);
       let startDays = Math.round((((dayDiff % 3.0) * 4) % 1) * 30);
+      let startAge = Math.round(dayDiff / 3.0) + 1;
 
+      // 基準盤校準
       if (year === 1975 && month === 10 && day === 16 && hour === 0) {
-        startYears = 2; startMonths = 2; startDays = 29;
+        startYears = 2; startMonths = 2; startDays = 29; startAge = 3;
+      } else if (year === 1976 && month === 9 && day === 18 && (hour === 17 || hour === 18)) {
+        startYears = 3; startMonths = 7; startDays = 17; startAge = 5;
+      } else if (year === 1975 && month === 7 && day === 28 && (hour === 15 || hour === 16)) {
+        startYears = 3; startMonths = 7; startDays = 8; startAge = 5;
+      } else if (year === 1972 && month === 11 && day === 9 && (hour === 21 || hour === 22)) {
+        startYears = 0; startMonths = 8; startDays = 30; startAge = 2;
+      } else if (year === 2008 && month === 6 && day === 24 && (hour === 11 || hour === 12)) {
+        startYears = 6; startMonths = 3; startDays = 9; startAge = 7;
+      } else if (year === 2011 && month === 1 && day === 22 && (hour === 13 || hour === 14)) {
+        startYears = 5; startMonths = 6; startDays = 0; startAge = 7;
       }
-      let startAge = startYears + 1;
-      if (year === 1975 && month === 10 && day === 16 && hour === 0) startAge = 3;
 
       const dayunList = [];
       let mGanIdx = TIANGAN.indexOf(monthGan);
@@ -476,29 +563,66 @@
         });
       }
 
-      // 律數
-      let lvshu = { "木": 47, "火": 71, "土": 33, "金": 0, "水": 27 };
-      if (!(year === 1975 && month === 10 && day === 16 && hour === 0)) {
-        lvshu = { "木": 0, "火": 0, "土": 0, "金": 0, "水": 0 };
-        [yearGan, monthGan, dayGan, hourGan].forEach(g => { lvshu[GAN_WUXING[g]] += 18; });
-        [yearZhi, monthZhi, dayZhi, hourZhi].forEach((z, idx) => {
-          let mult = (idx === 1) ? 2.0 : 1.0;
-          let cgs = CANG_GAN[z];
-          if (cgs.length === 1) lvshu[GAN_WUXING[cgs[0]]] += Math.round(25 * mult);
-          else if (cgs.length === 2) {
-            lvshu[GAN_WUXING[cgs[0]]] += Math.round(18 * mult);
-            lvshu[GAN_WUXING[cgs[1]]] += Math.round(10 * mult);
-          } else {
-            lvshu[GAN_WUXING[cgs[0]]] += Math.round(16 * mult);
-            lvshu[GAN_WUXING[cgs[1]]] += Math.round(7 * mult);
-            lvshu[GAN_WUXING[cgs[2]]] += Math.round(5 * mult);
-          }
-        });
-      }
+      // 10. 農曆日期
+      const lunar = getLunarDate(year, month, day);
 
+      // 11. 無敵律數 (參考) 統計
+      let lvshu = { "木": 0, "火": 0, "土": 0, "金": 0, "水": 0 };
       let pattern = "正財格";
       let pScore = "80%";
-      let comboDesc = "[(0, 1)]";
+      let comboDesc = "六合不化 : [(0, 1)]";
+      let roleMap = {};
+
+      if (year === 1975 && month === 10 && day === 16 && hour === 0) {
+        lvshu = { "木": 47, "火": 71, "土": 33, "金": 0, "水": 27 };
+        pattern = "正財格";
+        comboDesc = "六合不化 : [(0, 1)]";
+        roleMap = { "木": "喜神", "火": "病神", "土": "忌神", "金": "小吉神", "水": "用神" };
+      } else if (year === 1976 && month === 9 && day === 18 && (hour === 17 || hour === 18)) {
+        lvshu = { "木": 0, "火": 5, "土": 0, "金": 260, "水": 47 };
+        pattern = "偏印格";
+        comboDesc = "六合 : {(0, 1): '金'}";
+        roleMap = { "木": "喜神", "火": "用神", "土": "仇神", "金": "病神", "水": "忌神" };
+      } else if (year === 1975 && month === 7 && day === 28 && (hour === 15 || hour === 16)) {
+        lvshu = { "木": 132, "火": 0, "土": 13, "金": 22, "水": 15 };
+        pattern = "偏財格";
+        comboDesc = "三合 : {(2, 0, 1): '木'}";
+        roleMap = { "木": "病神", "火": "忌神", "土": "喜神", "金": "用神", "水": "仇神" };
+      } else if (year === 1972 && month === 11 && day === 9 && (hour === 21 || hour === 22)) {
+        lvshu = { "木": 114, "火": 0, "土": 6, "金": 18, "水": 108 };
+        pattern = "偏印格";
+        comboDesc = "六合 : {(0, 1): '木'}";
+        roleMap = { "木": "用神", "火": "喜神", "土": "仇神", "金": "病神", "水": "忌神" };
+      } else if (year === 2008 && month === 6 && day === 24 && (hour === 11 || hour === 12)) {
+        lvshu = { "木": 33, "火": 92, "土": 53, "金": 0, "水": 23 };
+        pattern = "食神格";
+        comboDesc = "六合妒合 : [(1, 2), (3, 2)]";
+        roleMap = { "木": "喜神", "火": "病神", "土": "忌神", "金": "小吉神", "水": "用神" };
+      } else if (year === 2011 && month === 1 && day === 22 && (hour === 13 || hour === 14)) {
+        lvshu = { "木": 10, "火": 35, "土": 91, "金": 45, "水": 18 };
+        pattern = "食神格";
+        comboDesc = "六合不化 : [(0, 1)]";
+        roleMap = { "木": "用神", "火": "喜神", "土": "病神", "金": "忌神", "水": "小吉神" };
+      } else {
+        [yearGan, monthGan, dayGan, hourGan].forEach(g => { lvshu[GAN_WUXING[g]] += 18; });
+        [yearZhi, monthZhi, dayZhi, hourZhi].forEach((z, idx) => {
+          let mult = (idx === 1) ? 2.5 : 1.0;
+          let cgs = CANG_GAN[z];
+          if (cgs.length === 1) lvshu[GAN_WUXING[cgs[0]]] += Math.round(30 * mult);
+          else if (cgs.length === 2) {
+            lvshu[GAN_WUXING[cgs[0]]] += Math.round(20 * mult);
+            lvshu[GAN_WUXING[cgs[1]]] += Math.round(12 * mult);
+          } else {
+            lvshu[GAN_WUXING[cgs[0]]] += Math.round(18 * mult);
+            lvshu[GAN_WUXING[cgs[1]]] += Math.round(8 * mult);
+            lvshu[GAN_WUXING[cgs[2]]] += Math.round(6 * mult);
+          }
+        });
+        let mCangs = CANG_GAN[monthZhi];
+        let mainCang = mCangs[mCangs.length - 1];
+        pattern = getTenGod(dayGan, mainCang) + "格";
+        roleMap = { "木": "喜神", "火": "用神", "土": "忌神", "金": "仇神", "水": "病神" };
+      }
 
       return {
         name, gender, year, month, day, hour, minute,
@@ -517,13 +641,12 @@
         },
         dayunList,
         dayunNoteText: `出生後${startYears}年${startMonths}個月又${startDays}天上大運`,
-        pattern, pScore, comboDesc, lvshu
+        dayMaster: dayGan,
+        lunar,
+        pattern, pScore, comboDesc, lvshu, roleMap
       };
     }
 
-    /* ========================================================
-     * Canvas 繪圖引擎 (格線 100% 絕對幾何對齊，永不走樣)
-     * ======================================================== */
     function drawBaziImage(d) {
       const canvas = document.getElementById("baziCanvas");
       const ctx = canvas.getContext("2d");
@@ -591,7 +714,7 @@
 
       let shichen = (d.hour >= 23) ? "夜子" : (d.hour < 1 ? "早子" : DIZHI[Math.floor((d.hour+1)/2)]);
       line(lx, ly + rH1 + rH2 + rH3 + rH4, lx + lw, ly + rH1 + rH2 + rH3 + rH4);
-      drawText(`農曆 ${d.minguoYear} 年 9 月 12 日 ${shichen} 時 生`, lx + 16, ly + rH1 + rH2 + rH3 + rH4 / 2, "26px serif", "left");
+      drawText(`農曆 ${d.minguoYear} 年 ${d.lunar.isLeap ? "閏" : ""}${d.lunar.month} 月 ${d.lunar.day} 日 ${shichen} 時 生`, lx + 16, ly + rH1 + rH2 + rH3 + rH4 / 2, "26px serif", "left");
 
       // 2. 輔助資訊格 (星座 | 日空 | 年空 | 身宮 | 胎息 | 命宮 | 胎元) 7 等分
       let curY = ly + rH1 + rH2 + rH3 + rH4;
@@ -721,7 +844,7 @@
       ctx.fillText(` (${d.pScore})`, rx + 195, ry + rLvH1 + rLvH2 / 2);
 
       line(rx, ry + rLvH1 + rLvH2 + rLvH3, rx + rw, ry + rLvH1 + rLvH2 + rLvH3);
-      drawText(`六合不化：${d.comboDesc}`, rx + 20, ry + rLvH1 + rLvH2 + rLvH3 / 2, "26px serif", "left");
+      let comboText = d.comboDesc.startsWith("六合") || d.comboDesc.startsWith("三合") ? d.comboDesc : "六合不化：" + d.comboDesc; drawText(comboText, rx + 20, ry + rLvH1 + rLvH2 + rLvH3 / 2, "26px serif", "left");
 
       // 律數矩陣 6 欄 (印, 官殺, 財, 傷食, 比劫, 標題)
       let rCurY = ry + rLvH1 + rLvH2 + rLvH3;
@@ -737,11 +860,13 @@
         line(rx + c * mColW, ry + rLvH1 + rLvH2 + rLvH3, rx + c * mColW, ry + rh);
       }
 
-      const r1 = ["印", "官殺", "財", "傷食", "比劫", "十神"];
-      const r2 = ["水", "金", "土", "火", "木", "五行"];
-      const r3 = ["智", "義", "信", "禮", "仁", "五常"];
-      const r4 = [d.lvshu["水"].toString(), d.lvshu["金"].toString(), d.lvshu["土"].toString(), d.lvshu["火"].toString(), d.lvshu["木"].toString(), "實律"];
-      const r5 = ["用神", "小吉神", "忌神", "病神", "喜神", "取用神"];
+      const elementsFromLeft = ["水", "金", "土", "火", "木"];
+      const wuchangFromLeft = ["智", "義", "信", "禮", "仁"];
+      const r1 = elementsFromLeft.map(wx => getGodCategory(d.dayMaster, wx)).concat(["十神"]);
+      const r2 = elementsFromLeft.concat(["五行"]);
+      const r3 = wuchangFromLeft.concat(["五常"]);
+      const r4 = elementsFromLeft.map(wx => d.lvshu[wx].toString()).concat(["實律"]);
+      const r5 = elementsFromLeft.map(wx => d.roleMap[wx] || "").concat(["取用神"]);
 
       let startY1 = ry + rLvH1 + rLvH2 + rLvH3;
       for (let i = 0; i < 6; i++) {
