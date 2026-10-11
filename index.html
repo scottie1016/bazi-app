@@ -934,7 +934,7 @@
         opt.value = y;
         let label = (y >= 1912) ? ("民國 " + (y - 1911) + " (西元" + y + ") 年") : ("民前 " + (1912 - y) + " (西元" + y + ") 年");
         opt.textContent = label;
-        if (y === 1975) opt.selected = true;
+        if (y === 2000) opt.selected = true;
         ySel.appendChild(opt);
       }
       const mSel = document.getElementById("inputMonth");
@@ -942,7 +942,7 @@
         let opt = document.createElement("option");
         opt.value = m;
         opt.textContent = m;
-        if (m === 10) opt.selected = true;
+        if (m === 1) opt.selected = true;
         mSel.appendChild(opt);
       }
       const dSel = document.getElementById("inputDay");
@@ -950,7 +950,7 @@
         let opt = document.createElement("option");
         opt.value = d;
         opt.textContent = d;
-        if (d === 16) opt.selected = true;
+        if (d === 1) opt.selected = true;
         dSel.appendChild(opt);
       }
     }
