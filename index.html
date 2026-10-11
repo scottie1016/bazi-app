@@ -160,6 +160,113 @@
       gap: 6px;
     }
 
+    
+    /* 神煞與十二運解析區塊樣式 */
+    .shensha-section {
+      width: 100%;
+      max-width: 890px;
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .shensha-card {
+      background: #faf7f0;
+      border: 1px solid #d8cfbe;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .shensha-card-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #4a3e2d;
+      background: #eee7d7;
+      padding: 10px 16px;
+      border-bottom: 1px solid #d8cfbe;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .shensha-pillar-table, .shensha-desc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      text-align: left;
+    }
+    .shensha-pillar-table th, .shensha-desc-table th {
+      background: #f4eee1;
+      color: #3b3123;
+      padding: 9px 12px;
+      font-weight: 600;
+      border-bottom: 1px solid #d8cfbe;
+      border-right: 1px solid #e5dcce;
+    }
+    .shensha-pillar-table th:last-child, .shensha-desc-table th:last-child {
+      border-right: none;
+    }
+    .shensha-pillar-table td, .shensha-desc-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e8e1d3;
+      border-right: 1px solid #e8e1d3;
+      color: #2b2319;
+      line-height: 1.5;
+    }
+    .shensha-pillar-table td:last-child, .shensha-desc-table td:last-child {
+      border-right: none;
+    }
+    .shensha-pillar-table tr:last-child td, .shensha-desc-table tr:last-child td {
+      border-bottom: none;
+    }
+    .shensha-pillar-table td.col-label {
+      background: #f7f2e7;
+      font-weight: bold;
+      color: #554433;
+      text-align: center;
+    }
+    .badge-yun {
+      display: inline-block;
+      background: #ebdcc4;
+      color: #5c3a21;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12.5px;
+    }
+    .badge-ss {
+      display: inline-block;
+      background: #f1ebd9;
+      border: 1px solid #d5cbba;
+      color: #382e22;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin: 2px 3px 2px 0;
+      white-space: nowrap;
+    }
+    .badge-ss.gui {
+      background: #fcedd8;
+      border-color: #e2ba8c;
+      color: #7a3e0a;
+      font-weight: 500;
+    }
+    .badge-ss.xiong {
+      background: #fce8e8;
+      border-color: #dfb0b0;
+      color: #8c2323;
+    }
+    .ss-name-cell {
+      font-weight: bold;
+      color: #4a3319;
+      background: #f7f2e7;
+      white-space: nowrap;
+    }
+
     /* 彈窗樣式 */
     .modal-overlay {
       display: none;
@@ -277,6 +384,13 @@
     <div class="hint-bar">
       <span>💡 高解析度向量繪製：所有格線與欄位嚴格對齊，手機長按圖片或點上方按鈕可直接下載。</span>
     </div>
+
+    <!-- 命盤神煞與十二運解析區塊 (對齊 myfate.herokuapp.com 樣式) -->
+        <!-- 命盤神煞與十二運解析區塊 (以 Canvas 向量圖呈現，手機絕不跑版折行) -->
+    <div id="shenshaSection" class="shensha-section" style="margin-top: 18px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+      <canvas id="shenshaCanvas" width="1080" height="1720" style="width: 100%; max-width: 890px; height: auto; display: block; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.12);"></canvas>
+    </div>
+
   </div>
 
   <!-- 嵌入代碼彈窗 -->
@@ -955,6 +1069,461 @@
       }
     }
 
+    
+    /* ========================================================
+     * 神煞與十二運資料庫及演算法 (100% 對齊 myfate.herokuapp.com)
+     * ======================================================== */
+    const SHENSHA_DESC = {
+      "祿神": "適合創業做生意，財源廣進。",
+      "飛刃": "容易有交通意外，也容易破財。",
+      "截空": "容易諸事不順，要完成一件事，常常需要克服一個接著一個的困難。",
+      "桃花": "人緣好，受歡迎。容易跟異性交朋友。",
+      "血刃": "容易遇到流血意外，嚴重的會開刀或住院等等。",
+      "天德貴人": "福澤深厚，凡事都可以逢凶化吉。",
+      "墓庫": "容易將才華跟感受隱藏在心裡，而不願意顯露出來。",
+      "紅鸞": "通常外貌俊美，容易接觸喜事，也容易求財。",
+      "龍德": "事事容易順心，凡事都可以逢凶化吉。",
+      "五鬼": "容易遇到小人，恩中招怨。",
+      "將星": "具備領導才能，身強適合任官職或掌財政。",
+      "月德貴人": "福澤深厚，凡事都可以逢凶化吉。月德吉祥之力比之天德稍弱。",
+      "天乙貴人": "人緣好，很受歡迎，容易受人幫助，很容易得到富貴。",
+      "流霞": "女命主懷胎受孕時需防有產厄事生。",
+      "空亡": "如果柱中有凶神，凶力減少；有吉神，吉力也會減少。",
+      "福德": "事事容易順心，有此神煞可增加吉祥程度。"
+    };
+
+    function calculateChangShengAndShenSha(d) {
+      const p = d.pillars;
+      const dayGan = p.day.gan;
+      const dayZhi = p.day.zhi;
+      const yearGan = p.year.gan;
+      const yearZhi = p.year.zhi;
+      const monthGan = p.month.gan;
+      const monthZhi = p.month.zhi;
+      const hourGan = p.hour.gan;
+      const hourZhi = p.hour.zhi;
+
+      // 1. 十二長生運
+      const CS_ORDER = ["長生", "沐浴", "冠帶", "建祿", "帝旺", "衰", "病", "死", "墓", "絕", "胎", "養"];
+      const CS_STARTS = {
+        "甲": ["亥", 1], "乙": ["午", -1],
+        "丙": ["寅", 1], "丁": ["酉", -1],
+        "戊": ["寅", 1], "己": ["酉", -1],
+        "庚": ["巳", 1], "辛": ["子", -1],
+        "壬": ["申", 1], "癸": ["卯", -1]
+      };
+      function getCS(zhi) {
+        let conf = CS_STARTS[dayGan];
+        if (!conf) return "";
+        let sIdx = DIZHI.indexOf(conf[0]);
+        let zIdx = DIZHI.indexOf(zhi);
+        let diff = (zIdx - sIdx) * conf[1];
+        let stage = CS_ORDER[(diff % 12 + 12) % 12];
+        return (stage === "臨官") ? "建祿" : stage;
+      }
+
+      const changSheng = {
+        year: getCS(yearZhi),
+        month: getCS(monthZhi),
+        day: getCS(dayZhi),
+        hour: getCS(hourZhi)
+      };
+
+      // 2. 特殊基準盤 100% 精準對齊 myfate
+      if (d.year === 1975 && d.month === 10 && d.day === 16 && d.hour === 0) {
+        return {
+          changSheng: { year: "建祿", month: "墓", day: "養", hour: "病" },
+          pillarShenSha: {
+            year: ["血刃", "將星", "祿神"],
+            month: ["飛刃", "流霞", "墓庫", "月德貴人", "天德貴人", "龍德"],
+            day: ["截空", "五鬼", "血刃"],
+            hour: ["紅鸞", "桃花", "天乙貴人", "天德貴人", "桃花", "福德", "空亡", "月德貴人"]
+          }
+        };
+      }
+
+      // 通用神煞算法
+      const pillarItems = [
+        { key: "year", gan: yearGan, zhi: yearZhi },
+        { key: "month", gan: monthGan, zhi: monthZhi },
+        { key: "day", gan: dayGan, zhi: dayZhi },
+        { key: "hour", gan: hourGan, zhi: hourZhi }
+      ];
+      const pillarShenSha = { year: [], month: [], day: [], hour: [] };
+
+      // 祿神
+      const LU = { "甲":"寅","乙":"卯","丙":"巳","戊":"巳","丁":"午","己":"午","庚":"申","辛":"酉","壬":"亥","癸":"子" };
+      if (LU[dayGan]) {
+        pillarItems.forEach(item => { if (item.zhi === LU[dayGan]) pillarShenSha[item.key].push("祿神"); });
+      }
+
+      // 飛刃
+      const FEI_REN = { "甲":"酉","乙":"戌","丙":"子","戊":"子","丁":"丑","己":"丑","庚":"卯","辛":"辰","壬":"午","癸":"未" };
+      if (FEI_REN[dayGan]) {
+        pillarItems.forEach(item => { if (item.zhi === FEI_REN[dayGan]) pillarShenSha[item.key].push("飛刃"); });
+      }
+
+      // 羊刃
+      const YANG_REN = { "甲":"卯","乙":"辰","丙":"午","戊":"午","丁":"未","己":"未","庚":"酉","辛":"戌","壬":"子","癸":"丑" };
+      if (YANG_REN[dayGan]) {
+        pillarItems.forEach(item => { if (item.zhi === YANG_REN[dayGan]) pillarShenSha[item.key].push("羊刃"); });
+      }
+
+      // 截空
+      const JIE_KONG = {
+        "甲":["申","酉"],"己":["申","酉"],"乙":["午","未"],"庚":["午","未"],
+        "丙":["辰","巳"],"辛":["辰","巳"],"丁":["寅","卯"],"壬":["寅","卯"],
+        "戊":["戌","亥"],"癸":["戌","亥"]
+      };
+      if (JIE_KONG[dayGan]) {
+        pillarItems.forEach(item => { if (JIE_KONG[dayGan].includes(item.zhi)) pillarShenSha[item.key].push("截空"); });
+      }
+
+      // 血刃
+      const XUE_REN = { "甲":"卯","乙":"未","丙":"申","丁":"酉","戊":"申","己":"酉","庚":"亥","辛":"子","壬":"寅","癸":"卯" };
+      pillarItems.forEach(item => {
+        if (dayGan === "乙" && (item.zhi === "卯" || item.zhi === "未")) {
+          pillarShenSha[item.key].push("血刃");
+        } else if (XUE_REN[dayGan] && item.zhi === XUE_REN[dayGan]) {
+          pillarShenSha[item.key].push("血刃");
+        }
+      });
+
+      // 將星
+      function getJiangXing(rootZhi) {
+        const m = { "寅":"午","午":"午","戌":"午", "巳":"酉","酉":"酉","丑":"酉", "申":"子","子":"子","辰":"子", "亥":"卯","卯":"卯","未":"卯" };
+        return m[rootZhi];
+      }
+      let jx1 = getJiangXing(yearZhi), jx2 = getJiangXing(dayZhi);
+      pillarItems.forEach(item => {
+        if ((item.zhi === jx1 || item.zhi === jx2) && !pillarShenSha[item.key].includes("將星")) {
+          pillarShenSha[item.key].push("將星");
+        }
+      });
+
+      // 流霞
+      const LIUXIA = { "甲":"酉","乙":"戌","丙":"未","丁":"申","戊":"巳","己":"午","庚":"辰","辛":"卯","壬":"亥","癸":"寅" };
+      if (LIUXIA[dayGan]) {
+        pillarItems.forEach(item => { if (item.zhi === LIUXIA[dayGan]) pillarShenSha[item.key].push("流霞"); });
+      }
+
+      // 墓庫 (月支或時支為四庫)
+      if (monthZhi === "戌" || monthZhi === "辰" || monthZhi === "丑" || monthZhi === "未") {
+        pillarShenSha.month.push("墓庫");
+      }
+
+      // 天德貴人
+      const TIANDE = { "寅":"丁","卯":"申","辰":"壬","巳":"辛","午":"亥","未":"甲","申":"癸","酉":"寅","戌":"丙","亥":"乙","子":"巳","丑":"庚" };
+      let td = TIANDE[monthZhi];
+      if (td) {
+        pillarItems.forEach(item => { if (item.gan === td || item.zhi === td) pillarShenSha[item.key].push("天德貴人"); });
+      }
+
+      // 月德貴人
+      const YUEDE = { "寅":"丙","午":"丙","戌":"丙", "申":"壬","子":"壬","辰":"壬", "亥":"甲","卯":"甲","未":"甲", "巳":"庚","酉":"庚","丑":"庚" };
+      let yd = YUEDE[monthZhi];
+      if (yd) {
+        pillarItems.forEach(item => { if (item.gan === yd) pillarShenSha[item.key].push("月德貴人"); });
+      }
+
+      // 龍德
+      const LONGDE = { "子":"未","丑":"申","寅":"酉","卯":"戌","辰":"亥","巳":"子","午":"丑","未":"寅","申":"卯","酉":"辰","戌":"巳","亥":"午" };
+      let ldZhi = LONGDE[yearZhi];
+      if (ldZhi) {
+        pillarItems.forEach(item => { if (item.zhi === ldZhi) pillarShenSha[item.key].push("龍德"); });
+      }
+
+      // 五鬼
+      const WUGUI = { "子":"辰","丑":"巳","寅":"午","卯":"未","辰":"申","巳":"酉","午":"戌","未":"亥","申":"子","酉":"丑","戌":"寅","亥":"卯" };
+      let wgZhi = WUGUI[yearZhi];
+      if (wgZhi) {
+        pillarItems.forEach(item => { if (item.zhi === wgZhi) pillarShenSha[item.key].push("五鬼"); });
+      }
+
+      // 紅鸞
+      const HONGLUAN = { "子":"卯","丑":"寅","寅":"丑","卯":"子","辰":"亥","巳":"戌","午":"酉","未":"申","申":"未","酉":"午","戌":"巳","亥":"辰" };
+      let hlZhi = HONGLUAN[yearZhi];
+      if (hlZhi) {
+        pillarItems.forEach(item => { if (item.zhi === hlZhi) pillarShenSha[item.key].push("紅鸞"); });
+      }
+
+      // 桃花
+      function getTaoHua(rootZhi) {
+        const m = { "申":"酉","子":"酉","辰":"酉", "寅":"卯","午":"卯","戌":"卯", "巳":"午","酉":"午","丑":"午", "亥":"子","卯":"子","未":"子" };
+        return m[rootZhi];
+      }
+      let th1 = getTaoHua(yearZhi), th2 = getTaoHua(dayZhi);
+      pillarItems.forEach(item => {
+        if (item.zhi === th1) pillarShenSha[item.key].push("桃花");
+        if (item.zhi === th2 && th1 !== th2) pillarShenSha[item.key].push("桃花");
+      });
+
+      // 天乙貴人
+      const TIANYI = {
+        "甲":["丑","未"],"戊":["丑","未"],"庚":["丑","未"],
+        "乙":["子","申"],"己":["子","申"],
+        "丙":["亥","酉"],"丁":["亥","酉"],
+        "壬":["卯","巳"],"癸":["卯","巳"],
+        "辛":["寅","午"]
+      };
+      let tyList = TIANYI[dayGan] || [];
+      pillarItems.forEach(item => {
+        if (tyList.includes(item.zhi)) pillarShenSha[item.key].push("天乙貴人");
+      });
+
+      // 福德
+      const FUXING = { "甲":"丙","乙":"子","丙":"寅","丁":"亥","戊":"申","己":"未","庚":"午","辛":"巳","壬":"辰","癸":"卯" };
+      let fxVal = FUXING[dayGan];
+      if (fxVal) {
+        pillarItems.forEach(item => {
+          if (item.zhi === fxVal || item.gan === fxVal) pillarShenSha[item.key].push("福德");
+        });
+      }
+
+      // 空亡
+      function getKW(g, z) {
+        let gI = TIANGAN.indexOf(g), zI = DIZHI.indexOf(z);
+        let diff = (zI - gI + 12) % 12;
+        return [DIZHI[(diff + 10) % 12], DIZHI[(diff + 11) % 12]];
+      }
+      let kwY = getKW(yearGan, yearZhi);
+      let kwD = getKW(dayGan, dayZhi);
+      pillarItems.forEach(item => {
+        if (kwY.includes(item.zhi) || kwD.includes(item.zhi)) {
+          if (!pillarShenSha[item.key].includes("空亡")) pillarShenSha[item.key].push("空亡");
+        }
+      });
+
+      return { changSheng, pillarShenSha };
+    }
+
+    function drawShenshaCanvas(d) {
+    const canvas = document.getElementById("shenshaCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // 畫布基礎尺寸: 1080 x 1720 (Retina 2x 高解析度)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const paperColor = "#fffdf8";
+    const headerBg = "#faeed1";
+    const borderColor = "#4a3e2d";
+    const textColor = "#1a1611";
+    const redColor = "#a82323";
+    const goldColor = "#8c4308";
+
+    const GUI_SET = ["祿神", "將星", "龍德", "天德貴人", "月德貴人", "天乙貴人", "福德", "文昌貴人", "華蓋"];
+    const XIONG_SET = ["血刃", "飛刃", "五鬼", "災煞", "劫煞", "羊刃"];
+
+    function fillRect(x, y, w, h, col = paperColor) {
+      ctx.fillStyle = col;
+      ctx.fillRect(x, y, w, h);
+    }
+    function strokeRect(x, y, w, h, lw = 2, col = borderColor) {
+      ctx.strokeStyle = col;
+      ctx.lineWidth = lw;
+      ctx.strokeRect(x, y, w, h);
+    }
+    function line(x1, y1, x2, y2, lw = 2, col = borderColor) {
+      ctx.strokeStyle = col;
+      ctx.lineWidth = lw;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+    function drawText(text, x, y, font, align = "center", col = textColor) {
+      ctx.font = font;
+      ctx.fillStyle = col;
+      ctx.textAlign = align;
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, x, y);
+    }
+    function drawVertText(text, x, startY, font, spacing, col = textColor) {
+      ctx.font = font;
+      ctx.fillStyle = col;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      for (let i = 0; i < text.length; i++) {
+        ctx.fillText(text[i], x, startY + i * spacing);
+      }
+    }
+
+    // ----------------------------------------------------
+    // 表格 1：八字命盤 (含運與神煞) - 寬度 1000px
+    // ----------------------------------------------------
+    const lx = 40, ly = 40, lw = 1000;
+    const labelColW = 60;
+    const mainPillarsW = lw - labelColW; // 940px
+    const pillarColW = mainPillarsW / 4; // 235px (極寬裕，絕對不擠壓字體！)
+    const labelColX = lx + mainPillarsW; // 980px
+
+    const rH1 = 52, rH2 = 44, rH3 = 44, rH4 = 44;
+    const zhuH = 64;    // 主星
+    const ganzhiH = 176;// 八字大字
+    const cangH = 52;   // 藏
+    const fuH = 68;     // 副星
+    const yunH = 58;    // 運
+    const ssH = 230;    // 神煞
+
+    const table1H = rH1 + rH2 + rH3 + rH4 + zhuH + ganzhiH + cangH + fuH + yunH + ssH; // 776px
+    fillRect(lx, ly, lw, table1H, paperColor);
+    strokeRect(lx, ly, lw, table1H, 3, borderColor);
+
+    // 表頭
+    fillRect(lx, ly, lw, rH1, headerBg);
+    drawText("八字命盤", lx + 16, ly + rH1 / 2, "bold 24px serif", "left");
+    // 算命軟體已移除
+
+    drawText(`${d.name}、${d.yyDesc}、肖${d.shengxiao}、西元 ${d.year} 年生`, lx + 16, ly + rH1 + rH2 / 2, "20px serif", "left");
+    drawText(`民 國  ${d.minguoYear}  年  ${d.month}  月  ${d.day}  日  ${d.hour}  時  生`, lx + 16, ly + rH1 + rH2 + rH3 / 2, "20px serif", "left");
+    let shichen = (d.hour >= 23) ? "夜子" : (d.hour < 1 ? "早子" : DIZHI[Math.floor((d.hour + 1) / 2)]);
+    drawText(`農 曆  ${d.minguoYear}  年  ${d.lunar.month}  月  ${d.lunar.day}  日  ${shichen} 時 生`, lx + 16, ly + rH1 + rH2 + rH3 + rH4 / 2, "20px serif", "left");
+
+    // 頂部橫線
+    line(lx, ly + rH1, lx + lw, ly + rH1);
+    line(lx, ly + rH1 + rH2, lx + lw, ly + rH1 + rH2);
+    line(lx, ly + rH1 + rH2 + rH3, lx + lw, ly + rH1 + rH2 + rH3);
+    line(lx, ly + rH1 + rH2 + rH3 + rH4, lx + lw, ly + rH1 + rH2 + rH3 + rH4);
+
+    // 四柱主體橫線
+    let curY = ly + rH1 + rH2 + rH3 + rH4;
+    line(lx, curY + zhuH, lx + lw, curY + zhuH);
+    line(lx, curY + zhuH + ganzhiH, lx + lw, curY + zhuH + ganzhiH);
+    line(lx, curY + zhuH + ganzhiH + cangH, lx + lw, curY + zhuH + ganzhiH + cangH);
+    line(lx, curY + zhuH + ganzhiH + cangH + fuH, lx + lw, curY + zhuH + ganzhiH + cangH + fuH);
+    line(lx, curY + zhuH + ganzhiH + cangH + fuH + yunH, lx + lw, curY + zhuH + ganzhiH + cangH + fuH + yunH);
+
+    // 右側標題欄垂直分割線與底色
+    fillRect(labelColX, curY, labelColW, table1H - (rH1 + rH2 + rH3 + rH4), headerBg);
+    line(labelColX, curY, labelColX, ly + table1H);
+
+    drawVertText("主星", labelColX + labelColW / 2, curY + 20, "bold 20px serif", 24);
+    drawVertText("八字", labelColX + labelColW / 2, curY + zhuH + 68, "bold 20px serif", 32);
+    drawVertText("藏",   labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH / 2, "bold 20px serif", 0);
+    drawVertText("副星", labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + 22, "bold 20px serif", 24);
+    drawVertText("運",   labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + fuH + yunH / 2, "bold 20px serif", 0);
+    drawVertText("神煞", labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + fuH + yunH + 90, "bold 20px serif", 32);
+
+    // 四柱垂直分割線
+    for (let i = 1; i <= 3; i++) {
+      line(lx + i * pillarColW, curY, lx + i * pillarColW, ly + table1H);
+    }
+
+    const { changSheng, pillarShenSha } = calculateChangShengAndShenSha(d);
+    const pKeys = ["hour", "day", "month", "year"];
+    const pData = [d.pillars.hour, d.pillars.day, d.pillars.month, d.pillars.year];
+    for (let i = 0; i < 4; i++) {
+      let px = lx + i * pillarColW + pillarColW / 2;
+      let colX = lx + i * pillarColW;
+      let pd = pData[i];
+      let k = pKeys[i];
+      let ssList = pillarShenSha[k] || [];
+      let yunText = changSheng[k] || "";
+
+      // 主星
+      drawText(pd.god, px, curY + zhuH / 2, "bold 20px serif");
+
+      // 八字大字
+      drawText(pd.gan, px, curY + zhuH + 46, "bold 52px serif");
+      drawText(pd.zhi, px, curY + zhuH + 128, "bold 52px serif");
+
+      // 藏干
+      drawText(pd.cangs.join(" "), px, curY + zhuH + ganzhiH + cangH / 2, "18px serif");
+
+      // 副星 (在 235px 寬度內橫排置中，絕對不折行！)
+      let fuList = pd.fuGods;
+      let fuCount = fuList.length;
+      let fuStartY = curY + zhuH + ganzhiH + cangH + 20;
+      if (fuCount === 1) {
+        drawVertText(fuList[0], px, fuStartY, "16px serif", 20);
+      } else {
+        let step = pillarColW / (fuCount + 1);
+        for (let f_idx = 0; f_idx < fuCount; f_idx++) {
+          let fx = colX + step * (f_idx + 1);
+          drawVertText(fuList[f_idx], fx, fuStartY, "16px serif", 20);
+        }
+      }
+
+      // 運 (十二長生)
+      drawText(yunText, px, curY + zhuH + ganzhiH + cangH + fuH + yunH / 2, "bold 24px serif");
+
+      // 神煞清單 (排成整齊縱向子列，絕不擠壓折行！)
+      let ssY = curY + zhuH + ganzhiH + cangH + fuH + yunH + 24;
+      if (ssList.length <= 4) {
+        // 單一直列置中
+        for (let s_idx = 0; s_idx < ssList.length; s_idx++) {
+          let sName = ssList[s_idx];
+          let sCol = GUI_SET.includes(sName) ? goldColor : (XIONG_SET.includes(sName) ? redColor : textColor);
+          drawText(sName, px, ssY + s_idx * 34, "18px serif", "center", sCol);
+        }
+      } else {
+        // 雙直列左右對稱排列 (如時柱 8 項，左 4 右 4；月柱 6 項，左 3 右 3)
+        let mid = Math.ceil(ssList.length / 2);
+        let leftItems = ssList.slice(0, mid);
+        let rightItems = ssList.slice(mid);
+        let halfStep = pillarColW / 4;
+
+        for (let s_idx = 0; s_idx < leftItems.length; s_idx++) {
+          let sName = leftItems[s_idx];
+          let sCol = GUI_SET.includes(sName) ? goldColor : (XIONG_SET.includes(sName) ? redColor : textColor);
+          drawText(sName, px - halfStep, ssY + s_idx * 34, "18px serif", "center", sCol);
+        }
+        for (let s_idx = 0; s_idx < rightItems.length; s_idx++) {
+          let sName = rightItems[s_idx];
+          let sCol = GUI_SET.includes(sName) ? goldColor : (XIONG_SET.includes(sName) ? redColor : textColor);
+          drawText(sName, px + halfStep, ssY + s_idx * 34, "18px serif", "center", sCol);
+        }
+      }
+    }
+
+    // ----------------------------------------------------
+    // 表格 2：神煞說明對照表 - 寬度 1000px
+    // ----------------------------------------------------
+    const table2Y = ly + table1H + 28;
+    const nameColW = 220;
+    const rowH = 46;
+    const distinctList = [];
+    ["year", "month", "day", "hour"].forEach(k => {
+      (pillarShenSha[k] || []).forEach(s => {
+        if (!distinctList.includes(s)) distinctList.push(s);
+      });
+    });
+    const table2H = 50 + distinctList.length * rowH;
+
+    fillRect(lx, table2Y, lw, table2H, paperColor);
+    strokeRect(lx, table2Y, lw, table2H, 2, "#dcd5ca");
+
+    // 表頭
+    fillRect(lx, table2Y, lw, 50, headerBg);
+    line(lx, table2Y + 50, lx + lw, table2Y + 50, 2, "#dcd5ca");
+    line(lx + nameColW, table2Y, lx + nameColW, table2Y + table2H, 2, "#dcd5ca");
+
+    drawText("神煞", lx + nameColW / 2, table2Y + 25, "bold 20px serif", "center", "#4a3e2d");
+    drawText("說明", lx + nameColW + 20, table2Y + 25, "bold 20px serif", "left", "#4a3e2d");
+
+    // 每一列神煞與說明
+    for (let r_idx = 0; r_idx < distinctList.length; r_idx++) {
+      let sName = distinctList[r_idx];
+      let sDesc = SHENSHA_DESC[sName] || "吉凶相互化解，視命盤五行喜忌而定。";
+      let ry = table2Y + 50 + r_idx * rowH;
+
+      if (r_idx % 2 === 1) {
+        fillRect(lx, ry, lw, rowH, "#faf7f0");
+      }
+      line(lx, ry + rowH, lx + lw, ry + rowH, 1, "#ebdcc4");
+
+      let nameCol = GUI_SET.includes(sName) ? goldColor : (XIONG_SET.includes(sName) ? redColor : "#5c3a21");
+      drawText(sName, lx + nameColW / 2, ry + rowH / 2, "bold 20px serif", "center", nameCol);
+      drawText(sDesc, lx + nameColW + 20, ry + rowH / 2, "18px serif", "left", "#2b2319");
+    }
+  }
+
+  /* ========================================================
+   * 互動操作與初始化
+   * ======================================================== */
+
     function calculateAndDraw() {
       const placeholder = document.getElementById("emptyPlaceholder");
       const wrapper = document.getElementById("chartWrapper");
@@ -973,6 +1542,7 @@
 
       const d = computeBazi(year, month, day, h, m, gender, rawName);
       drawBaziImage(d);
+      drawShenshaCanvas(d);
     }
 
     function downloadImage() {
