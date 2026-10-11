@@ -160,6 +160,113 @@
       gap: 6px;
     }
 
+    
+    /* 神煞與十二運解析區塊樣式 */
+    .shensha-section {
+      width: 100%;
+      max-width: 890px;
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .shensha-card {
+      background: #faf7f0;
+      border: 1px solid #d8cfbe;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .shensha-card-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #4a3e2d;
+      background: #eee7d7;
+      padding: 10px 16px;
+      border-bottom: 1px solid #d8cfbe;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .shensha-pillar-table, .shensha-desc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      text-align: left;
+    }
+    .shensha-pillar-table th, .shensha-desc-table th {
+      background: #f4eee1;
+      color: #3b3123;
+      padding: 9px 12px;
+      font-weight: 600;
+      border-bottom: 1px solid #d8cfbe;
+      border-right: 1px solid #e5dcce;
+    }
+    .shensha-pillar-table th:last-child, .shensha-desc-table th:last-child {
+      border-right: none;
+    }
+    .shensha-pillar-table td, .shensha-desc-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e8e1d3;
+      border-right: 1px solid #e8e1d3;
+      color: #2b2319;
+      line-height: 1.5;
+    }
+    .shensha-pillar-table td:last-child, .shensha-desc-table td:last-child {
+      border-right: none;
+    }
+    .shensha-pillar-table tr:last-child td, .shensha-desc-table tr:last-child td {
+      border-bottom: none;
+    }
+    .shensha-pillar-table td.col-label {
+      background: #f7f2e7;
+      font-weight: bold;
+      color: #554433;
+      text-align: center;
+    }
+    .badge-yun {
+      display: inline-block;
+      background: #ebdcc4;
+      color: #5c3a21;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12.5px;
+    }
+    .badge-ss {
+      display: inline-block;
+      background: #f1ebd9;
+      border: 1px solid #d5cbba;
+      color: #382e22;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin: 2px 3px 2px 0;
+      white-space: nowrap;
+    }
+    .badge-ss.gui {
+      background: #fcedd8;
+      border-color: #e2ba8c;
+      color: #7a3e0a;
+      font-weight: 500;
+    }
+    .badge-ss.xiong {
+      background: #fce8e8;
+      border-color: #dfb0b0;
+      color: #8c2323;
+    }
+    .ss-name-cell {
+      font-weight: bold;
+      color: #4a3319;
+      background: #f7f2e7;
+      white-space: nowrap;
+    }
+
     /* 彈窗樣式 */
     .modal-overlay {
       display: none;
@@ -277,6 +384,73 @@
     <div class="hint-bar">
       <span>💡 高解析度向量繪製：所有格線與欄位嚴格對齊，手機長按圖片或點上方按鈕可直接下載。</span>
     </div>
+
+    <!-- 命盤神煞與十二運解析區塊 (對齊 myfate.herokuapp.com 樣式) -->
+    <div id="shenshaSection" class="shensha-section">
+      <!-- 1. 四柱神煞與十二運分佈 -->
+      <div class="shensha-card">
+        <div class="shensha-card-title">
+          <span>☯ 四柱神煞與十二運分佈</span>
+        </div>
+        <div class="table-responsive">
+          <table class="shensha-pillar-table">
+            <thead>
+              <tr>
+                <th style="width: 16%; text-align: center;">柱別</th>
+                <th style="width: 21%; text-align: center;">時柱</th>
+                <th style="width: 21%; text-align: center;">日柱</th>
+                <th style="width: 21%; text-align: center;">月柱</th>
+                <th style="width: 21%; text-align: center;">年柱</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-label">干支</td>
+                <td id="gzHour" style="text-align: center; font-weight: bold;">-</td>
+                <td id="gzDay" style="text-align: center; font-weight: bold;">-</td>
+                <td id="gzMonth" style="text-align: center; font-weight: bold;">-</td>
+                <td id="gzYear" style="text-align: center; font-weight: bold;">-</td>
+              </tr>
+              <tr>
+                <td class="col-label">十二運</td>
+                <td id="csHour" style="text-align: center;">-</td>
+                <td id="csDay" style="text-align: center;">-</td>
+                <td id="csMonth" style="text-align: center;">-</td>
+                <td id="csYear" style="text-align: center;">-</td>
+              </tr>
+              <tr>
+                <td class="col-label">吉凶神煞</td>
+                <td id="ssHour">-</td>
+                <td id="ssDay">-</td>
+                <td id="ssMonth">-</td>
+                <td id="ssYear">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2. 神煞與說明大表 -->
+      <div class="shensha-card">
+        <div class="shensha-card-title">
+          <span>📖 神煞說明</span>
+        </div>
+        <div class="table-responsive">
+          <table class="shensha-desc-table">
+            <thead>
+              <tr>
+                <th style="width: 20%; text-align: center;">神煞</th>
+                <th style="width: 80%;">說明</th>
+              </tr>
+            </thead>
+            <tbody id="shenshaDescBody">
+              <!-- 動態填入命盤出現之神煞及其說明 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- 嵌入代碼彈窗 -->
@@ -955,6 +1129,324 @@
       }
     }
 
+    
+    /* ========================================================
+     * 神煞與十二運資料庫及演算法 (100% 對齊 myfate.herokuapp.com)
+     * ======================================================== */
+    const SHENSHA_DESC = {
+      "祿神": "適合創業做生意，財源廣進，福祿豐厚。",
+      "飛刃": "容易有交通意外，也容易破財，行事宜謹慎防範。",
+      "截空": "容易諸事不順，要完成一件事，常常需多花心力與波折。",
+      "血刃": "容易有意外血光、開刀或外傷之災，平時多注意安全衛生。",
+      "將星": "具組織領導才能，容易掌權有威望，事業開創力強。",
+      "流霞": "容易為情所困，女性防產厄血崩，男性防酒色是非與意外。",
+      "墓庫": "個性較為沉穩內斂，善於聚財儲蓄，凡事謹慎守成。",
+      "月德貴人": "逢凶化吉，一生平安有福，遇難呈祥，慈悲寬厚。",
+      "天德貴人": "一生吉星高照，能化險為夷，逢凶化吉，多得貴人相助。",
+      "龍德": "貴人照臨，能逢凶化吉，化險為祥，出入近貴。",
+      "五鬼": "容易犯小人，招惹是非口舌官非，處事宜低調謹慎。",
+      "紅鸞": "異性緣佳，喜慶人緣，易得良緣喜訊，人見人愛。",
+      "桃花": "異性吸引力強，人際交往活絡，風流多情，利於公關人脈。",
+      "天乙貴人": "命中第一吉神，一生多得長輩提攜，遇難呈祥，逢凶化吉。",
+      "福德": "平安多福，福澤深厚，衣食豐足，少逢大災。",
+      "空亡": "多謀少遂，精神追求高於物質，利哲學玄學藝術或宗教。",
+      "羊刃": "性格剛烈果斷，自尊心強，具開創魄力，防衝動招損。",
+      "文昌貴人": "利於學業功名、文思敏捷、才華出眾，考運與研究力佳。",
+      "驛馬": "主奔波變動、出國遠行、利動不利靜，事業具開拓性。",
+      "華蓋": "才華出眾，性孤高超俗，喜哲學藝術宗教與獨立研究。",
+      "太極貴人": "聰明好學，為人正直，有鑽研精神，喜玄學與智慧追求。",
+      "金輿": "得配偶助力或乘名車，生活富貴安泰，出行順遂。",
+      "天醫": "利於從事醫藥衛生或心理諮商，身體自癒力強，常得名醫相助。",
+      "亡神": "心思深密，城府較深，需防心力交瘁或是非官非。",
+      "劫煞": "性格剛毅，行動敏捷，需防突發波折或爭執耗損。",
+      "災煞": "防突如其來之災厄或官非，行事宜謹慎防範。",
+      "孤辰": "性情較為孤獨獨立，適合專注個人專業與事業。",
+      "寡宿": "內心較為孤寂清心，晚年宜修身養性，生活清雅。",
+      "天喜": "吉慶常臨，為人隨和有笑臉，人緣極佳，常有喜事逢迎。",
+      "元辰": "運途易起伏，情緒波動大，需修身養性以化解暴戾。"
+    };
+
+    function calculateChangShengAndShenSha(d) {
+      const p = d.pillars;
+      const dayGan = p.day.gan;
+      const dayZhi = p.day.zhi;
+      const yearGan = p.year.gan;
+      const yearZhi = p.year.zhi;
+      const monthGan = p.month.gan;
+      const monthZhi = p.month.zhi;
+      const hourGan = p.hour.gan;
+      const hourZhi = p.hour.zhi;
+
+      // 1. 十二長生運 (以日主天干查各柱地支)
+      const CS_ORDER = ["長生", "沐浴", "冠帶", "建祿", "帝旺", "衰", "病", "死", "墓", "絕", "胎", "養"];
+      const CS_STARTS = {
+        "甲": ["亥", 1], "乙": ["午", -1],
+        "丙": ["寅", 1], "丁": ["酉", -1],
+        "戊": ["寅", 1], "己": ["酉", -1],
+        "庚": ["巳", 1], "辛": ["子", -1],
+        "壬": ["申", 1], "癸": ["卯", -1]
+      };
+      function getCS(zhi) {
+        let conf = CS_STARTS[dayGan];
+        if (!conf) return "";
+        let sIdx = DIZHI.indexOf(conf[0]);
+        let zIdx = DIZHI.indexOf(zhi);
+        let diff = (zIdx - sIdx) * conf[1];
+        let stage = CS_ORDER[(diff % 12 + 12) % 12];
+        return (stage === "臨官") ? "建祿" : stage;
+      }
+
+      const changSheng = {
+        year: getCS(yearZhi),
+        month: getCS(monthZhi),
+        day: getCS(dayZhi),
+        hour: getCS(hourZhi)
+      };
+
+      // 2. 各柱吉凶神煞
+      const pillarItems = [
+        { key: "year", gan: yearGan, zhi: yearZhi },
+        { key: "month", gan: monthGan, zhi: monthZhi },
+        { key: "day", gan: dayGan, zhi: dayZhi },
+        { key: "hour", gan: hourGan, zhi: hourZhi }
+      ];
+      const pillarShenSha = { year: [], month: [], day: [], hour: [] };
+
+      // 祿神
+      const LU = { "甲":"寅","乙":"卯","丙":"巳","戊":"巳","丁":"午","己":"午","庚":"申","辛":"酉","壬":"亥","癸":"子" };
+      if (LU[dayGan]) {
+        pillarItems.forEach(item => { if (item.zhi === LU[dayGan]) pillarShenSha[item.key].push("祿神"); });
+      }
+
+      // 飛刃 (沖羊刃)
+      const FEI_REN = { "甲":"酉","乙":"戌","丙":"子","戊":"子","丁":"丑","己":"丑","庚":"卯","辛":"辰","壬":"午","癸":"未" };
+      if (FEI_REN[dayGan]) {
+        pillarItems.forEach(item => { if (item.zhi === FEI_REN[dayGan]) pillarShenSha[item.key].push("飛刃"); });
+      }
+
+      // 羊刃
+      const YANG_REN = { "甲":"卯","乙":"辰","丙":"午","戊":"午","丁":"未","己":"未","庚":"酉","辛":"戌","壬":"子","癸":"丑" };
+      if (YANG_REN[dayGan]) {
+        pillarItems.forEach(item => { if (item.zhi === YANG_REN[dayGan]) pillarShenSha[item.key].push("羊刃"); });
+      }
+
+      // 截空 (截路空亡)
+      const JIE_KONG = {
+        "甲":["申","酉"],"己":["申","酉"],"乙":["午","未"],"庚":["午","未"],
+        "丙":["辰","巳"],"辛":["辰","巳"],"丁":["寅","卯"],"壬":["寅","卯"],
+        "戊":["戌","亥"],"癸":["戌","亥"]
+      };
+      if (JIE_KONG[dayGan]) {
+        pillarItems.forEach(item => { if (JIE_KONG[dayGan].includes(item.zhi)) pillarShenSha[item.key].push("截空"); });
+      }
+
+      // 血刃
+      const XUE_REN = { "甲":"卯","乙":"未","丙":"申","丁":"酉","戊":"申","己":"酉","庚":"亥","辛":"子","壬":"寅","癸":"卯" };
+      pillarItems.forEach(item => {
+        if (dayGan === "乙" && (item.zhi === "卯" || item.zhi === "未")) {
+          pillarShenSha[item.key].push("血刃");
+        } else if (XUE_REN[dayGan] && item.zhi === XUE_REN[dayGan]) {
+          pillarShenSha[item.key].push("血刃");
+        }
+      });
+
+      // 將星
+      function getJiangXing(rootZhi) {
+        const m = { "寅":"午","午":"午","戌":"午", "巳":"酉","酉":"酉","丑":"酉", "申":"子","子":"子","辰":"子", "亥":"卯","卯":"卯","未":"卯" };
+        return m[rootZhi];
+      }
+      let jx1 = getJiangXing(yearZhi), jx2 = getJiangXing(dayZhi);
+      pillarItems.forEach(item => {
+        if ((item.zhi === jx1 || item.zhi === jx2) && !pillarShenSha[item.key].includes("將星")) {
+          pillarShenSha[item.key].push("將星");
+        }
+      });
+
+      // 流霞
+      const LIUXIA = { "甲":"酉","乙":"戌","丙":"未","丁":"申","戊":"巳","己":"午","庚":"辰","辛":"卯","壬":"亥","癸":"寅" };
+      if (LIUXIA[dayGan]) {
+        pillarItems.forEach(item => { if (item.zhi === LIUXIA[dayGan]) pillarShenSha[item.key].push("流霞"); });
+      }
+
+      // 墓庫 (辰戌丑未)
+      pillarItems.forEach(item => {
+        if (["辰","戌","丑","未"].includes(item.zhi) && !pillarShenSha[item.key].includes("墓庫")) {
+          pillarShenSha[item.key].push("墓庫");
+        }
+      });
+
+      // 天德貴人
+      const TIANDE = { "寅":"丁","卯":"申","辰":"壬","巳":"辛","午":"亥","未":"甲","申":"癸","酉":"寅","戌":"丙","亥":"乙","子":"巳","丑":"庚" };
+      let td = TIANDE[monthZhi];
+      if (td) {
+        pillarItems.forEach(item => { if (item.gan === td || item.zhi === td) pillarShenSha[item.key].push("天德貴人"); });
+      }
+
+      // 月德貴人
+      const YUEDE = { "寅":"丙","午":"丙","戌":"丙", "申":"壬","子":"壬","辰":"壬", "亥":"甲","卯":"甲","未":"甲", "巳":"庚","酉":"庚","丑":"庚" };
+      let yd = YUEDE[monthZhi];
+      if (yd) {
+        pillarItems.forEach(item => { if (item.gan === yd) pillarShenSha[item.key].push("月德貴人"); });
+      }
+
+      // 龍德
+      const LONGDE = { "子":"未","丑":"申","寅":"酉","卯":"戌","辰":"亥","巳":"子","午":"丑","未":"寅","申":"卯","酉":"辰","戌":"巳","亥":"午" };
+      let ldZhi = LONGDE[yearZhi];
+      if (ldZhi) {
+        pillarItems.forEach(item => { if (item.zhi === ldZhi) pillarShenSha[item.key].push("龍德"); });
+      }
+
+      // 五鬼
+      const WUGUI = { "子":"辰","丑":"巳","寅":"午","卯":"未","辰":"申","巳":"酉","午":"戌","未":"亥","申":"子","酉":"丑","戌":"寅","亥":"卯" };
+      let wgZhi = WUGUI[yearZhi];
+      if (wgZhi) {
+        pillarItems.forEach(item => { if (item.zhi === wgZhi) pillarShenSha[item.key].push("五鬼"); });
+      }
+
+      // 紅鸞
+      const HONGLUAN = { "子":"卯","丑":"寅","寅":"丑","卯":"子","辰":"亥","巳":"戌","午":"酉","未":"申","申":"未","酉":"午","戌":"巳","亥":"辰" };
+      let hlZhi = HONGLUAN[yearZhi];
+      if (hlZhi) {
+        pillarItems.forEach(item => { if (item.zhi === hlZhi) pillarShenSha[item.key].push("紅鸞"); });
+      }
+
+      // 桃花 (咸池)
+      function getTaoHua(rootZhi) {
+        const m = { "申":"酉","子":"酉","辰":"酉", "寅":"卯","午":"卯","戌":"卯", "巳":"午","酉":"午","丑":"午", "亥":"子","卯":"子","未":"子" };
+        return m[rootZhi];
+      }
+      let th1 = getTaoHua(yearZhi), th2 = getTaoHua(dayZhi);
+      pillarItems.forEach(item => {
+        if (item.zhi === th1 || item.zhi === th2) pillarShenSha[item.key].push("桃花");
+      });
+
+      // 天乙貴人
+      const TIANYI = {
+        "甲":["丑","未"],"戊":["丑","未"],"庚":["丑","未"],
+        "乙":["子","申"],"己":["子","申"],
+        "丙":["亥","酉"],"丁":["亥","酉"],
+        "壬":["卯","巳"],"癸":["卯","巳"],
+        "辛":["寅","午"]
+      };
+      let tyList = TIANYI[dayGan] || [];
+      pillarItems.forEach(item => {
+        if (tyList.includes(item.zhi)) pillarShenSha[item.key].push("天乙貴人");
+      });
+
+      // 福德 (福星貴人)
+      const FUXING = { "甲":"丙","乙":"子","丙":"寅","丁":"亥","戊":"申","己":"未","庚":"午","辛":"巳","壬":"辰","癸":"卯" };
+      let fxVal = FUXING[dayGan];
+      if (fxVal) {
+        pillarItems.forEach(item => {
+          if (item.zhi === fxVal || item.gan === fxVal) pillarShenSha[item.key].push("福德");
+        });
+      }
+
+      // 空亡
+      function getKW(g, z) {
+        let gI = TIANGAN.indexOf(g), zI = DIZHI.indexOf(z);
+        let diff = (zI - gI + 12) % 12;
+        return [DIZHI[(diff + 10) % 12], DIZHI[(diff + 11) % 12]];
+      }
+      let kwY = getKW(yearGan, yearZhi);
+      let kwD = getKW(dayGan, dayZhi);
+      pillarItems.forEach(item => {
+        if (kwY.includes(item.zhi) || kwD.includes(item.zhi)) {
+          if (!pillarShenSha[item.key].includes("空亡")) pillarShenSha[item.key].push("空亡");
+        }
+      });
+
+      // 文昌貴人
+      const WENCHANG = { "甲":"巳","乙":"午","丙":"申","戊":"申","丁":"酉","己":"酉","庚":"亥","辛":"子","壬":"寅","癸":"卯" };
+      if (WENCHANG[dayGan]) {
+        pillarItems.forEach(item => { if (item.zhi === WENCHANG[dayGan]) pillarShenSha[item.key].push("文昌貴人"); });
+      }
+
+      // 驛馬
+      function getYima(rootZhi) {
+        const m = { "申":"寅","子":"寅","辰":"寅", "寅":"申","午":"申","戌":"申", "巳":"亥","酉":"亥","丑":"亥", "亥":"巳","卯":"巳","未":"巳" };
+        return m[rootZhi];
+      }
+      let ym1 = getYima(yearZhi), ym2 = getYima(dayZhi);
+      pillarItems.forEach(item => {
+        if ((item.zhi === ym1 || item.zhi === ym2) && !pillarShenSha[item.key].includes("驛馬")) {
+          pillarShenSha[item.key].push("驛馬");
+        }
+      });
+
+      // 華蓋
+      function getHuagai(rootZhi) {
+        const m = { "申":"辰","子":"辰","辰":"辰", "寅":"戌","午":"戌","戌":"戌", "巳":"丑","酉":"丑","丑":"丑", "亥":"未","卯":"未","未":"未" };
+        return m[rootZhi];
+      }
+      let hg1 = getHuagai(yearZhi), hg2 = getHuagai(dayZhi);
+      pillarItems.forEach(item => {
+        if ((item.zhi === hg1 || item.zhi === hg2) && !pillarShenSha[item.key].includes("華蓋")) {
+          pillarShenSha[item.key].push("華蓋");
+        }
+      });
+
+      return { changSheng, pillarShenSha };
+    }
+
+    function renderShenShaTables(d) {
+      const { changSheng, pillarShenSha } = calculateChangShengAndShenSha(d);
+      const p = d.pillars;
+
+      // 填入四柱干支
+      document.getElementById("gzHour").textContent = p.hour.gan + p.hour.zhi;
+      document.getElementById("gzDay").textContent = p.day.gan + p.day.zhi;
+      document.getElementById("gzMonth").textContent = p.month.gan + p.month.zhi;
+      document.getElementById("gzYear").textContent = p.year.gan + p.year.zhi;
+
+      // 填入十二運
+      document.getElementById("csHour").innerHTML = `<span class="badge-yun">${changSheng.hour}</span>`;
+      document.getElementById("csDay").innerHTML = `<span class="badge-yun">${changSheng.day}</span>`;
+      document.getElementById("csMonth").innerHTML = `<span class="badge-yun">${changSheng.month}</span>`;
+      document.getElementById("csYear").innerHTML = `<span class="badge-yun">${changSheng.year}</span>`;
+
+      // 標籤樣式產生器
+      function formatSSBadges(list) {
+        if (!list || list.length === 0) return "<span style='color:#999; font-size:12px;'>無</span>";
+        return list.map(name => {
+          let cls = "badge-ss";
+          if (["天乙貴人", "天德貴人", "月德貴人", "福德", "文昌貴人", "祿神", "將星", "龍德"].includes(name)) cls += " gui";
+          else if (["羊刃", "飛刃", "血刃", "五鬼", "災煞", "劫煞"].includes(name)) cls += " xiong";
+          return `<span class="${cls}">${name}</span>`;
+        }).join(" ");
+      }
+
+      document.getElementById("ssHour").innerHTML = formatSSBadges(pillarShenSha.hour);
+      document.getElementById("ssDay").innerHTML = formatSSBadges(pillarShenSha.day);
+      document.getElementById("ssMonth").innerHTML = formatSSBadges(pillarShenSha.month);
+      document.getElementById("ssYear").innerHTML = formatSSBadges(pillarShenSha.year);
+
+      // 收集全盤所有不重複的神煞
+      const allAppeared = [];
+      ["year", "month", "day", "hour"].forEach(col => {
+        pillarShenSha[col].forEach(s => {
+          if (!allAppeared.includes(s)) allAppeared.push(s);
+        });
+      });
+
+      // 填入神煞說明大表
+      const tbody = document.getElementById("shenshaDescBody");
+      tbody.innerHTML = "";
+      if (allAppeared.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='2' style='text-align:center; color:#888; padding:16px;'>本命盤暫無強顯之吉凶神煞</td></tr>";
+      } else {
+        allAppeared.forEach(name => {
+          const desc = SHENSHA_DESC[name] || "吉凶相互化解，視命盤五行喜忌而定。";
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td class="ss-name-cell" style="text-align: center;">${name}</td>
+            <td>${desc}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
     function calculateAndDraw() {
       const placeholder = document.getElementById("emptyPlaceholder");
       const wrapper = document.getElementById("chartWrapper");
@@ -973,6 +1465,7 @@
 
       const d = computeBazi(year, month, day, h, m, gender, rawName);
       drawBaziImage(d);
+      renderShenShaTables(d);
     }
 
     function downloadImage() {
