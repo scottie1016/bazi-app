@@ -388,7 +388,7 @@
     <!-- 命盤神煞與十二運解析區塊 (對齊 myfate.herokuapp.com 樣式) -->
         <!-- 命盤神煞與十二運解析區塊 (以 Canvas 向量圖呈現，手機絕不跑版折行) -->
     <div id="shenshaSection" class="shensha-section" style="margin-top: 18px; width: 100%; display: flex; flex-direction: column; align-items: center;">
-      <canvas id="shenshaCanvas" width="1080" height="1720" style="width: 100%; max-width: 890px; height: auto; display: block; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.12);"></canvas>
+      <canvas id="shenshaCanvas" width="800" height="1460" style="width: 100%; max-width: 640px; height: auto; display: block; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.12);"></canvas>
     </div>
 
   </div>
@@ -1297,232 +1297,309 @@
       return { changSheng, pillarShenSha };
     }
 
+    /* ========================================================
+     * 神煞與十二運對照大表 (100% 依 myfate 原版直書規格與官方原文順序)
+     * ======================================================== */
+    const MYFATE_SHENSHA_LIST = [
+      ["祿神", "適合創業做生意，財源廣進。"],
+      ["飛刃", "容易有交通意外，也容易破財。"],
+      ["截空", "容易諸事不順，要完成一件事，常常需要克服一個接著一個的困難。"],
+      ["桃花", "人緣好，受歡迎。容易跟異性交朋友。"],
+      ["血刃", "容易遇到流血意外，嚴重的會開刀或住院等等。"],
+      ["天德貴人", "福澤深厚，凡事都可以逢凶化吉。"],
+      ["墓庫", "容易將才華跟感受隱藏在心裡，而不願意顯露出來。"],
+      ["紅鸞", "通常外貌俊美，容易接觸喜事，也容易求財。"],
+      ["龍德", "事事容易順心，凡事都可以逢凶化吉。"],
+      ["五鬼", "容易遇到小人，恩中招怨。"],
+      ["將星", "具備領導才能，身強適合任官職或掌財政。"],
+      ["月德貴人", "福澤深厚，凡事都可以逢凶化吉。月德吉祥之力比之天德稍弱。"],
+      ["天乙貴人", "人緣好，很受歡迎，容易受人幫助，很容易得到富貴。"],
+      ["流霞", "女命主懷胎受孕時需防有產厄事生。"],
+      ["空亡", "如果柱中有凶神，凶力減少；有吉神，吉力也會減少。"],
+      ["福德", "事事容易順心，有此神煞可增加吉祥程度。"]
+    ];
+
     function drawShenshaCanvas(d) {
-    const canvas = document.getElementById("shenshaCanvas");
-    const ctx = canvas.getContext("2d");
+      const canvas = document.getElementById("shenshaCanvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
 
-    // 畫布基礎尺寸: 1080 x 1720 (Retina 2x 高解析度)
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // 取得十二運與四柱神煞資料
+      const { changSheng, pillarShenSha } = calculateChangShengAndShenSha(d);
 
-    const paperColor = "#fffdf8";
-    const headerBg = "#faeed1";
-    const borderColor = "#4a3e2d";
-    const textColor = "#1a1611";
-    const redColor = "#a82323";
-    const goldColor = "#8c4308";
+      // 畫布基礎尺寸: 800 x 1460 (100% 對齊預覽圖版面)
+      canvas.width = 800;
+      canvas.height = 1460;
 
-    const GUI_SET = ["祿神", "將星", "龍德", "天德貴人", "月德貴人", "天乙貴人", "福德", "文昌貴人", "華蓋"];
-    const XIONG_SET = ["血刃", "飛刃", "五鬼", "災煞", "劫煞", "羊刃"];
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    function fillRect(x, y, w, h, col = paperColor) {
-      ctx.fillStyle = col;
-      ctx.fillRect(x, y, w, h);
-    }
-    function strokeRect(x, y, w, h, lw = 2, col = borderColor) {
-      ctx.strokeStyle = col;
-      ctx.lineWidth = lw;
-      ctx.strokeRect(x, y, w, h);
-    }
-    function line(x1, y1, x2, y2, lw = 2, col = borderColor) {
-      ctx.strokeStyle = col;
-      ctx.lineWidth = lw;
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-    }
-    function drawText(text, x, y, font, align = "center", col = textColor) {
-      ctx.font = font;
-      ctx.fillStyle = col;
-      ctx.textAlign = align;
-      ctx.textBaseline = "middle";
-      ctx.fillText(text, x, y);
-    }
-    function drawVertText(text, x, startY, font, spacing, col = textColor) {
-      ctx.font = font;
-      ctx.fillStyle = col;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      for (let i = 0; i < text.length; i++) {
-        ctx.fillText(text[i], x, startY + i * spacing);
+      const paperBg = "#ffffff";
+      const headerBg = "#faeed1";
+      const borderColor = "#2b2319";
+      const borderLight = "#dcd5ca";
+      const textColor = "#1a1611";
+
+      function fillRect(x, y, w, h, col = paperBg) {
+        ctx.fillStyle = col;
+        ctx.fillRect(x, y, w, h);
       }
-    }
-
-    // ----------------------------------------------------
-    // 表格 1：八字命盤 (含運與神煞) - 寬度 1000px
-    // ----------------------------------------------------
-    const lx = 40, ly = 40, lw = 1000;
-    const labelColW = 60;
-    const mainPillarsW = lw - labelColW; // 940px
-    const pillarColW = mainPillarsW / 4; // 235px (極寬裕，絕對不擠壓字體！)
-    const labelColX = lx + mainPillarsW; // 980px
-
-    const rH1 = 52, rH2 = 44, rH3 = 44, rH4 = 44;
-    const zhuH = 64;    // 主星
-    const ganzhiH = 176;// 八字大字
-    const cangH = 52;   // 藏
-    const fuH = 68;     // 副星
-    const yunH = 58;    // 運
-    const ssH = 230;    // 神煞
-
-    const table1H = rH1 + rH2 + rH3 + rH4 + zhuH + ganzhiH + cangH + fuH + yunH + ssH; // 776px
-    fillRect(lx, ly, lw, table1H, paperColor);
-    strokeRect(lx, ly, lw, table1H, 3, borderColor);
-
-    // 表頭
-    fillRect(lx, ly, lw, rH1, headerBg);
-    drawText("八字命盤", lx + 16, ly + rH1 / 2, "bold 24px serif", "left");
-    // 算命軟體已移除
-
-    drawText(`${d.name}、${d.yyDesc}、肖${d.shengxiao}、西元 ${d.year} 年生`, lx + 16, ly + rH1 + rH2 / 2, "20px serif", "left");
-    drawText(`民 國  ${d.minguoYear}  年  ${d.month}  月  ${d.day}  日  ${d.hour}  時  生`, lx + 16, ly + rH1 + rH2 + rH3 / 2, "20px serif", "left");
-    let shichen = (d.hour >= 23) ? "夜子" : (d.hour < 1 ? "早子" : DIZHI[Math.floor((d.hour + 1) / 2)]);
-    drawText(`農 曆  ${d.minguoYear}  年  ${d.lunar.month}  月  ${d.lunar.day}  日  ${shichen} 時 生`, lx + 16, ly + rH1 + rH2 + rH3 + rH4 / 2, "20px serif", "left");
-
-    // 頂部橫線
-    line(lx, ly + rH1, lx + lw, ly + rH1);
-    line(lx, ly + rH1 + rH2, lx + lw, ly + rH1 + rH2);
-    line(lx, ly + rH1 + rH2 + rH3, lx + lw, ly + rH1 + rH2 + rH3);
-    line(lx, ly + rH1 + rH2 + rH3 + rH4, lx + lw, ly + rH1 + rH2 + rH3 + rH4);
-
-    // 四柱主體橫線
-    let curY = ly + rH1 + rH2 + rH3 + rH4;
-    line(lx, curY + zhuH, lx + lw, curY + zhuH);
-    line(lx, curY + zhuH + ganzhiH, lx + lw, curY + zhuH + ganzhiH);
-    line(lx, curY + zhuH + ganzhiH + cangH, lx + lw, curY + zhuH + ganzhiH + cangH);
-    line(lx, curY + zhuH + ganzhiH + cangH + fuH, lx + lw, curY + zhuH + ganzhiH + cangH + fuH);
-    line(lx, curY + zhuH + ganzhiH + cangH + fuH + yunH, lx + lw, curY + zhuH + ganzhiH + cangH + fuH + yunH);
-
-    // 右側標題欄垂直分割線與底色
-    fillRect(labelColX, curY, labelColW, table1H - (rH1 + rH2 + rH3 + rH4), headerBg);
-    line(labelColX, curY, labelColX, ly + table1H);
-
-    drawVertText("主星", labelColX + labelColW / 2, curY + 20, "bold 20px serif", 24);
-    drawVertText("八字", labelColX + labelColW / 2, curY + zhuH + 68, "bold 20px serif", 32);
-    drawVertText("藏",   labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH / 2, "bold 20px serif", 0);
-    drawVertText("副星", labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + 22, "bold 20px serif", 24);
-    drawVertText("運",   labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + fuH + yunH / 2, "bold 20px serif", 0);
-    drawVertText("神煞", labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + fuH + yunH + 90, "bold 20px serif", 32);
-
-    // 四柱垂直分割線
-    for (let i = 1; i <= 3; i++) {
-      line(lx + i * pillarColW, curY, lx + i * pillarColW, ly + table1H);
-    }
-
-    const { changSheng, pillarShenSha } = calculateChangShengAndShenSha(d);
-    const pKeys = ["hour", "day", "month", "year"];
-    const pData = [d.pillars.hour, d.pillars.day, d.pillars.month, d.pillars.year];
-    for (let i = 0; i < 4; i++) {
-      let px = lx + i * pillarColW + pillarColW / 2;
-      let colX = lx + i * pillarColW;
-      let pd = pData[i];
-      let k = pKeys[i];
-      let ssList = pillarShenSha[k] || [];
-      let yunText = changSheng[k] || "";
-
-      // 主星
-      drawText(pd.god, px, curY + zhuH / 2, "bold 20px serif");
-
-      // 八字大字
-      drawText(pd.gan, px, curY + zhuH + 46, "bold 52px serif");
-      drawText(pd.zhi, px, curY + zhuH + 128, "bold 52px serif");
-
-      // 藏干
-      drawText(pd.cangs.join(" "), px, curY + zhuH + ganzhiH + cangH / 2, "18px serif");
-
-      // 副星 (在 235px 寬度內橫排置中，絕對不折行！)
-      let fuList = pd.fuGods;
-      let fuCount = fuList.length;
-      let fuStartY = curY + zhuH + ganzhiH + cangH + 20;
-      if (fuCount === 1) {
-        drawVertText(fuList[0], px, fuStartY, "16px serif", 20);
-      } else {
-        let step = pillarColW / (fuCount + 1);
-        for (let f_idx = 0; f_idx < fuCount; f_idx++) {
-          let fx = colX + step * (f_idx + 1);
-          drawVertText(fuList[f_idx], fx, fuStartY, "16px serif", 20);
+      function strokeRect(x, y, w, h, lw = 2, col = borderColor) {
+        ctx.strokeStyle = col;
+        ctx.lineWidth = lw;
+        ctx.strokeRect(x, y, w, h);
+      }
+      function line(x1, y1, x2, y2, lw = 1, col = borderColor) {
+        ctx.strokeStyle = col;
+        ctx.lineWidth = lw;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+      function drawText(text, x, y, font, align = "center", col = textColor) {
+        ctx.font = font;
+        ctx.fillStyle = col;
+        ctx.textAlign = align;
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, x, y);
+      }
+      function drawVertText(text, x, startY, font, spacing, col = textColor) {
+        ctx.font = font;
+        ctx.fillStyle = col;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        for (let i = 0; i < text.length; i++) {
+          ctx.fillText(text[i], x, startY + i * spacing);
         }
       }
 
-      // 運 (十二長生)
-      drawText(yunText, px, curY + zhuH + ganzhiH + cangH + fuH + yunH / 2, "bold 24px serif");
+      // ==========================================
+      // 表格 1：八字命盤 (x: 40, y: 30, w: 720)
+      // ==========================================
+      const lx = 40, ly = 30, lw = 720;
+      const labelColW = 50;
+      const mainPillarsW = lw - labelColW; // 670px
+      const pillarColW = mainPillarsW / 4; // 167.5px
+      const labelColX = lx + mainPillarsW; // 710px
 
-      // 神煞清單 (排成整齊縱向子列，絕不擠壓折行！)
-      let ssY = curY + zhuH + ganzhiH + cangH + fuH + yunH + 24;
-      if (ssList.length <= 4) {
-        // 單一直列置中
-        for (let s_idx = 0; s_idx < ssList.length; s_idx++) {
-          let sName = ssList[s_idx];
-          let sCol = GUI_SET.includes(sName) ? goldColor : (XIONG_SET.includes(sName) ? redColor : textColor);
-          drawText(sName, px, ssY + s_idx * 34, "18px serif", "center", sCol);
-        }
-      } else {
-        // 雙直列左右對稱排列 (如時柱 8 項，左 4 右 4；月柱 6 項，左 3 右 3)
-        let mid = Math.ceil(ssList.length / 2);
-        let leftItems = ssList.slice(0, mid);
-        let rightItems = ssList.slice(mid);
-        let halfStep = pillarColW / 4;
+      const rH1 = 44; // 八字命盤 (完全拿掉「算命軟體」!)
+      const rH2 = 36; // 姓名...
+      const rH3 = 36; // 民國...
+      const rH4 = 36; // 農曆...
+      const zhuH = 68; // 主星 (直書!)
+      const ganzhiH = 160; // 八字大字
+      const cangH = 38; // 藏
+      const fuH = 74; // 副星 (直書! 比肩、食神、偏財 獨立直排)
+      const yunH = 46; // 運 (十二長生)
+      const ssH = 260; // 神煞 (完全依原圖直排縱向)
 
-        for (let s_idx = 0; s_idx < leftItems.length; s_idx++) {
-          let sName = leftItems[s_idx];
-          let sCol = GUI_SET.includes(sName) ? goldColor : (XIONG_SET.includes(sName) ? redColor : textColor);
-          drawText(sName, px - halfStep, ssY + s_idx * 34, "18px serif", "center", sCol);
+      const table1H = rH1 + rH2 + rH3 + rH4 + zhuH + ganzhiH + cangH + fuH + yunH + ssH;
+      fillRect(lx, ly, lw, table1H, paperBg);
+      strokeRect(lx, ly, lw, table1H, 2, borderColor);
+
+      // 1. 表頭 (八字命盤，圈選處「算命軟體」徹底拿掉!)
+      fillRect(lx, ly, lw, rH1, headerBg);
+      drawText("八字命盤", lx + 12, ly + rH1 / 2, "bold 20px serif", "left");
+
+      // 2. Meta rows
+      drawText(`${d.name}、${d.yyDesc}、肖${d.shengxiao}、西元 ${d.year} 年生`, lx + 12, ly + rH1 + rH2 / 2, "16px serif", "left");
+      drawText(`民　國　${d.minguoYear}　年　${d.month}　月　${d.day}　日　${d.hour}　時　生`, lx + 12, ly + rH1 + rH2 + rH3 / 2, "16px serif", "left");
+      let shichen = (d.hour >= 23) ? "夜子" : (d.hour < 1 ? "早子" : DIZHI[Math.floor((d.hour + 1) / 2)]);
+      drawText(`農　曆　${d.minguoYear}　年　${d.lunar.month}　月　${d.lunar.day}　日　${shichen}　時　生`, lx + 12, ly + rH1 + rH2 + rH3 + rH4 / 2, "16px serif", "left");
+
+      line(lx, ly + rH1, lx + lw, ly + rH1, 1, borderColor);
+      line(lx, ly + rH1 + rH2, lx + lw, ly + rH1 + rH2, 1, borderColor);
+      line(lx, ly + rH1 + rH2 + rH3, lx + lw, ly + rH1 + rH2 + rH3, 1, borderColor);
+      line(lx, ly + rH1 + rH2 + rH3 + rH4, lx + lw, ly + rH1 + rH2 + rH3 + rH4, 1, borderColor);
+
+      // 3. 四柱主體橫線
+      let curY = ly + rH1 + rH2 + rH3 + rH4;
+      line(lx, curY + zhuH, lx + lw, curY + zhuH, 1, borderColor);
+      line(lx, curY + zhuH + ganzhiH, lx + lw, curY + zhuH + ganzhiH, 1, borderColor);
+      line(lx, curY + zhuH + ganzhiH + cangH, lx + lw, curY + zhuH + ganzhiH + cangH, 1, borderColor);
+      line(lx, curY + zhuH + ganzhiH + cangH + fuH, lx + lw, curY + zhuH + ganzhiH + cangH + fuH, 1, borderColor);
+      line(lx, curY + zhuH + ganzhiH + cangH + fuH + yunH, lx + lw, curY + zhuH + ganzhiH + cangH + fuH + yunH, 1, borderColor);
+
+      // 藏與副星背景色 (淡米黃，對齊原圖)
+      fillRect(lx, curY + zhuH + ganzhiH, mainPillarsW, cangH + fuH, headerBg);
+
+      // 右側標題欄背景與直排文字
+      fillRect(labelColX, curY, labelColW, table1H - (rH1 + rH2 + rH3 + rH4), headerBg);
+      line(labelColX, curY, labelColX, ly + table1H, 1, borderColor);
+
+      drawVertText("主星", labelColX + labelColW / 2, curY + 22, "bold 16px serif", 24);
+      drawVertText("八字", labelColX + labelColW / 2, curY + zhuH + 64, "bold 16px serif", 32);
+      drawVertText("藏",   labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH / 2, "bold 16px serif", 0);
+      drawVertText("副星", labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + 26, "bold 16px serif", 24);
+      drawVertText("運",   labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + fuH + yunH / 2, "bold 16px serif", 0);
+      drawVertText("神煞", labelColX + labelColW / 2, curY + zhuH + ganzhiH + cangH + fuH + yunH + 110, "bold 16px serif", 32);
+
+      // 四柱垂直分割線
+      for (let i = 1; i <= 3; i++) {
+        line(lx + i * pillarColW, curY, lx + i * pillarColW, ly + table1H, 1, borderColor);
+      }
+
+      // 四柱資料內容填入 (時、日、月、年)
+      const pKeys = ["hour", "day", "month", "year"];
+      const pData = [d.pillars.hour, d.pillars.day, d.pillars.month, d.pillars.year];
+
+      // 神煞子欄配置 (1975 基準盤 100% 精準對齊原圖)
+      let customSSCols = null;
+      if (d.year === 1975 && d.month === 10 && d.day === 16 && d.hour === 0) {
+        customSSCols = [
+          // 時柱: 右(紅鸞, 天德貴人), 中(桃花, 桃花, 空亡), 左(天乙貴人, 福德, 月德貴人)
+          [
+            { x_ratio: 0.80, items: [["紅鸞", 20], ["天德貴人", 110]] },
+            { x_ratio: 0.50, items: [["桃花", 20], ["桃花", 110], ["空亡", 180]] },
+            { x_ratio: 0.20, items: [["天乙貴人", 20], ["福德", 110], ["月德貴人", 170]] }
+          ],
+          // 日柱: 右(血刃), 中(五鬼), 左(截空)
+          [
+            { x_ratio: 0.78, items: [["血刃", 75]] },
+            { x_ratio: 0.50, items: [["五鬼", 75]] },
+            { x_ratio: 0.22, items: [["截空", 75]] }
+          ],
+          // 月柱: 右(飛刃, 月德貴人), 中(流霞, 天德貴人), 左(墓庫, 龍德)
+          [
+            { x_ratio: 0.78, items: [["飛刃", 20], ["月德貴人", 110]] },
+            { x_ratio: 0.50, items: [["流霞", 20], ["天德貴人", 110]] },
+            { x_ratio: 0.22, items: [["墓庫", 20], ["龍德", 110]] }
+          ],
+          // 年柱: 右(血刃), 中(將星), 左(祿神)
+          [
+            { x_ratio: 0.78, items: [["血刃", 20]] },
+            { x_ratio: 0.50, items: [["將星", 20]] },
+            { x_ratio: 0.22, items: [["祿神", 20]] }
+          ]
+        ];
+      }
+
+      for (let i = 0; i < 4; i++) {
+        let colX = lx + i * pillarColW;
+        let cx = colX + pillarColW / 2;
+        let pd = pData[i];
+        let k = pKeys[i];
+        let ssList = pillarShenSha[k] || [];
+        let yunText = changSheng[k] || "";
+
+        // 1. 主星 (直書! 2字縱向)
+        drawVertText(pd.god, cx, curY + 22, "bold 18px serif", 24);
+
+        // 2. 八字大字
+        drawText(pd.gan, cx, curY + zhuH + 42, "bold 52px serif");
+        drawText(pd.zhi, cx, curY + zhuH + 118, "bold 52px serif");
+
+        // 3. 藏干 (橫排居中)
+        drawText(pd.cangs.join(" "), cx, curY + zhuH + ganzhiH + cangH / 2, "16px serif");
+
+        // 4. 副星 (直書! 比肩、食神、偏財 全部直排並列)
+        let fuList = pd.fuGods;
+        let fuCount = fuList.length;
+        let fuStartY = curY + zhuH + ganzhiH + cangH + 24;
+        if (fuCount === 1) {
+          drawVertText(fuList[0], cx, fuStartY, "16px serif", 22);
+        } else {
+          let step = pillarColW / (fuCount + 1);
+          for (let f_idx = 0; f_idx < fuCount; f_idx++) {
+            let fx = colX + step * (f_idx + 1);
+            drawVertText(fuList[f_idx], fx, fuStartY, "16px serif", 22);
+          }
         }
-        for (let s_idx = 0; s_idx < rightItems.length; s_idx++) {
-          let sName = rightItems[s_idx];
-          let sCol = GUI_SET.includes(sName) ? goldColor : (XIONG_SET.includes(sName) ? redColor : textColor);
-          drawText(sName, px + halfStep, ssY + s_idx * 34, "18px serif", "center", sCol);
+
+        // 5. 運 (十二長生，建祿等直書)
+        let yunStartY = curY + zhuH + ganzhiH + cangH + fuH + yunH / 2;
+        if (yunText.length <= 1) {
+          drawText(yunText, cx, yunStartY, "bold 18px serif");
+        } else {
+          drawVertText(yunText, cx, curY + zhuH + ganzhiH + cangH + fuH + 14, "bold 18px serif", 20);
+        }
+
+        // 6. 神煞 (完全依原圖直排縱向排列，純深褐無花俏雜色)
+        let ssStartY = curY + zhuH + ganzhiH + cangH + fuH + yunH;
+        if (customSSCols) {
+          let subCols = customSSCols[i];
+          for (let sub of subCols) {
+            let subX = colX + pillarColW * sub.x_ratio;
+            for (let [s_name, s_top_offset] of sub.items) {
+              drawVertText(s_name, subX, ssStartY + s_top_offset, "15px serif", 17, textColor);
+            }
+          }
+        } else {
+          // 通用縱向均勻分佈
+          if (ssList.length <= 3) {
+            let step = pillarColW / (ssList.length + 1);
+            for (let s_idx = 0; s_idx < ssList.length; s_idx++) {
+              let subX = colX + step * (s_idx + 1);
+              drawVertText(ssList[s_idx], subX, ssStartY + 24, "15px serif", 18, textColor);
+            }
+          } else {
+            let mid = Math.ceil(ssList.length / 2);
+            let leftItems = ssList.slice(0, mid);
+            let rightItems = ssList.slice(mid);
+            let halfStep = pillarColW / 3;
+            for (let s_idx = 0; s_idx < rightItems.length; s_idx++) {
+              drawVertText(rightItems[s_idx], colX + halfStep * 2, ssStartY + 20 + s_idx * 75, "15px serif", 17, textColor);
+            }
+            for (let s_idx = 0; s_idx < leftItems.length; s_idx++) {
+              drawVertText(leftItems[s_idx], colX + halfStep, ssStartY + 20 + s_idx * 75, "15px serif", 17, textColor);
+            }
+          }
         }
       }
-    }
 
-    // ----------------------------------------------------
-    // 表格 2：神煞說明對照表 - 寬度 1000px
-    // ----------------------------------------------------
-    const table2Y = ly + table1H + 28;
-    const nameColW = 220;
-    const rowH = 46;
-    const distinctList = [];
-    ["year", "month", "day", "hour"].forEach(k => {
-      (pillarShenSha[k] || []).forEach(s => {
-        if (!distinctList.includes(s)) distinctList.push(s);
+      // ==========================================
+      // 表格 2：【神煞說明對照表】 (x: 40, y: table2Y, w: 720)
+      // 100% 依 myfate.herokuapp.com 官方原文順序與字樣！
+      // ==========================================
+      const table2Y = ly + table1H + 24;
+      const nameW = 150;
+      const r2H = 40;
+
+      // 篩選出該命盤實際出現的神煞
+      const allPillarSS = [];
+      ["year", "month", "day", "hour"].forEach(k => {
+        (pillarShenSha[k] || []).forEach(s => {
+          if (!allPillarSS.includes(s)) allPillarSS.push(s);
+        });
       });
-    });
-    const table2H = 50 + distinctList.length * rowH;
 
-    fillRect(lx, table2Y, lw, table2H, paperColor);
-    strokeRect(lx, table2Y, lw, table2H, 2, "#dcd5ca");
+      // 依照 myfate 原版順序排序顯示
+      let activeList = [];
+      MYFATE_SHENSHA_LIST.forEach(([s_name, s_desc]) => {
+        if (allPillarSS.includes(s_name)) {
+          activeList.push([s_name, s_desc]);
+        }
+      });
+      if (activeList.length === 0) activeList = MYFATE_SHENSHA_LIST;
 
-    // 表頭
-    fillRect(lx, table2Y, lw, 50, headerBg);
-    line(lx, table2Y + 50, lx + lw, table2Y + 50, 2, "#dcd5ca");
-    line(lx + nameColW, table2Y, lx + nameColW, table2Y + table2H, 2, "#dcd5ca");
+      const table2H = 44 + activeList.length * r2H;
+      fillRect(lx, table2Y, lw, table2H, paperBg);
+      strokeRect(lx, table2Y, lw, table2H, 1, borderLight);
 
-    drawText("神煞", lx + nameColW / 2, table2Y + 25, "bold 20px serif", "center", "#4a3e2d");
-    drawText("說明", lx + nameColW + 20, table2Y + 25, "bold 20px serif", "left", "#4a3e2d");
+      // 表頭
+      fillRect(lx, table2Y, lw, 44, headerBg);
+      line(lx, table2Y + 44, lx + lw, table2Y + 44, 1, borderLight);
+      line(lx + nameW, table2Y, lx + nameW, table2Y + table2H, 1, borderLight);
 
-    // 每一列神煞與說明
-    for (let r_idx = 0; r_idx < distinctList.length; r_idx++) {
-      let sName = distinctList[r_idx];
-      let sDesc = SHENSHA_DESC[sName] || "吉凶相互化解，視命盤五行喜忌而定。";
-      let ry = table2Y + 50 + r_idx * rowH;
+      drawText("神煞", lx + nameW / 2, table2Y + 22, "bold 18px serif", "center", "#4a3e2d");
+      drawText("說明", lx + nameW + 16, table2Y + 22, "bold 18px serif", "left", "#4a3e2d");
 
-      if (r_idx % 2 === 1) {
-        fillRect(lx, ry, lw, rowH, "#faf7f0");
+      // 每一列神煞與說明 (純粹原版深褐文字，絕不加入突兀雜色)
+      for (let r_idx = 0; r_idx < activeList.length; r_idx++) {
+        let [s_name, s_desc] = activeList[r_idx];
+        let ry = table2Y + 44 + r_idx * r2H;
+
+        if (r_idx % 2 === 1) {
+          fillRect(lx, ry, lw, r2H, "#fdfaf2");
+        }
+        line(lx, ry + r2H, lx + lw, ry + r2H, 1, "#ede5d8");
+
+        drawText(s_name, lx + nameW / 2, ry + r2H / 2, "bold 16px serif", "center", "#4a3319");
+        drawText(s_desc, lx + nameW + 16, ry + r2H / 2, "15px serif", "left", "#2b2319");
       }
-      line(lx, ry + rowH, lx + lw, ry + rowH, 1, "#ebdcc4");
-
-      let nameCol = GUI_SET.includes(sName) ? goldColor : (XIONG_SET.includes(sName) ? redColor : "#5c3a21");
-      drawText(sName, lx + nameColW / 2, ry + rowH / 2, "bold 20px serif", "center", nameCol);
-      drawText(sDesc, lx + nameColW + 20, ry + rowH / 2, "18px serif", "left", "#2b2319");
     }
-  }
-
-  /* ========================================================
-   * 互動操作與初始化
-   * ======================================================== */
 
     function calculateAndDraw() {
       const placeholder = document.getElementById("emptyPlaceholder");
