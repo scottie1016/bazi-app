@@ -234,6 +234,44 @@
       cursor: pointer;
       float: right;
     }
+    /* 來源網站與版權宣告 */
+    .source-footer {
+      width: 100%;
+      max-width: 920px;
+      margin-top: 20px;
+      padding: 16px 20px;
+      background: #ffffff;
+      border: 1px solid #dcd5ca;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      text-align: center;
+      box-sizing: border-box;
+      line-height: 1.6;
+      color: #555047;
+      font-size: 13.5px;
+    }
+    .source-footer a {
+      color: #8b2500;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .source-footer a:hover {
+      text-decoration: underline;
+    }
+    .footer-title {
+      font-size: 14.5px;
+      font-weight: bold;
+      color: #2b2319;
+      margin-bottom: 6px;
+    }
+    .footer-desc {
+      color: #4a3e2d;
+    }
+    .footer-note {
+      font-size: 12px;
+      color: #8c8275;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -305,9 +343,7 @@
       <span>💡 高解析度向量繪製：所有格線與欄位嚴格對齊，手機長按圖片或點上方按鈕可直接下載。</span>
     </div>
 
-    <div class="action-btn-row" style="display:flex; justify-content:center; gap:12px; margin: 14px 0 18px;">
-      <button class="btn-save" onclick="downloadImage()">💾 下載八字命盤與無敵律數大圖</button>
-    </div>
+
 
   </div>
 
@@ -323,6 +359,18 @@
       <button class="btn-copy" onclick="copyIframeCode()">複製代碼</button>
     </div>
   </div>
+
+  <!-- 來源網站與版權宣告 -->
+  <footer class="source-footer">
+    <div class="footer-title">📜 資料來源與版權宣告</div>
+    <div class="footer-desc">
+      本命盤排盤系統之演算法架構、四柱推算標準與無敵律數實律統計參照自 
+      <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer">myfate.herokuapp.com</a> (免費八字命盤) 官方計算引擎。
+    </div>
+    <div class="footer-note">
+      相關演算法與命盤設計版權歸原作者所有，本程式僅供學術交流與個人命理排盤參考。
+    </div>
+  </footer>
 
   <script>
     /* ========================================================
