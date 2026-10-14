@@ -263,14 +263,8 @@
           <button type="button" id="fillNowBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle hover:opacity-80 transition">
             ⏱️ 帶入現在時間
           </button>
-          <button type="button" id="fillOrig1975Btn" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition">
-            📌 原圖範例 (民國64/10/16早子男)
-          </button>
-          <button type="button" id="fillDemo1Btn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle hover:opacity-80 transition">
-            範例一 (1990男)
-          </button>
-          <button type="button" id="fillDemo2Btn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle hover:opacity-80 transition">
-            範例二 (1995女)
+          <button type="button" id="clearBaziBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle hover:opacity-80 transition">
+            🧹 清除重填
           </button>
         </div>
       </div>
@@ -343,6 +337,12 @@
 
     <!-- ==================== TAB 1: 免費八字命盤 ==================== -->
     <div id="tabPanelBazi" class="space-y-5">
+      <div id="baziEmptyStateBox" class="theme-card border border-dashed theme-border rounded-2xl p-8 text-center space-y-2">
+        <div class="text-2xl">☯️</div>
+        <div class="text-base font-bold serif-font">請於上方選擇出生年月日時，並點擊「立即排盤分析」</div>
+        <p class="text-xs theme-muted">支援西元 1900（民前12年）至 2050（民國139年）陽曆／農曆轉換與早子、夜子時排盤</p>
+      </div>
+      <div id="baziResultsWrapper" class="hidden space-y-5">
 
       <!-- Authentic Original Website (myfate.herokuapp.com) Classic Tables Section -->
       <div class="theme-card border rounded-2xl p-4 sm:p-5 shadow-sm space-y-5">
@@ -520,10 +520,17 @@
 
       </div>
       </div>
+      </div>
     </div>
 
     <!-- ==================== TAB 2: 免費紫微命盤 ==================== -->
     <div id="tabPanelZiwei" class="hidden space-y-5">
+      <div id="ziweiEmptyStateBox" class="theme-card border border-dashed theme-border rounded-2xl p-8 text-center space-y-2">
+        <div class="text-2xl">✨</div>
+        <div class="text-base font-bold serif-font">請於上方選擇出生年月日時，並點擊「立即排盤分析」</div>
+        <p class="text-xs theme-muted">輸入生辰後將自動同步排出紫微斗數十二宮命盤、四化與三方四正星曜解析</p>
+      </div>
+      <div id="ziweiResultsWrapper" class="hidden space-y-5">
       <div class="theme-card border rounded-2xl p-4 sm:p-5 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
@@ -557,6 +564,7 @@
           <!-- Populated by JS -->
         </div>
       </div>
+      </div>
     </div>
 
     <!-- ==================== TAB 3: 免費姓名吉凶分析 ==================== -->
@@ -570,20 +578,18 @@
             </p>
           </div>
           <div class="flex items-center gap-2">
-            <button type="button" id="nameDemo1Btn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle hover:opacity-80">範例：林雅婷</button>
-            <button type="button" id="nameDemo2Btn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle hover:opacity-80">範例：陳家豪</button>
-            <button type="button" id="nameDemo3Btn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle hover:opacity-80">範例：張博鈞</button>
+            <button type="button" id="clearNameBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle hover:opacity-80">🧹 清除重填</button>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
           <div>
             <label for="surnameInput" class="block text-xs font-semibold mb-1.5 theme-muted">姓氏（支援單姓或複姓）</label>
-            <input type="text" id="surnameInput" value="林" maxlength="2" placeholder="例如：林、歐陽" class="w-full rounded-xl border theme-border theme-card px-3.5 py-2 text-base font-bold focus:outline-none focus:ring-2 focus:ring-amber-600" />
+            <input type="text" id="surnameInput" value="" maxlength="2" placeholder="例如：林、歐陽" class="w-full rounded-xl border theme-border theme-card px-3.5 py-2 text-base font-bold focus:outline-none focus:ring-2 focus:ring-amber-600" />
           </div>
           <div>
             <label for="givenNameInput" class="block text-xs font-semibold mb-1.5 theme-muted">名字（支援單名或雙名）</label>
-            <input type="text" id="givenNameInput" value="雅婷" maxlength="2" placeholder="例如：雅婷、家豪" class="w-full rounded-xl border theme-border theme-card px-3.5 py-2 text-base font-bold focus:outline-none focus:ring-2 focus:ring-amber-600" />
+            <input type="text" id="givenNameInput" value="" maxlength="2" placeholder="例如：雅婷、家豪" class="w-full rounded-xl border theme-border theme-card px-3.5 py-2 text-base font-bold focus:outline-none focus:ring-2 focus:ring-amber-600" />
           </div>
           <div>
             <button type="button" id="analyzeNameBtn" class="w-full py-2.5 px-4 rounded-xl text-sm font-bold bg-gradient-to-r from-amber-800 to-red-800 hover:from-amber-900 hover:to-red-900 text-white shadow transition">
@@ -1995,13 +2001,15 @@
       theme: 'paper',
       isEmbedPreview: false,
       calType: 'solar',
-      gender: 'M',
-      year: 1975,
-      month: 10,
-      day: 16,
+      gender: 'F',
+      year: '',
+      month: '',
+      day: '',
       isLeapMonth: false,
-      hourValue: 0,
+      hourValue: '',
       personName: '無名氏',
+      hasCalculatedBazi: false,
+      hasCalculatedName: false,
       showModernCards: true,
       nightZiKeepDay: true,
       selectedDayunIdx: 0,
@@ -2050,7 +2058,7 @@
 
     function initFormSelectors() {
       const yearSel = document.getElementById('birthYearSelect');
-      yearSel.innerHTML = '';
+      yearSel.innerHTML = '<option value="">-- 請選擇年份 --</option>';
       for (let y = 1900; y <= 2050; y++) {
         const opt = document.createElement('option');
         opt.value = y;
@@ -2062,7 +2070,7 @@
       yearSel.value = state.year;
 
       const monthSel = document.getElementById('birthMonthSelect');
-      monthSel.innerHTML = '';
+      monthSel.innerHTML = '<option value="">-- 請選擇月份 --</option>';
       for (let m = 1; m <= 12; m++) {
         const opt = document.createElement('option');
         opt.value = m;
@@ -2072,7 +2080,7 @@
       monthSel.value = state.month;
 
       const daySel = document.getElementById('birthDaySelect');
-      daySel.innerHTML = '';
+      daySel.innerHTML = '<option value="">-- 請選擇日期 --</option>';
       for (let d = 1; d <= 31; d++) {
         const opt = document.createElement('option');
         opt.value = d;
@@ -2082,7 +2090,7 @@
       daySel.value = state.day;
 
       const hourSel = document.getElementById('birthHourSelect');
-      hourSel.innerHTML = '';
+      hourSel.innerHTML = '<option value="">-- 請選擇時辰 --</option>';
       HOUR_OPTIONS.forEach(h => {
         const opt = document.createElement('option');
         opt.value = h.value;
@@ -2130,12 +2138,26 @@
     }
 
     function runCalculationsAndRender() {
-      let solarY = state.year;
-      let solarM = state.month;
-      let solarD = state.day;
+      if (!state.hasCalculatedBazi || state.year === '' || state.month === '' || state.day === '' || state.hourValue === '') {
+        document.getElementById('baziEmptyStateBox').classList.remove('hidden');
+        document.getElementById('baziResultsWrapper').classList.add('hidden');
+        document.getElementById('ziweiEmptyStateBox').classList.remove('hidden');
+        document.getElementById('ziweiResultsWrapper').classList.add('hidden');
+        document.getElementById('convertedDateBadge').textContent = '尚未排盤（請選擇年月日時後點擊立即排盤）';
+        return;
+      }
+
+      document.getElementById('baziEmptyStateBox').classList.add('hidden');
+      document.getElementById('baziResultsWrapper').classList.remove('hidden');
+      document.getElementById('ziweiEmptyStateBox').classList.add('hidden');
+      document.getElementById('ziweiResultsWrapper').classList.remove('hidden');
+
+      let solarY = Number(state.year);
+      let solarM = Number(state.month);
+      let solarD = Number(state.day);
 
       if (state.calType === 'lunar') {
-        const s = lunarToSolar(state.year, state.month, state.day, state.isLeapMonth);
+        const s = lunarToSolar(solarY, solarM, solarD, state.isLeapMonth);
         solarY = s.year;
         solarM = s.month;
         solarD = s.day;
@@ -2148,7 +2170,7 @@
         }
       }
 
-      const bazi = calculateBazi(solarY, solarM, solarD, state.hourValue, state.gender, state.nightZiKeepDay);
+      const bazi = calculateBazi(solarY, solarM, solarD, Number(state.hourValue), state.gender, state.nightZiKeepDay);
       state.baziResult = bazi;
       state.ziweiResult = calculateZiwei(bazi);
       if (state.selectedZiweiBranchIdx === null) {
@@ -2157,7 +2179,6 @@
 
       renderBaziView();
       renderZiweiView();
-      renderNameView();
     }
 
     function renderBaziView() {
@@ -2913,13 +2934,23 @@
      * 7. NAME NUMEROLOGY UI RENDERING (三才五格 + 81靈動數 + 易經姓名學)
      ***********************************************************************/
     function renderNameView() {
-      const surnameRaw = (document.getElementById('surnameInput').value || '林').trim();
-      const givenRaw = (document.getElementById('givenNameInput').value || '雅婷').trim();
+      const surnameRaw = (document.getElementById('surnameInput').value || '').trim();
+      const givenRaw = (document.getElementById('givenNameInput').value || '').trim();
+            
+      if (!surnameRaw || !givenRaw) {
+        adjustContainer.innerHTML = '<span class="text-xs theme-muted">（輸入姓氏與名字後將自動顯示各字康熙筆劃）</span>';
+        resBox.innerHTML = `
+          <div class="lg:col-span-3 theme-card border border-dashed theme-border rounded-2xl p-8 text-center space-y-2">
+            <div class="text-2xl">🖋️</div>
+            <div class="text-base font-bold serif-font">請於上方輸入「姓氏」與「名字」，並點擊「執行姓名吉凶分析」</div>
+            <p class="text-xs theme-muted">將自動計算三才五格、八十一靈動數吉凶與易經姓名學流年卦象</p>
+          </div>
+        `;
+        return;
+      }
+
       const surnameChars = Array.from(surnameRaw).slice(0, 2);
       const givenChars = Array.from(givenRaw).slice(0, 2);
-
-      if (surnameChars.length === 0) surnameChars.push('林');
-      if (givenChars.length === 0) givenChars.push('雅');
 
       const allChars = [
         ...surnameChars.map((c, i) => ({ ch: c, role: `姓氏${i + 1}`, key: `S${i}_${c}` })),
@@ -3179,6 +3210,7 @@
 
       syncInputControlsFromState();
       runCalculationsAndRender();
+      renderNameView();
       updateEmbedCodeSnippet();
 
       document.querySelectorAll('.service-tab-btn').forEach(btn => {
@@ -3262,33 +3294,45 @@
         runCalculationsAndRender();
       });
 
+      const autoCheckReady = () => {
+        if (state.year !== '' && state.month !== '' && state.day !== '' && state.hourValue !== '') {
+          state.hasCalculatedBazi = true;
+          runCalculationsAndRender();
+        }
+      };
+
       document.getElementById('birthYearSelect').addEventListener('change', (e) => {
-        state.year = parseInt(e.target.value, 10);
-        runCalculationsAndRender();
+        state.year = e.target.value === '' ? '' : parseInt(e.target.value, 10);
+        autoCheckReady();
       });
       document.getElementById('birthMonthSelect').addEventListener('change', (e) => {
-        state.month = parseInt(e.target.value, 10);
-        runCalculationsAndRender();
+        state.month = e.target.value === '' ? '' : parseInt(e.target.value, 10);
+        autoCheckReady();
       });
       document.getElementById('birthDaySelect').addEventListener('change', (e) => {
-        state.day = parseInt(e.target.value, 10);
-        runCalculationsAndRender();
+        state.day = e.target.value === '' ? '' : parseInt(e.target.value, 10);
+        autoCheckReady();
       });
       document.getElementById('birthHourSelect').addEventListener('change', (e) => {
-        state.hourValue = parseInt(e.target.value, 10);
-        runCalculationsAndRender();
+        state.hourValue = e.target.value === '' ? '' : parseInt(e.target.value, 10);
+        autoCheckReady();
       });
       document.getElementById('leapMonthCheck').addEventListener('change', (e) => {
         state.isLeapMonth = e.target.checked;
-        runCalculationsAndRender();
+        if (state.hasCalculatedBazi) runCalculationsAndRender();
       });
       document.getElementById('nightZiKeepDayCheck').addEventListener('change', (e) => {
         state.nightZiKeepDay = e.target.checked;
-        runCalculationsAndRender();
+        if (state.hasCalculatedBazi) runCalculationsAndRender();
       });
       document.getElementById('calculateChartBtn').addEventListener('click', () => {
+        if (state.year === '' || state.month === '' || state.day === '' || state.hourValue === '') {
+          showToast('⚠️ 請先完整選擇出生「年、月、日、時辰」後再點擊排盤！');
+          return;
+        }
+        state.hasCalculatedBazi = true;
         runCalculationsAndRender();
-        showToast('✨ 命盤已更新！');
+        showToast('✨ 命盤分析完成！');
       });
 
       document.getElementById('fillNowBtn').addEventListener('click', () => {
@@ -3298,55 +3342,32 @@
         state.month = now.getMonth() + 1;
         state.day = now.getDate();
         state.hourValue = now.getHours();
+        state.hasCalculatedBazi = true;
         syncInputControlsFromState();
         runCalculationsAndRender();
         showToast('⏱️ 已帶入目前時間並完成排盤！');
       });
 
-      
-      document.getElementById('fillOrig1975Btn').addEventListener('click', () => {
-        state.calType = 'solar';
-        state.gender = 'M';
-        state.year = 1975;
-        state.month = 10;
-        state.day = 16;
-        state.hourValue = 0;
+      document.getElementById('clearBaziBtn').addEventListener('click', () => {
+        state.year = '';
+        state.month = '';
+        state.day = '';
+        state.hourValue = '';
+        state.hasCalculatedBazi = false;
+        state.baziResult = null;
+        state.ziweiResult = null;
         syncInputControlsFromState();
         runCalculationsAndRender();
-        showToast('📌 已載入原圖範例（民國64年10月16日 0時早子 陰男）');
+        showToast('🧹 已清除生辰與命盤資料，請重新選擇！');
       });
 
       document.getElementById('chartPersonNameInput').addEventListener('input', () => {
-        renderBaziView();
+        if (state.hasCalculatedBazi) renderBaziView();
       });
 
       document.getElementById('toggleModernCardsBtn').addEventListener('click', () => {
         const wrap = document.getElementById('modernSupplementWrapper');
         wrap.classList.toggle('hidden');
-      });
-
-      document.getElementById('fillDemo1Btn').addEventListener('click', () => {
-        state.calType = 'solar';
-        state.gender = 'M';
-        state.year = 1990;
-        state.month = 5;
-        state.day = 20;
-        state.hourValue = 9;
-        syncInputControlsFromState();
-        runCalculationsAndRender();
-        showToast('已載入範例一（1990年5月20日 早上9點多 男命）');
-      });
-
-      document.getElementById('fillDemo2Btn').addEventListener('click', () => {
-        state.calType = 'solar';
-        state.gender = 'F';
-        state.year = 1995;
-        state.month = 10;
-        state.day = 8;
-        state.hourValue = 15;
-        syncInputControlsFromState();
-        runCalculationsAndRender();
-        showToast('已載入範例二（1995年10月8日 下午3點多 女命）');
       });
 
       document.getElementById('copyAiPromptBtn').addEventListener('click', () => {
@@ -3387,23 +3408,21 @@
       });
 
       document.getElementById('analyzeNameBtn').addEventListener('click', () => {
+        const s = (document.getElementById('surnameInput').value || '').trim();
+        const g = (document.getElementById('givenNameInput').value || '').trim();
+        if (!s || !g) {
+          showToast('⚠️ 請先輸入「姓氏」與「名字」！');
+          return;
+        }
         renderNameView();
-        showToast('🔍 已更新姓名三才五格與八十一靈動數分析！');
+        showToast('🔍 已完成姓名三才五格與八十一靈動數分析！');
       });
-      document.getElementById('nameDemo1Btn').addEventListener('click', () => {
-        document.getElementById('surnameInput').value = '林';
-        document.getElementById('givenNameInput').value = '雅婷';
+      document.getElementById('clearNameBtn').addEventListener('click', () => {
+        document.getElementById('surnameInput').value = '';
+        document.getElementById('givenNameInput').value = '';
+        state.customStrokes = {};
         renderNameView();
-      });
-      document.getElementById('nameDemo2Btn').addEventListener('click', () => {
-        document.getElementById('surnameInput').value = '陳';
-        document.getElementById('givenNameInput').value = '家豪';
-        renderNameView();
-      });
-      document.getElementById('nameDemo3Btn').addEventListener('click', () => {
-        document.getElementById('surnameInput').value = '張';
-        document.getElementById('givenNameInput').value = '博鈞';
-        renderNameView();
+        showToast('🧹 已清除姓名欄位！');
       });
     });
   </script>
