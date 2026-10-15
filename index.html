@@ -838,7 +838,7 @@
             </p>
           </div>
           <div class="flex items-center gap-2">
-            <button type="button" id="nameDemoLinBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle border theme-border hover:opacity-80 transition">範例：林義峰</button>
+            <button type="button" id="nameDemoLinBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle border theme-border hover:opacity-80 transition">範例：王小明</button>
             <button type="button" id="clearNameBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle hover:opacity-80">🧹 清除重填</button>
           </div>
         </div>
@@ -3379,7 +3379,7 @@
       const resBox = document.getElementById('nameResultContainer');
 
       if (!surnameRaw || !givenRaw) {
-        adjustContainer.innerHTML = '<span class="text-xs theme-muted">（輸入姓氏與名字後將自動顯示各字康熙筆劃，亦可點選右上角「範例：林義峰」預覽原站圖解）</span>';
+        adjustContainer.innerHTML = '<span class="text-xs theme-muted">（輸入姓氏與名字後將自動顯示各字康熙筆劃，亦可點選右上角「範例：王小明」預覽原站圖解）</span>';
         resBox.innerHTML = `
           <div class="lg:col-span-3 theme-card border border-dashed theme-border rounded-2xl p-8 text-center space-y-2">
             <div class="text-2xl">🖋️</div>
@@ -3987,11 +3987,11 @@
       const demoLinBtn = document.getElementById('nameDemoLinBtn');
       if (demoLinBtn) {
         demoLinBtn.addEventListener('click', () => {
-          document.getElementById('surnameInput').value = '林';
-          document.getElementById('givenNameInput').value = '義峰';
+          document.getElementById('surnameInput').value = '王';
+          document.getElementById('givenNameInput').value = '小明';
           state.customStrokes = {};
           renderNameView();
-          showToast('已載入「林義峰」原站圖解範例！');
+          showToast('已載入「王小明」範例！');
         });
       }
 
