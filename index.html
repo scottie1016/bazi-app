@@ -106,21 +106,19 @@
       color: #111111;
     }
     .orig-vtext {
-      writing-mode: vertical-rl;
-      text-orientation: upright;
       display: inline-block;
       line-height: 1.25;
-      letter-spacing: 1px;
+      text-align: center;
+      vertical-align: middle;
       margin: 0 auto;
     }
     .orig-bazi-char {
-      writing-mode: vertical-rl;
-      text-orientation: upright;
       display: inline-block;
       font-size: 2rem;
       font-weight: 700;
       line-height: 1.15;
-      letter-spacing: 2px;
+      text-align: center;
+      vertical-align: middle;
       margin: 4px auto;
     }
     .orig-shensha-table {
@@ -213,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">免費八字・紫微・姓名命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v2.5</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：改編與致敬自
@@ -3869,6 +3867,15 @@
       `;
 
       const ssContainer = document.getElementById('shenshaListContainer');
+
+      // Ensure 100% top-to-bottom vertical stacking on iOS Safari / mobile browsers (preventing RTL horizontal flip like 巳辛 / 座星)
+      document.querySelectorAll('.orig-vtext, .orig-bazi-char').forEach(el => {
+        const raw = (el.textContent || '').trim();
+        if (raw.length > 1 && !el.innerHTML.includes('<br')) {
+          el.innerHTML = Array.from(raw).join('<br>');
+        }
+      });
+
       ssContainer.innerHTML = detailedSS.uniqueNames.map(nm => `
         <div class="theme-subtle p-2.5 rounded-xl border theme-border text-xs">
           <div class="flex items-center justify-between mb-1">
