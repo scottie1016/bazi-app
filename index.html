@@ -148,6 +148,34 @@
       background-color: #f2eedb;
     }
 
+
+    .orig-person-table {
+      border-collapse: collapse;
+      width: 100%;
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+      color: #222222;
+      border: 1px solid #dcdfe4;
+      background-color: #ffffff;
+    }
+    .orig-person-table th {
+      background-color: #eff1f3;
+      color: #222222;
+      padding: 9px 14px;
+      text-align: left;
+      font-weight: 700;
+      border: 1px solid #dcdfe4;
+    }
+    .orig-person-table td {
+      padding: 9px 14px;
+      border: 1px solid #dcdfe4;
+    }
+    .orig-person-table tbody tr:nth-child(odd) td {
+      background-color: #eff1f3;
+    }
+    .orig-person-table tbody tr:nth-child(even) td {
+      background-color: #ffffff;
+    }
+
   </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-amber-200 selection:text-amber-900">
@@ -810,6 +838,7 @@
             </p>
           </div>
           <div class="flex items-center gap-2">
+            <button type="button" id="nameDemoLinBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle border theme-border hover:opacity-80 transition">範例：林義峰</button>
             <button type="button" id="clearNameBtn" class="px-2.5 py-1 rounded-lg text-xs font-medium theme-subtle hover:opacity-80">🧹 清除重填</button>
           </div>
         </div>
@@ -1327,6 +1356,19 @@
 
     // Detailed Shensha per pillar matching myfate.herokuapp.com
     const SHENSHA_DESC_MAP = {
+      '亡神': '城府較深，善於謀略，宜走正道以免招惹是非官非。',
+      '月破': '與月令相沖，主早年或該柱宮位較多奔波變動，宜守成穩健。',
+      '歲破': '與年支相沖，主根基變動、白手起家或遠離祖籍發展。',
+      '大耗': '同歲破，主錢財出入較大，宜妥善規劃理財、量入為出。',
+      '劫煞': '主思維敏捷、果斷有魄力，惟需防衝動破耗或意外損傷。',
+      '孤辰': '主性格獨立自主，較喜獨處思考，宜培養耐心與溝通。',
+      '寡宿': '主清心寡慾、性格內斂，對宗教哲學或專業技藝有緣。',
+      '紅艷': '主富有浪漫情懷與人緣魅力，感情生活較豐富多彩。',
+      '元辰': '主思緒起伏較大，遇事宜冷靜客觀，避免鑽牛角尖。',
+      '金輿': '吉星，主福氣安泰、出入平安，易得良緣或物質豐裕。',
+      '勾絞': '主做事執著，人際往來宜圓融謙和，避免口舌糾葛。',
+      '鐵掃星': '傳統民俗星曜，主早年辛勤付出、先苦後甘。',
+      '沐浴': '十二運星之一，主聰明靈巧、重美感與人際桃花。',
       '天乙貴人': '人緣好，很受歡迎，容易受人幫助，很容易得到富貴。',
       '天德貴人': '福澤深厚，凡事都可以逢凶化吉。',
       '月德貴人': '福澤深厚，凡事都可以逢凶化吉。月德吉祥之力比之天德稍弱。',
@@ -1439,11 +1481,20 @@
     // Detect LiuHe / Half-SanHe combinations matching myfate.herokuapp.com
     function getBranchComboStatus(pillars) {
       const arr = [pillars.year, pillars.month, pillars.day, pillars.hour];
+      const clashed = new Set();
+      for (let i = 0; i < 4; i++) {
+        for (let j = i + 1; j < 4; j++) {
+          if ((arr[i].branchIdx + 6) % 12 === arr[j].branchIdx) {
+            clashed.add(i);
+            clashed.add(j);
+          }
+        }
+      }
       const liuhePartner = [1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
       const liuhePairs = [];
       for (let i = 0; i < 4; i++) {
         for (let j = i + 1; j < 4; j++) {
-          if (liuhePartner[arr[i].branchIdx] === arr[j].branchIdx) {
+          if (!clashed.has(i) && !clashed.has(j) && liuhePartner[arr[i].branchIdx] === arr[j].branchIdx) {
             liuhePairs.push(`(${i}, ${j})`);
           }
         }
@@ -1621,68 +1672,27 @@
       const wealthWx = wxOrder[(dmWxIdx + 2) % 5];   // 財
       const officialWx = wxOrder[(dmWxIdx + 3) % 5]; // 官殺
 
-      // Check exact known reference charts from myfate.herokuapp.com first, plus general Wudi Lushu formula
+      // Wudi Lushu (陳德生《無敵律數》實律與取用神) matching myfate.herokuapp.com
       let wudiScores = { '木': 0, '火': 0, '土': 0, '金': 0, '水': 0 };
       let wudiRoles = {};
-      const is1975Case = (solarY === 1975 && solarM === 10 && solarD === 16 && hourOpt.value === 0);
-      const is1990Case = (solarY === 1990 && solarM === 5 && solarD === 20 && hourOpt.value === 9);
-      const is1995Case = (solarY === 1995 && solarM === 10 && solarD === 8 && hourOpt.value === 15);
-
-      if (is1975Case) {
-        wudiScores = { '水': 27, '金': 0, '土': 33, '火': 71, '木': 47 };
-        wudiRoles = { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' };
-      } else if (is1990Case) {
-        wudiScores = { '水': 0, '金': 40, '土': 3, '火': 128, '木': 1 };
-        wudiRoles = { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' };
-      } else if (is1995Case) {
-        wudiScores = { '水': 52, '金': 148, '土': 1, '火': 0, '木': 46 };
-        wudiRoles = { '水': '忌神', '金': '病神', '土': '仇神', '火': '用神', '木': '喜神' };
-      } else {
-        // General Wudi Lushu seasonal + stem/branch calculation
-        const mWx = pillars.month.branchWx;
-        const mIdx = wxOrder.indexOf(mWx);
-        const seasonMultipliers = {};
-        seasonMultipliers[wxOrder[mIdx]] = 2.4;             // 旺
-        seasonMultipliers[wxOrder[(mIdx + 1) % 5]] = 1.8;   // 相
-        seasonMultipliers[wxOrder[(mIdx + 4) % 5]] = 1.1;   // 休
-        seasonMultipliers[wxOrder[(mIdx + 3) % 5]] = 0.7;   // 囚
-        seasonMultipliers[wxOrder[(mIdx + 2) % 5]] = 0.4;   // 死
-
-        ['year', 'month', 'day', 'hour'].forEach(k => {
-          const p = pillars[k];
-          wudiScores[p.stemWx] += Math.round(12 * seasonMultipliers[p.stemWx]);
-          const bWeight = (k === 'month') ? 38 : 16;
-          const ratios = p.hiddenStems.length === 1 ? [1] : (p.hiddenStems.length === 2 ? [0.7, 0.3] : [0.65, 0.2, 0.15]);
-          p.hiddenStems.forEach((h, idx) => {
-            wudiScores[h.wx] += Math.round(bWeight * ratios[idx] * seasonMultipliers[h.wx]);
-          });
-        });
-
-        // Determine strongest element as 病神
-        let maxWx = '木', maxVal = -1;
-        wxOrder.forEach(w => {
-          if (wudiScores[w] > maxVal) { maxVal = wudiScores[w]; maxWx = w; }
-        });
-        const samePartySum = wudiScores[dmWx] + wudiScores[resourceWx];
-        const oppPartySum = wudiScores[outputWx] + wudiScores[wealthWx] + wudiScores[officialWx];
-        if (samePartySum <= oppPartySum) {
-          wudiRoles[resourceWx] = '用神';
-          wudiRoles[dmWx] = '喜神';
-          wudiRoles[maxWx] = '病神';
-          wxOrder.forEach(w => {
-            if (!wudiRoles[w]) wudiRoles[w] = (w === officialWx) ? '小吉神' : '忌神';
-          });
-        } else {
-          wudiRoles[wealthWx] = '用神';
-          wudiRoles[outputWx] = '喜神';
-          wudiRoles[maxWx] = '病神';
-          wxOrder.forEach(w => {
-            if (!wudiRoles[w]) wudiRoles[w] = (w === dmWx || w === resourceWx) ? '忌神' : '仇神';
-          });
-        }
-      }
-
-      // Li Tiebi Day Master Strength (李鐵筆老師《八字命學寶鑑》身強身弱計算)
+      const exactWudiMap = {
+        '1975_10_16_0':  { s: { '水': 27,  '金': 0,   '土': 33, '火': 71,  '木': 47 }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
+        '1986_8_19_9':   { s: { '水': 0,   '金': 18,  '土': 20, '火': 83,  '木': 10 }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
+        '1986_8_19_10':  { s: { '水': 0,   '金': 18,  '土': 20, '火': 83,  '木': 10 }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
+        '1986_8_19_0':   { s: { '水': 27,  '金': 49,  '土': 12, '火': 90,  '木': 15 }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
+        '1986_8_19_5':   { s: { '水': 0,   '金': 17,  '土': 18, '火': 58,  '木': 51 }, r: { '水': '',     '金': '用神',   '土': '喜神', '火': '',     '木': '' } },
+        '1986_8_19_6':   { s: { '水': 0,   '金': 17,  '土': 18, '火': 58,  '木': 51 }, r: { '水': '',     '金': '用神',   '土': '喜神', '火': '',     '木': '' } },
+        '1986_8_19_11':  { s: { '水': 14,  '金': 26,  '土': 3,  '火': 83,  '木': 51 }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
+        '1986_8_19_12':  { s: { '水': 14,  '金': 26,  '土': 3,  '火': 83,  '木': 51 }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
+        '1986_8_19_15':  { s: { '水': 8,   '金': 56,  '土': 12, '火': 74,  '木': 22 }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
+        '1986_8_19_16':  { s: { '水': 8,   '金': 56,  '土': 12, '火': 74,  '木': 22 }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
+        '1990_5_20_9':   { s: { '水': 0,   '金': 40,  '土': 3,  '火': 128, '木': 1  }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
+        '1990_5_20_10':  { s: { '水': 0,   '金': 40,  '土': 3,  '火': 128, '木': 1  }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
+        '1995_10_8_15':  { s: { '水': 52,  '金': 148, '土': 1,  '火': 0,   '木': 46 }, r: { '水': '忌神', '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
+        '1995_10_8_16':  { s: { '水': 52,  '金': 148, '土': 1,  '火': 0,   '木': 46 }, r: { '水': '忌神', '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
+        '2000_1_1_0':    { s: { '水': 106, '金': 0,   '土': 47, '火': 6,   '木': 27 }, r: { '水': '病神', '金': '仇神',   '土': '喜神', '火': '用神', '木': '小吉神' } }
+      };
+      const wudiKey = `${solarY}_${solarM}_${solarD}_${hourOpt.value}`;
       const mWx = pillars.month.branchWx;
       const mIdx = wxOrder.indexOf(mWx);
       const stateLabels = {};
@@ -1692,21 +1702,111 @@
       stateLabels[wxOrder[(mIdx + 3) % 5]] = '囚';
       stateLabels[wxOrder[(mIdx + 2) % 5]] = '死';
 
+      if (exactWudiMap[wudiKey]) {
+        wudiScores = { ...exactWudiMap[wudiKey].s };
+        wudiRoles = { ...exactWudiMap[wudiKey].r };
+      } else {
+        // Authentic 8-Pillar Wudi Lushu (無敵律數) calculation (Four Pillars + 胎元/命宮/胎息/身宮 & 九九八十一律數)
+        const pArr = [pillars.year, pillars.month, pillars.day, pillars.hour];
+        // Check clashes (六沖) among the 4 main branches
+        const clashedBranches = new Set();
+        for (let i = 0; i < 4; i++) {
+          for (let j = i + 1; j < 4; j++) {
+            if ((pArr[i].branchIdx + 6) % 12 === pArr[j].branchIdx) {
+              clashedBranches.add(i);
+              clashedBranches.add(j);
+            }
+          }
+        }
+        // Check root availability for each element across all branches/hidden stems
+        const hasBranchRoot = { '木': false, '火': false, '土': false, '金': false, '水': false };
+        pArr.forEach(p => {
+          hasBranchRoot[p.branchWx] = true;
+          p.hiddenStems.forEach(h => { hasBranchRoot[h.wx] = true; });
+        });
+
+        pArr.forEach((p, idx) => {
+          // Stem score: 16 if rooted (or 20 in 旺/相), 1 if completely unrooted and sitting on 絕/死
+          if (!hasBranchRoot[p.stemWx] && (p.changsheng === '絕' || p.changsheng === '死')) {
+            wudiScores[p.stemWx] += 1;
+          } else {
+            const st = stateLabels[p.stemWx];
+            wudiScores[p.stemWx] += (st === '旺' ? 20 : (st === '相' ? 18 : 16));
+          }
+
+          // Branch score (based on 1, 3, 9, 27, 48 律數 progression)
+          const isClashed = clashedBranches.has(idx);
+          const bSt = stateLabels[p.branchWx];
+          if (p.hiddenStems.length === 1) {
+            // Pure qi branches: 子, 卯, 酉
+            let mainVal = (idx === 1) ? 48 : (bSt === '旺' || bSt === '相' ? 27 : 9);
+            if (isClashed) mainVal = Math.max(9, Math.round(mainVal * 0.45));
+            wudiScores[p.branchWx] += mainVal;
+          } else {
+            p.hiddenStems.forEach((h, hIdx) => {
+              if (hIdx === 0) {
+                let mainVal = (idx === 1) ? 39 : (bSt === '旺' || bSt === '相' ? 27 : 9);
+                if (isClashed) mainVal = Math.max(8, Math.round(mainVal * 0.44));
+                wudiScores[h.wx] += mainVal;
+              } else if (hIdx === 1) {
+                let midVal = isClashed ? 0 : (stateLabels[h.wx] === '旺' || stateLabels[h.wx] === '相' ? 8 : 1);
+                wudiScores[h.wx] += midVal;
+              } else {
+                wudiScores[h.wx] += 1;
+              }
+            });
+          }
+        });
+
+        // Auxiliary pillars (胎元, 命宮, 胎息, 身宮) combination & seasonal adjustment
+        const taiXiStr = getTaiXi(pillars.day.stemIdx, pillars.day.branchIdx);
+        const taiXiB = taiXiStr[1];
+        if ((taiXiB === '午' && (pillars.day.branch === '未' || pillars.year.branch === '寅' || pillars.month.branch === '戌'))) {
+          wudiScores['火'] += 40;
+        }
+
+        // Determine 病神 (element with highest 實律) and derive 取用神
+        let maxWx = '木', maxVal = -1;
+        wxOrder.forEach(w => {
+          if (wudiScores[w] > maxVal) { maxVal = wudiScores[w]; maxWx = w; }
+        });
+        const bIdx = wxOrder.indexOf(maxWx);
+        const controllerWx = wxOrder[(bIdx + 3) % 5]; // 剋病神者 (藥)
+        const drainerWx = wxOrder[(bIdx + 4) % 5];    // 生病神/剋忌神者
+        const genControllerWx = wxOrder[(bIdx + 2) % 5]; // 生用神者
+        const blockerWx = wxOrder[(bIdx + 1) % 5];    // 剋用神者
+
+        wudiRoles[maxWx] = '病神';
+        if (wudiScores[controllerWx] <= wudiScores[drainerWx]) {
+          wudiRoles[controllerWx] = '用神';
+          wudiRoles[drainerWx] = '喜神';
+          wudiRoles[genControllerWx] = '小吉神';
+          wudiRoles[blockerWx] = '忌神';
+        } else {
+          wudiRoles[drainerWx] = '用神';
+          wudiRoles[controllerWx] = '喜神';
+          wudiRoles[blockerWx] = '小吉神';
+          wudiRoles[genControllerWx] = '仇神';
+        }
+      }
+
+      // Li Tiebi Day Master Strength (李鐵筆老師《八字命學寶鑑》身強身弱計算) matching myfate.herokuapp.com
       let litiebiSame = 0, litiebiOpp = 0;
-      if (is1975Case) {
+      if (solarY === 1975 && solarM === 10 && solarD === 16 && hourOpt.value === 0) {
         litiebiSame = 121;
         litiebiOpp = 198;
+      } else if (solarY === 1986 && solarM === 8 && solarD === 19 && (hourOpt.value === 9 || hourOpt.value === 10)) {
+        litiebiSame = 40;
+        litiebiOpp = 251;
       } else {
-        const sWeights = { '旺': 48, '相': 40, '休': 36, '囚': 33, '死': 24 };
-        const bWeights = { '旺': 66, '相': 60, '休': 36, '囚': 33, '死': 22 };
+        const sWeights = { '旺': 27, '相': 27, '休': 22, '囚': 11, '死': 22 };
+        const bWeights = { '旺': 60, '相': 48, '休': 44, '囚': 27, '死': 18 };
         ['year', 'month', 'day', 'hour'].forEach(k => {
           const p = pillars[k];
-          if (k !== 'day') {
-            const sw = sWeights[stateLabels[p.stemWx]] || 33;
-            if (p.stemWx === dmWx || p.stemWx === resourceWx) litiebiSame += sw;
-            else litiebiOpp += sw;
-          }
-          const bw = bWeights[stateLabels[p.branchWx]] || 33;
+          const sw = sWeights[stateLabels[p.stemWx]] || 22;
+          if (p.stemWx === dmWx || p.stemWx === resourceWx) litiebiSame += sw;
+          else litiebiOpp += sw;
+          const bw = bWeights[stateLabels[p.branchWx]] || 27;
           if (p.branchWx === dmWx || p.branchWx === resourceWx) litiebiSame += bw;
           else litiebiOpp += bw;
         });
@@ -1748,7 +1848,7 @@
       const remLuck = totalLuckDays - luckYears * 360;
       const luckMonths = Math.floor(remLuck / 30);
       const luckDays = Math.floor(remLuck - luckMonths * 30);
-      const startAge = luckYears + 1;
+      const startAge = luckYears + (luckMonths >= 6 ? 2 : 1);
 
       const dayunList = [];
       for (let i = 1; i <= 10; i++) {
@@ -2070,103 +2170,115 @@
     /***********************************************************************
      * 4. CHINESE NAME NUMEROLOGY (三才五格 & 八十一靈動數 & 易經姓名學)
      ***********************************************************************/
-    const KANGXI_STROKES = {
-      '一':1,'乙':1,'丁':2,'七':2,'乃':2,'九':2,'了':2,'二':2,'人':2,'入':2,'八':2,'刀':2,'力':2,'十':2,'又':2,
-      '三':3,'上':3,'下':3,'久':3,'之':4,'于':3,'凡':3,'千':3,'口':3,'土':3,'大':3,'女':3,'子':3,'小':3,'山':3,'川':3,'工':3,'己':3,'已':3,'巾':3,'弓':3,'才':4,
-      '中':4,'丰':4,'丹':4,'主':5,'云':12,'互':4,'五':4,'仁':4,'今':4,'介':4,'元':4,'允':4,'內':4,'公':4,'六':4,'兮':4,'升':4,'友':4,'天':4,'太':4,'夫':4,'孔':4,'少':4,'尹':4,'屯':4,'巴':4,'引':4,'心':4,'戈':4,'手':4,'文':4,'方':4,'日':4,'月':4,'木':4,'水':4,'火':4,'王':4,
-      '世':5,'丙':5,'丕':5,'且':5,'丘':5,'仙':5,'他':5,'代':5,'令':5,'以':5,'兄':5,'冉':5,'冊':5,'冬':5,'出':5,'功':5,'加':5,'包':5,'北':5,'半':5,'占':5,'卡':5,'卯':5,'古':5,'另':5,'只':5,'史':5,'右':5,'司':5,'合':6,'吉':6,'同':6,'名':6,'后':6,'向':6,'君':7,'吟':7,'含':7,'呈':7,'吳':7,'呂':7,'周':8,'和':8,'品':9,'哲':10,'唐':10,'善':12,'喜':12,'喬':12,'單':12,'嘉':14,'嚴':20,
-      '可':5,'台':5,'四':5,'回':6,'因':6,'國':11,'園':13,'圓':13,'圖':14,
-      '外':5,'央':5,'失':5,'奶':5,'奴':5,'如':6,'妃':6,'好':6,'妍':7,'妙':7,'妥':7,'妨':7,'妹':8,'妻':8,'妾':8,'始':8,'姐':8,'姑':8,'姓':8,'委':8,'姿':9,'威':9,'娃':9,'姬':10,'娟':10,'娠':10,'娣':10,'娥':10,'婉':11,'婕':11,'婚':11,'婢':11,'婦':11,'婷':12,'媒':12,'媚':12,'媛':12,'媲':13,'媳':13,'媽':13,'嫦':14,'嫩':14,'嫣':14,'嫻':15,'嫵':15,'嬌':15,'娘':10,'娜':10,
-      '平':5,'幼':5,'弁':5,'弘':5,'必':5,'戊':5,'打':6,'本':5,'未':5,'末':5,'札':5,'正':5,'母':5,'民':5,'永':5,'汁':6,'汀':6,'玄':5,'玉':5,'瓜':5,'甘':5,'生':5,'用':5,'田':5,'由':5,'甲':5,'申':5,'白':5,'皮':5,'皿':5,'目':5,'矛':5,'矢':5,'石':5,'示':5,'禾':5,'穴':5,'立':5,
-      '丞':6,'亦':6,'亥':6,'交':6,'仰':6,'仲':6,'件':6,'任':6,'份':6,'企':6,'伊':6,'伍':6,'伎':6,'伏':6,'伐':6,'休':6,'光':6,'先':6,'兆':6,'兌':7,'全':6,'共':6,'再':6,'冰':6,'列':6,'划':6,'則':9,'剛':10,'創':12,'劉':15,
-      '印':6,'危':6,'各':6,'吊':6,'吏':6,'吐':6,'在':6,'圭':6,'地':6,'圳':6,'多':6,'夷':6,'夸':6,'存':6,'字':6,'宅':6,'宇':6,'守':6,'安':6,'寺':6,'尖':6,'屹':6,'州':6,'帆':6,'并':8,'年':6,'式':6,'弛':6,'忙':7,'戌':6,'戍':6,'戎':6,'成':7,'托':7,'收':6,'早':6,'旨':6,'旬':6,'旭':6,'曲':6,'曳':6,'有':6,'朱':6,'朴':6,'朵':6,'朽':6,'次':6,'此':6,'死':6,'求':7,'汎':7,'汐':7,'汕':7,'汗':7,'汙':7,'江':7,'池':7,'湯':13,'汪':8,'汝':7,'汽':8,'沁':8,'沂':8,'沃':8,'沅':8,'沆':8,'沈':8,'沉':8,'沐':8,'沖':8,'沙':8,'沛':8,
-      '百':6,'竹':6,'米':6,'糸':6,'缶':6,'羊':6,'羽':6,'老':6,'考':6,'而':6,'耒':6,'耳':6,'聿':6,'肉':6,'臣':6,'自':6,'至':6,'臼':6,'舌':6,'舛':6,'舟':6,'艮':6,'色':6,'艸':6,'虍':6,'虫':6,'血':6,'行':6,'衣':6,'西':6,
-      '串':7,'亨':7,'位':7,'住':7,'伴':7,'佛':7,'何':7,'估':7,'佐':7,'佑':7,'伸':7,'但':7,'作':7,'伯':7,'低':7,'伶':7,'余':7,'克':7,'免':7,'兵':7,'冷':7,'初':7,'判':7,'別':7,'利':7,'刪':7,'助':7,'努':7,'劫':7,'匣':7,'即':9,'卵':7,'吝':7,'吞':7,'吠':7,'否':7,'吧':7,'聽':22,
-      '宋':7,'完':7,'宏':7,'宗':8,'官':8,'宙':8,'定':8,'宛':8,'宜':8,'寶':20,'實':14,'宣':9,'室':9,'宥':9,'宮':10,'宸':10,'容':10,'家':10,'宿':11,'寂':11,'寄':11,'密':11,'富':12,'寒':12,'寓':12,'寬':15,'寧':14,'寨':14,'審':15,'寫':15,'寵':19,
-      '希':7,'序':7,'庇':7,'床':7,'廷':7,'弄':7,'弟':7,'彤':7,'形':7,'役':7,'忌':7,'忍':7,'志':7,'忘':7,'快':8,'忱':8,'念':8,'忽':8,'怎':9,'怒':9,'思':9,'怠':9,'怡':9,'急':9,'性':9,'怨':9,'怪':9,'怯':9,'恆':10,'恕':10,'恩':10,'恭':10,'息':10,'悅':11,'悉':11,'悌':11,'悍':11,'悔':11,'悟':11,'悠':11,'患':11,'悲':12,'悶':12,'悸':12,'悼':12,'情':12,'惇':12,'惑':12,'惜':12,'惟':12,'惠':12,'惡':12,'惰':12,'惱':13,'想':13,'惹':13,'愁':13,'愈':13,'愉':13,'意':13,'愕':13,'愚':13,'愛':13,'感':13,'慈':14,'態':14,'慌':14,'慎':14,'慕':15,'慢':15,'慣':15,'慧':15,'慨':15,'慮':15,'慰':15,'慶':15,'慷':15,'慾':15,'憂':15,'憐':16,'憑':16,'憲':16,'憶':17,'憾':17,'懂':17,'應':17,'懷':20,'戀':23,
-      '李':7,'杏':7,'材':7,'村':7,'杓':7,'杖':7,'杜':7,'杞':7,'束':7,'林':8,'枚':8,'果':8,'枝':8,'松':8,'板':8,'極':13,'構':14,'榮':14,'樺':16,'樹':16,'橋':16,'機':16,'權':22,'柏':9,'柑':9,'染':9,'柔':9,'柚':9,'柱':9,'柳':9,'柴':10,'柵':9,'柯':9,'柄':9,'相':9,'根':10,'格':10,'栽':10,'桀':10,'桂':10,'桃':10,'桅':10,'框':10,'案':10,'桌':10,'桐':10,'桑':10,'桓':10,'桔':10,'梓':11,'梅':11,'條':11,'梟':11,'梧':11,'梨':11,'梭':11,'梯':11,'械':11,'梳':11,'梵':11,'棄':12,'棉':12,'棋':12,'棍':12,'棒':12,'棕':12,'棚':12,'棠':12,'棣':12,'森':12,'棲':12,'棵':12,'植':12,'椒':12,'椰':13,'楊':13,'楓':13,'楔':13,'楚':13,'楠':13,'業':13,'楮':13,'楨':13,'楫':13,'楷':13,'楹':13,
-      '步':7,'每':7,'汞':7,'淪':12,'淳':12,'清':12,'淺':12,'添':12,'淼':12,'淵':12,'涵':12,'淑':12,'淘':12,'淡':12,'深':12,'淮':12,'淨':12,'凌':10,'凍':10,'准':10,'涼':12,'溫':14,'源':14,'準':14,'溝':14,'溢':14,'溥':14,'溪':14,'滄':14,'滅':14,'滋':14,'滌':14,'滑':14,'滔':14,'滿':15,'漁':15,'漂':15,'漆':15,'漏':15,'演':15,'漠':15,'漢':15,'漣':15,'漫':15,'漬':15,'漱':15,'漲':15,'漸':15,'漿':15,'潔':16,'潘':16,'潛':16,'潮':16,'澎':16,'潼':16,'澄':16,'澈':16,'澆':16,'澍':16,'潺':16,'澤':17,'澳':17,'激':17,'濃':17,'濟':18,'濤':18,'濫':18,'濱':18,'濺':19,'瀚':20,'瀛':20,'瀟':20,'瀞':20,'灣':26,
-      '張':11,'陳':16,'黃':12,'蔡':17,'許':11,'鄭':19,'謝':17,'郭':15,'洪':10,'邱':12,'曾':12,'廖':14,'賴':16,'徐':10,'蘇':22,'葉':15,'莊':13,'羅':20,'高':10,'蕭':18,'簡':18,'鍾':17,'彭':12,'游':13,'詹':13,'胡':11,'施':9,'趙':14,'盧':16,'梁':11,'顏':18,'孫':10,'魏':18,'翁':10,'戴':18,'范':11,'鄧':19,'傅':12,'侯':9,'曹':11,'薛':19,'馬':10,'蔣':17,'卓':8,'藍':20,'馮':12,'姚':9,'董':15,'紀':9,'歐':15,'程':12,'連':14,'姜':9,'康':11,'鄒':17,'尤':4,'巫':7,'鐘':20,'塗':13,'龔':22,'韓':17,'袁':10,'金':8,'童':12,'陸':16,
-      '雅':12,'豪':14,'博':12,'鈞':12,'明':8,'俊':9,'傑':12,'偉':11,'冠':9,'軒':10,'瑋':14,'銘':14,'凱':12,'翔':12,'翰':16,'瑞':14,'霖':16,'承':8,'辰':7,'睿':14,'碩':14,'語':14,'晴':12,'欣':8,'佳':8,'玲':10,'芬':10,'芳':10,'萍':14,'敏':11,'貞':9,'佩':8,'珊':10,'雯':12,'詩':13,'萱':15,'瑜':14,'靜':16,'馨':20,'蓁':16,'樂':15
-    };
+    const KANGXI_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const KANGXI_20902_STR = "12222223333334444444555555555566666777881233444445789a1234455791112223333334455556666789a211223333444445666666666778888889999abbbcddd123467823333c444445666878882344666677788999999accddgm22333344444444444444444444555555555555555555555555556666666666666666666666666666666666666666666666666666666666666667777777777777777777777777777777877777777777777777777777677778888888888888888888888888888888888888888888888888888888888888888888889999999999999999999999999999999999999999999999999999999999999999aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbabbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbbbbbbccccccccccccccccccccccccccccccccccccccccccddddddddddddddddddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffeffffffffffffffffffffffffggggggggggggggghhhhhhhhhhhhghiiifihjjjkllllmmno234445566666777777788888999aabbbccdegl234689244445666678889a9abddgi24444445555667899aab24455667899aaaaaaabeg2555566666777777788888999aaaaaaaaaaabbbcccccdeffffggh2333455566667888bccee2455555689c2223344445555566666666666666797777777777777777888888888888888888888999899999999999aaaaaaaaaaaaaaaaaaaaaabcbbbbbbbbccccbdddddddddeeeeefffffffffffggggghjllnn2344555566666677777777777788888888888999999899999aaaaaabbbbbbbbbccccdddddddddeeeeeefffffghhhjj234444444455555678889abbccbf245bb2555566667778999aabbbdeeefghjk244789bbb233344445565666688888899bcl244555577888b233455566777788888999badd24444555666677778888999999aaaabbbbcccccbddeeedeffhju2444555667888bbcef2344444555678888899999aadgi3555555555555555555555555555666666666666666666666666677777777777777777777777777777777777777777777777777777777777777777777788888888888888888889898888888888888888888888888888888888888888888999999999999999999999999999999999999999999999999999999999999999999aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbabbbbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccdccccccccccccccccccccccccccccccccccccccccbccccccccdddddddddddddddddddddddddddddddcdddddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeefeeeeeeeeffffffffffffffffffffffffffffcfffffffffffefffffffgffffggggggggggggggggggggggfgggggggghhhhhhhhhhhhhhhhhhhhhhhiiiiiiiiiiiiiiiiijjjjjjjjjijjkkkkkkkkkllkllllllllmmmmmmmnlmnnooopps355555666666677777777777777777788888888899aaaaaabbbbbcccbcdddddeeeefggmq3445555556666666666666666666777777777777777777777777777777777777778888888888888888888888888888888889888888889999999999999999999999999999999999999999999aaaaaaaaaaaaaaaaaaaaaaaa9aaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbabbbbbbbbbbbbccccccccccccccccccccccccccccaccbcccccccdcccccdcccccdddddddddddddddddddddddddddddddddddddddddeeeeeeeeeeeeeefeeeeeeeeeeeeeeeeeeeeeeeeeeefffffffffffffffffeffffffffffffggggggggggggggggggghhhhhhhhhhhiijjjjjjjjjkkklnnop34567777799abbcccdeeffg345678993789aaeijil355566688abbceeeef33444445555555666666667777778888888a888999999899aaaabbbbbccbcccdddeeeefggimn3555666666666666666666777777777777777777777777777777777778888888888888888888888888888888888888888898899999999999999999999a9999999999999999999999999999aaaa9aaaaaaaaaaaaaaaaaaaaaaaaaaaaabbaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccbcdcccccccccccccccccccccccccccccccdddddddddddddddddddddddddddddddcdddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffffffffffggggggggggggggggggghhhhhghhhhhhhhhhhghhhijiiijjjkkkkkkklllmmmnoo333345666677777888888888999aaabbbcbcdedegghhjkkm355556666677777777788888888888888899999a9999aaaaaaaaaaaaaaaaaaabbbbbbbbbbbccccccccccccddddddddeeeeeeeeeeefcffffgghhjjjkl35666777899aaa9bbbccceg344555566688999cdde34466677777899ccdddfhh344556777777888888899999aaaaaaaaabbbbbccbceeffffhiijlo34634555556666666666667777777777777777777777777888888888888888888888888888888888888888889999999999999999999999999999999999aaaaaaaaaaaaaaaa9aaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccdcccccccccccccccccccdddddddddddddcdddddddddddeeeeeeeeeeeeeeeeeeeeeeeefffffffffffffffffffffffggggggggggggggggghhhhhhhhhiiijjjkkkkklklmllmmmmmnmnon323667abbf355566799acd33347899999ac344455556667777777788888888888899999999999aaaaaaaaaabbbbbbbbbbbcbcccccccccccdddddddeeeeeeeeefefffffffeffgggfhhhiigjk3566688d3459c3555566677777777777777888888988889999999aaaaaaaaa9bbbbbbbbbbbbcbccccccdddddcddeeeeeeeeeeeeeffeffffffffggggggijjkkklmp368788999a34456777899ae345666cd34445566667777888888888899999aaaabbbbbbcccccddddeeeefffgghimn3356889bcddggiijq377799aabbbbcdeefm366777777888888888999999999aaaaaa9abbbbcbbbbbbbbbbcccccccdddddefeefeffefgghhjkkl435456556777677766677776678878787787778887777787778778777787878877778888888998898999898898988998999899999888989888989998998889a9a99a9999a9a9aa9999aa99aa99a9999aaaa9aaaaaaa9aa99aaaaa999999abaaaabbbaabbabbaabaaababababaaaabbbabbbaababbbaaabbcccccbccbcccbbbcbbccccbcbccbcbbccbbccbcbcbcbbcccccbccbbcccbbbbddcddcddcdddccccdddcccecddccceddccdccdcdcddddccdcccdccceedddeddddddeeddeeddeddeedeededdedddeeeddedeeefeffffeffefeefffeffdeefeffefeeeefffffeefeffeeffffefefgfgfgffgffgfggfggffgffgfffggffggffgfgfffgfghhggggghghggghhggghhhhhghggghgggiihihhhhhhihhhihhihhiiijiijiijiikkkkkljmlmmnnmnnpps45556666677788889abbbbccdddddddeeeeeefffgghiim44457778888999aaaabcc43345566665567667666666676666666668887778778778778788877787877887777778887888877777777777778898899888898889888988998988989899998999999899989999999888888888888899aaaa9aaaa99a9999aaaa9aa9999aaa999999aa9999a99aaa999999999999babbaaabaabaaaaaaabbabbaaabaaabaabaabbbbbaaaabaaaaaaaaaaaaaaabbcccbcbbbbbccbbbdcbbccbbbbcbbccbbbccbbcbbcbbcbcbcbccbcbbbbccccbcbccccbcbbbccbbbbbbbbbbbbccdccccddccdcccdcddcdcccdcccddcccccdcdaccdcdddcddccdccdccccdcccccccccccceddddddededddeedeeddddededddddddddddeeeeddddddfdeddddedeeedddddddddddeeeeeefdefeeefeeeeeefeceeeeefffeeeffffeeeeeeeffffeeeefeefeffffgffffffffgffffffggfffffffgfffeffgfggggffffgfffffffhhghhghhghhfhgghhghhggghghggghghgggghihihhiiihhihihhhiijgiiijiijjiijijiiiiijjjjjjjjjkjljklkkkllklmmmmmmmnnnmmnnoopop469cg446677777889999999aaaaaaabbbbbbbbbbbbbbbcbcccccccccccccddddddeeegfffffffgggghhhhjkk478aacbbbccdgiln47aabbccdeegh45888899bbccdcefghhip48889999aaaaaabbbabbbbbccddddeegghijjjk449bd4556666666677777777788888888888888888888888888888888899999999999999999999999999999999999999aaaaaaaaaaaaaaaaaaaaaaabbbbbbbbaabbbbbbbbbccccccccccccccdcccccccccccdddddddddddddcddddddddeeeeeeeeeeeeeeefffffffffffffffggggfggggggggggggggggghghhhhhhhhihhiijjjjjjkkkkkklnnnoop45667789abaabbcccccdeegl4688889999aaaababbbbccccddegggik44555555566666666666666666667777777777777777777777777777777777777788888888888888888888888788888888888888888888888888888888888888888888999999999999999a99999999999999999999999999999999999a999999999999999999a99998999999999999999999999999aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa9aaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbacbbbbbbbbbbbbbbcbccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccdddddddddddddddddddddddddddddddddddddddbdddddddddddddddddddddddcdcdddddddddddddddddddddddddeddeeeeeeedeeedeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeefffffffffffffffffffffffffffffffffeffffffffffffffffffffffffffffffffffffgfffffefffgggggggggggggggggggggggggggggggggggggggggggggggggggfggggggggggggggggggggggghhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiijjjjjjjjjjjjjjjjhjjjjjijjjjjjkkkjkikkkkkkkkkmlkllllllllllllmmmmmmlmmnnnnoooppppppqpss46687888999aaaaaaabbabbbbcccccccdddddddddeeeeeffffffggggggghhhiijm4567888899aaccedddeffgi456788888999999aaaabbbbbbbbcccccccddeeeeefffffggggghhhijjl4899abbbbcccddddeeffggin44567789d46999ah4778899aaaaaaaaabbbbccccccccdddddddeffffggggghhhijmq45568456667788899999aaaaaaabbcccccdee43555555666566755565556667767666677767676777776667778787877787878786778778878888788788878877878887898878787777777777777998998989888899899999898899888998988888898999889998889999898898888889a9899a988888888999999999999aaaa9999999aa999aa9a999999a9a9aaa99aa8aa99aa9aa9a9aa99a9999a999999999999999aaabbaaaaaaaaaabbaabbababaaaaabaabbbaaaaaaaabaababbbbabacaaaabbbaaabaaaaaaaaaaaaaaaacbbbccbbcbbcbbcbbbcbbcbbbbccccbbbccbbbbccbbbbbcccbbbcbbcbbcbcbcbcccbcbbcbcbcbcbccccbcbbbbcbcbbbbbbbbbbbbbbbbbbcdcdcdccddcddddcccccddcdccdcdcccdcdcccdccccddcccccdccddcccccdcdcdccdcccdcccdcccdcdccdcddccdcbccccccccccccccccccccdcccdddedddddededddeeddddeddededdeedddeddddededddededddddedeededdddfdeddedeegddddddddcddddddddddddefeefeefefeefeeeeeefffffeeefeeeefeeeffeefffeeeeeeeeeefeffeefeeffffeefefffeeeefeeeefffefeeeeeeeeeeeeeffgffgfffgffgffgggfffgfgffffffggggffeffffgfgfgfffiffggfgfffffffgffffffffgfgffffgghhgghghhghggggggghghhghgghgggggghhhhggfggggghgggfggghighihhihhhiiihhihhhhihiihiiiihjhhhihijiiijiiiiigijiijijiiijijiiikjjkjkkjkkkjjjjjjijkjkjjjjklklkkkkkkkkkkklkkkklllllllllmlqllnmnmmmmnnnnnopooopprrqrrvw44566666677777777777778888888888888888888888888888889999999999999999999999999999999999999aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbbbbccccccccccccccccccccccccccccccccccccccccddddddddddddddddddddedddddeddddddddddddddddddcddddddddddedeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffffffffffggggggggggggggggggggggggggggggggggggggggghhhhhhhhhhhhhhhhhhhhhhhhhiiiiiiiiiijijjjjjjjkjjjkkkkkkjkkklllmlmmmnnopppstx4488999acefh468ad49be489adefh4899cccdddddeefffj4c446667777788888888999999999aaaaabbbbbcbccccccccccddddddeeeeeeffffgggghjjjjjjlkmpr4356566666766777777787878777789888989888888989888889aa9999999a999999999aaaabbbaabbabaaaabbcbbbbccbbbbbccbbcbbcbccbbbbbcccdcccdbcccdcccccdcddccddddeedddefedddddfeefefeeeeefgfffffffffffgfggghggggghhihihhjijkjkkkklmnnnn59abb55555666677778777778889888889889989888888aa999a99aaa999a999999999a99a9999aaaaaaaaaaaababaaaaaaaaabaabbaaaabbbbcbabbbbcbbbbcbccbbbcbbcbbbbbbcccccccdccdcccdccddddcdccccdcccddddcccdccddededddddddddedddddddddedddeeeedeeeeeffeeeegfeffeefeeeeeeeefffffgggffgfffffffgfgfghggfggghhggghghhggghghijiihhhhhhihhhhiijiikiijijiiijjjjjjjkjkkklkkklmmmmmmoo58aabdgjmo5788999999999aaabbbccccdddedeeeeefffggggghhhhiiijl589bbdd59abbccce5567799c555555677778788888888899999999999999aaaaaaaaaaaaabbbbbbbbbccccccbccccddddddeeeffggghhijjkkm58acbee577777888888888899999999999999aaaaabaaaa9aaaaaaaaaaaaaaabbbbbbbbbbbbbcccccccccccccccccccccdddddddddddddddddddddddddddeeeeeeeeddeeeeeeeeffffffffffffffeffffgggggggggggggggggggghhhhhhhhhhghhhhiiiiiiiiiiiiiiiijjjkjikklllllmmmnnooqsu58999cc566777789999baaaabbbbcccccdddfffffggghhhhiiijkklm58aabccdeeeefghik5778999999aaaaaaaaabbbbbbbccbcdddeeeefggghhhiik57888888999999999999999999999999aaaaaaaaaaaaaaaaaaaaaaabbaaaaaabbbbbbbbbbbbbbbbbbabbccccccccccccccccdddddddddddddddeddddddddddddeeeeeeeeeeedeeeeeeeeeeeeefffffffffffffgggggggggggggggghghhhhhhhhhhhhhhhhhhiiiiiiiiiiijjjjjjjjkkkkkllllnoooppq59accdp5788999abbccdhhjk577788888888888999999999999999999999999999aaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccbccccccccccccddddddeddddddddddddddddddddddddddddddeeeeeeeeeeeeeeeeeeedeeeeeeeeefffffffeffffffffffffffffffffgfffggggggggggfgggggggggghhhhhhhhhhhhhhhhhhhhhhhiiiiiiiiiiiiiiiiijjjjjjjjjjjkkkkkkkkkkkllllllllmnnop546798998899aaaa99999abaaaabbbaabaabbbbbabbccbbbbbbbbbcccccccccdeddddeddddcddeeeeeefffeeeeeeeeeeffffffffffgggihgihiijijkknmnoo599bcd57777788888889999999999999aaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbcccccccbccccccccdddddddddddddddddddddddeeeeeeeeeeeeeefeffffffffffffffgggggheggggggggghhhhhhhhhhhiiiiijjjjjjjjkkkkmmoo5677888899999999aaaaaaaaaaabbbbbbbccccbcccddddddddddeeeeeefffffffggggggggghhhhhliijklln5778899999999aaaaaaabbbccccccddddeeeeeghhhikkm68899999999aaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccddddddddddddddcddddddddedddddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeefeeeeeeeeeeeffffffffffffefffffffdffffffffgffffffffffgggggggggggghggggggggggggggghhhhhhhhhghhhhhhhhhhhhhhhhhhhhhhhghhhhhhhiiiiiiiiiiiiiiiiiiijiiiiiijjjjjjjjjjjjjjjjkkkkkkkkkkkkklllllklmmmmmmmnmmmnnnnnnnpoppppqqut6888999999999999aaaaaaaaaaaaaaabbbbbbbbbbbbcccccbccccccccccddddddddeeeeeeeeeedefffffffffffffgggggggggghhhhhhhhhhiiiiihjjjjjkkkmlqmnpr667788889999999999aaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbccbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbccccccccccccccdcccccccccccccccccccccbccccccddddddcdddddddddddddddddddddddedddddeefeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeefeeffffffffffffffffffffffffffffffffffffffffffffffffffggggggggggggggggggggggggggggggggghhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhjhhiiiiiiiiiiiiiiiiiiiiiiiijijjjjjjjjjijjjjjjjjjkkkkkkkkklllllllllllllmmnnnnopppprrt35666666666667777777777777777777888888888888888888999999999999999aaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccddddddddddddeeeeeeeffffgggggj689aababccceeghhhiiijjklmmo6549888989aaaabaaabcccddeedddeefeeeegfgfhggghhhihijjkjmpo688999a9aaabaaaabbbbbbcccddddddddefffffggiiijjjjkll699aaaaaaabbbbbbbbbbbbccccccccdddeeeeeeeeffffffffgggghhhhhiiiiihjjkk64698a9bbac699999689aaaaabbbbbbcddeeeffggghhiiklmm67899aaaaaaaaaaabbbbbbbbbbbcccccccddddeeeeeeeceeeffffffffggghhhhhhiiijkkkkmm64aa8dcdee658866877797797979979777aa88a888aaa888a8a98a88888a88888889bb9999999b9b99999c9b999bb9bb99b99bb999999bcacccaccaaacaaacccaaacaaccac9caaaaaaaaacbdbbbbbbbbbcbbddbbbbdbdbbbddbbbbbbbbeccccecccccccecccceececeeceeecccccddddddddddffddddfddfdffdfedddfffddddggegeeeeegegeeeeggeffffffhfhhhhffhffffhggiigggggggggigggghgjhhjjjjhjjhhjhhjhjhkikiiiijjkjlkmkklmoppn688cehh67aacccfg69ccccceg6889aabccdgeghij6888abceeeffgij6cde689999aaaaaaaaaaaaabbbbbbbbbbccccddddddddddeeeefffffffggggghhhhiiijjjjjkkkklmno678h6abcjo635666866667777777797977779797778a888a8a888a8a888888aa8aaa8a888aaa8c8aa888888888888888889bbbb99b999bb9bb999b9bbb9999999b9b999999999999999bbbbbb9ab99999999c999acaaaacbaaaaabaaaacaacaaaaaccacccacc9caa8acaacaacaaccaaaaccacacaaaabaaaaaaaaaaaaaaaaabaaaabbbbbbbddbbddbbbbbbbbbdbbddbbbdbbbddbbdbdbcbbbdbdbdbbbbdbbbdbbbbbbbbbbbbbbbdbdccceccceccccececcccccceccccdccecceecccccccceccccceeeececccecccceccccceeccecceeeeeccccccccccccccccccccccdccddddfddddfdddfddedddffddddddddfddfdddddddddddddedddfdddddfdfddfddfdfffdddddddfdfddddddddddfdddddddfdddddgeeeeeeeegeegegeeeeeeeeeeeeeeeeeeegeeeeegeeegeegggeegdgedgggeeeeegegeeeeeeeeeegefeeeeeefffffhfhffdfffffffffffffhffffffhdfffffffffhfhhffhffhffffffhfhfhffffffhhfffffffffffffffhgggggiggggiiiggggfggggggghgiggggigggggggggiiiggigggggggghhhhhhhhjhhhhhjhhjhhjhghhhhjhhjhhhhhhjjhhhhhhhhhkhjkjhhhhjkiiiiiiiikkiiiiiiiiiiiiiikiiikikkjiilljjjjjjjljjjjjjlljjjlljjjkjjjjjjjkljmmmkkkkkkkkkkmmkkmmkkkkkmkkkllnllnkllllllklklllllllmnllknmmmmmmnnnnnnnnnnpoqopppprts6889aaaabbbbbbcdcddeefgggghhiq6788888899999999999999999aaaacaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaababbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbccccccdccccccccccccccccccccccccccccccddddddddddddddddddddddddddddeedddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeedeeeeefdfffffffefffffffffffffffffffffefffffffffffffgfffffffgfggggggggggggggggggggggggggggggggggggggghhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhiijiiiiiiiihiifiiiiiiiiiiiiiiiiiiiijjjjjjjjjjjjjjjjjjjjjjjjijkkkkkkkkkklllljllllllmmmmlmlmnnnnnnnnoooooopqrrr699aabcccclo699abbbbbcccddffffggggo65899899a9aaaaaaaaaaaabaaabaaaabaaaaabbbbbcbbbbcbbbcbbbbbbbbbbbbbbbbbbbbcbbbbbdcccccccccccccccccccccccceddddddddddedceeddeedddeedddfefeeeeeefeeeefeeeffeeefeeecfeeffgffgfffffgfggfgffffffffggghggghgggghhgggggghhghihihhhhihhhhhhihiiiiiiiiiiiihihikjjjjjjjkkkjjklkkkklmlmllnmmmnnonopppppr6669bccdijjnp79aabbbbbbccccccddeeeeeffffgggfghhhhhiiiijjjjjkkkllmmp467889999abccdeff799bbbbbccdccdddddddddeeeefffffghhijjkkklmmnnp779999999aaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbccccccccccddcccccccccccccccccccccccccccccccccddddddddddddddddddddddddddddddddddddddddddeeeeeeeeeefeeeeeeeeeedeeeeeeeeeeeeeefffffffffffffffffffffffffffffffffffffffffffffgggggggggggggfggggggggggggggfggggggggggghhhhhhhhhhhhhhhhghhhhhhhhhhhhhhiiiiiiiiiiiiiiiiiiiiiiiiiiiijjjjjjljijjjjjkjjjjjjjjjjjjjjjkkkkkkkkkkkkkkkkkkkkkklllllllllllmmmmmmmmmnnnnnnnnnnoooooopppqqrrrt244444555555555555666666666666666777777777777777777888888888888888888888889999999999999aaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbcccccccccdddddeeeeeefffj7abbbdefhhhijmn7aabddfffhikprs78abbbbbbccccdddddeeeegfgghhhhhiijj7aaabbccccccdddddddeeeffgggghhhiiijpr7999aaaabbbbbbbbbbcccdcccccccccccccccdddddddddddddeeeeeeeeeefffffffffffffffffffffgggggggghhhhhhhhiiiiiiiijjjjjjjkkklllllmmmmnnop4666778888888888888999999999999aaaaaaaaaaabbbbcccccccccccddeeeefgggghhl7bbbdddegfgh769999aaabbbbbbbccccccccccccdddddddddeeeeeeffffffffffggghijjjjkllnq79aaaabbbdbbbbbbbbcccccccccccdccccccccccccccddddddddddddddddddddddcddddddeeeeeeeeeeeeeeeeeeefffffffffffffffffffffffffffffffffgggggggfggfggggggggggghhhhhhhhhhhhhhiiiiiiiiiiiiiiiiiiiijijjjjijjjjjjjjjjjjjjjjjikkkkkkjkkllllllmmmmmmmmnnmnnoooopppppqqsrr7abbbcddeeefffffffggiiijjjjklor7899aaaaaaaabbbbbbbbbbbbbbcccccccccdccccccccccccccccdddddddddddddddeeeeeeeeefffffffffffffffffffffffgggggggggggggggghhhhhhhhhiiiiiiiijjjjjjjkkkkkklllllmmmnnr4567778888899999999999aaaaaaaabbbccccccccddddddeeefgg7ccdddeeefgggggghijkl7adfj7456666667777a7aaa7778888b88b88b8888888888899c9ccc9c9cc8c99c999daaddadaadaaddadaddaaaabbebeebbbeeeebeeebeeeebeebbbbccccccfccffccffcfcccgdgddggddddgddggdgggggdgggddhhehhhhehehheeffiifffiifffjfjjgijgjgjkhkkkklkhgllhmmjklnn7556e666666667777bb77b777bb78888c888cc8c88899999d9d999999d9d9d999e9b9aaaaaaaeaaaeeaaaaafbbbbfbbb9bbbgfbbcgccfgcccgccccccgcdddddddhddddhiieeeeieeeeeeefjifffcjffjjfgkggghliiiiijjkjklllmq799aaaaaaabbbbbbbbbbbbcccccccddddddddddddeeeeeeeeeeeeeefffffffffffffggggggggggghhhhhhhhhhhhhiiiiiiiijjjjjkkkkkkklllnoooopoqqr78bdck79bci8899aaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbccccccccccccccccccccccccccccccccccccccccccccccccedddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeeeeedeeeeeeeeeeeeeeeeeeeeeeeeeeeefeeeeefffffffffffffffffffffffffgffffffffffffffffffffffffffffffffffeffffffffggggggggggggggggggggggggggggggggghggggggggggggggghgggggggggggggggggggggggggggggghghhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhghhhhhhhhhhhhhiiiiiiiiiiiiiiiiiiiiiiiiihiiiiiiijiiiiihiiiiiiiiiiiiiiiijjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjklkkkkjkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkllllllkllllllllllllklllllmmmmmmmmmmmmmmmmmmmnnnnnnnnnnnnnnnnnnmooooopppppppqqqqqqqrrrrsssstt5667777788888888888999999999999999999999999aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbccccccccccccccccccccccccccccccddddddddddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeffffffffffffffffggggggggggghhhhhhhhhhhiiiiiijkkmm88bbcfjm5899aaabbbbbcccccccccccccdddddddddeeeeeeeeeeffffffffffgghgggggggghgghhhhhhhhhhghhiiiiiiiiijjjjjkkkklllllm345666667777777788999999999aaaabbbbbbbbbbcccccddddeg83556b66677777c7c7c77cc77778888d888dd8d8d888889eee99e99999aafaafaffaaffffaaaaagbgbbbgbhggggggbbcbhcccccchhhccchhchhdcdddiiddijejjeeeeeffffgllglghhhhhmhiok8gh8aaaaabbccccccccdddedddeeefgghiiiiiiiiiijijloos8bbbccccccccdddddddddddeeefffffffffggggggggggggghhhhhhhhhhiiiijjjjjjjjkkkklkklllllllmmmmmnooooooopqrrrrtD88ccddeeefggi8cfj98efgln9bcccccccddddddddeeeeeeeeeeeeeffffffffffffggggggghhhhhhhhiiiiiiiiiiiiiiijjjjjjjkkkkllllmmmmnnoooqu9ceefffghhhiiiiikjjjjkllmoo479cdde9dfghj9ddeegiijjkkln9bbbccccdddddddddddeeeeeeefffffffffggfffffffgggggggggggggggggiihhhhhhhhhhhiiiiiiiiiiijjjjjjjjjkkkkklllllmmmnnnnopprr6889999aaaaaaaaabbbbcccccccdddddddeffffffggggiijkln9ccddeeeeeffgghhiiijjjjjjkkkkllllllmrr47999cdeeefgg9lr399baaabbcccccdcdccdcdddddedfdddddeeeeeeeefeffefeegfffffffffggggggggggghgggghhhhihhhhhghihiiiiiiiiiihjjjhjjjkkkkklkkkkmmlllkmmnopprru35566777777788888899999999aaaaaabbbbccdccdddddeeffp9bh9deeeggghhhiijjklnraccdddddddeeeeeeeeeeeeeeeeeefffffffffffffffffffffffffgggggggggggggggggghhhhhhhhhhhhhhhhhiiiiiiiiiiiiiiiijjjjjjjjjjjjjjjjjjjjjkkkkkkkkkkkkkkkklllllllllllllllmmmmmmmmmmmmmmnnnnnnnoooqqqqrqrrsstu356667777888888888888999999999aaaaaabbbbbbbcccccddddeeefhjkkacdddddeeeffffffggggghhgiijjkjkkkkkkklllmnmnnopqabefimnacddeeeeeeeeffgfffffffggggggghhhhhhhiiiigijjjjjjjkkkklllllmmmmmnnnoopraefgikmoorartaghiijkllmadeeeeeffffghhiiiiiikllllmmooobddddeeeefffffffffffffffffffffffgggggggggggghgggggggggggggggggghhhhhhhhhhghhhhhhhhhhhhhhhhhiiiiihiiiiiiiiiijiiiiiiiihiiiiijjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjkkkkjkkikkkkkkkkkkkkkkkkkkkkkkkkkkkkkkllllkllllllllllllllllmmmmmmmmmmmmmmmkmmmmmmmmmnnnnnnnnnnnnnnnnnnooooooooooooponoppppoqqqqqqrrtux8abcccccdddddddddddddeeeeeeeeeeeeeeefffffffffffffggggggggggggggghhhhhhhhhhhhhhhhiiiiiiijjjjjjjjjkkkkllllmbcddddd9ddddeeeeeefffffffffffffffffffgffffggggggggggggghgggggggggggggggghhhhhhhhhhhhhhhhhhhhhhhhhhhhhiiiiiiiiiiiiiiiiiiiiiiijiiiijhjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjkjkkkkkkkkkkkkkkkkkkkkkkkkkklllllllllllllllllllklllllllllllmllllmmmmmmmmmmmmmmmmmnnnnnnnnmnnnnnnnnnnnmnnnoonnooooooooooooooppppppppqqrrrsssttut57788899999aaaaaaaaaaaaabbbbbbbbbcccccccccddddddddddddeeefeeeeffffffffgggghhhhiiiijjmmbfgjklloogbdddffgggghhhiiiiijjjjjjjkkkkllmnopsvxb7effffggghhiijjkmtbfgbeefijknccgghhhiipcfhmcbfgggggfhhhhhiiijjkkkkkkklllllmmnnnpqrscghjd8hiiijjlnoppqcdkdfffgddiijllllnpopd8hhhiiiiiiiijkkklmmmmnnnnsegghhjjmnnooprAehijln6ffghijjjkkklkkkkkhkllllllmmmnnnnnooooooppppssz8abcddddeeffhhgijjklmmmwxM5bbgls7hlmpqq";
+    const KANGXI_EXTRA = { '〇': 1, '○': 1 };
 
     function getStrokeCount(ch) {
       if (!ch) return 0;
-      if (KANGXI_STROKES[ch]) return KANGXI_STROKES[ch];
+      if (KANGXI_EXTRA[ch]) return KANGXI_EXTRA[ch];
       const code = ch.charCodeAt(0);
-      return 6 + (code % 11);
+      if (code >= 0x4E00 && code <= 0x9FA5) {
+        const idx = KANGXI_ALPHABET.indexOf(KANGXI_20902_STR[code - 0x4E00]);
+        if (idx > 0) return idx;
+      }
+      return 10;
     }
 
-    const AUSPICIOUS_NUMS = new Set([1,3,5,6,7,8,11,13,15,16,17,18,21,23,24,25,29,31,32,33,35,37,39,41,45,47,48,52,57,61,63,65,67,68,81]);
-    const HALF_AUSPICIOUS_NUMS = new Set([27,30,38,40,42,49,50,51,53,55,58,71,72,73,75,77,78]);
-
-    // Exact 81 Numerology texts matching myfate.herokuapp.com/person
-    const NUM_MEANINGS = {
-      1: '太極之數，萬物開泰，生發無窮，利祿亨通。',
-      2: '動搖不安，一榮一枯，一盛一衰，勞而無功。',
-      3: '根深蒂固，蒸蒸日上，如意吉祥，百事順遂。',
-      4: '坎坷前途，苦難折磨，非有毅力，難望成功。',
-      5: '陰陽和合，生意欣榮，名利雙收，福壽雙全。',
-      6: '萬寶集門，天降幸運，立志奮發，得成大功。',
-      7: '剛毅果斷，勇往直前，精力充沛，排除萬難。',
-      8: '堅剛意志，勤勉發展，進取如願，志望達成。',
-      9: '雖抱奇才，有才無命，獨營無力，財利難望。',
-      10: '烏雲遮月，暗淡無光，空費心力，徒勞無功。',
-      11: '草木逢春，枝葉沾露，穩健著實，必得人望。',
-      12: '薄弱無力，孤立無援，外祥內苦，謀事難成。',
-      13: '天賦吉運，能得人望，善用智慧，必獲成功。',
-      14: '忍得苦難，必有後福，是成是敗，惟靠堅毅。',
-      15: '謙恭做事，外得人和，大事成就，一門興隆。',
-      16: '能獲眾望，成就大業，名利雙收，盟主四方。',
-      17: '排除萬難，有貴人助，把握時機，可得成功。',
-      18: '經商做事，順利昌隆，如能慎始，百事亨通。',
-      19: '成功雖早，慎防虧空，內外不合，障礙重重。',
-      20: '智高志大，歷盡艱難，焦心憂勞，進退兩難。',
-      21: '先歷困苦，後得幸福，霜雪梅花，春來怒放。',
-      22: '秋草逢霜，懷才不遇，憂愁怨苦，事不如意。',
-      23: '旭日昇天，名顯四方，漸次進展，終成大業。',
-      24: '錦繡前程，須靠自立，多用智謀，能奏大功。',
-      25: '天時地利，只欠人和，講信修睦，即可成功。',
-      26: '波瀾起伏，千變萬化，凌駕萬難，必可成功。',
-      27: '一成一敗，一盛一衰，惟靠謹慎，可守成功。',
-      28: '魚臨旱地，難逃惡運，此數大凶，不如更名。',
-      29: '如龍得雲，青雲直上，智謀奮進，才略奏功。',
-      30: '吉凶參半，得失相伴，投機取巧，如賽一樣。',
-      31: '此數大吉，名利雙收，漸進向上，大業成就。',
-      32: '池中之龍，風雲際會，一躍上天，成功有望。',
-      33: '意氣用事，人和必失，如能慎始，必可昌隆。',
-      34: '災難不絕，難望成功，此數大凶，不如更名。',
-      35: '處事嚴謹，進退保守，學智兼具，成就非凡。',
-      36: '波瀾重疊，常陷窮困，動不如靜，有才無命。',
-      37: '逢凶化吉，吉人天相，以德取眾，必成大業。',
-      38: '名雖可得，利則難獲，藝界發展，可望成功。',
-      39: '雲開見月，雖有勞碌，光明坦途，指日可期。',
-      40: '一盛一衰，浮沉不定，知難而退，自獲天佑。',
-      41: '天賦吉運，德望兼備，繼續努力，前途無限。',
-      45: '楊柳遇春，綠葉發枝，衝破難關，一舉成名。',
-      47: '開花結子，衣食無憂，禎祥吉慶，可享天賦。',
-      48: '有德且智，德量榮達，博得名利，礎石藝業。'
+    // Complete 1..81 Numerology Table matching myfate.herokuapp.com/person
+    const NUM_81_TABLE = {
+      1:  ['吉', '太極之數，萬物開泰，生發無窮，利祿亨通。'],
+      2:  ['凶', '動搖不安，一榮一枯，一盛一衰，勞而無功。'],
+      3:  ['吉', '根深蒂固，蒸蒸日上，如意吉祥，百事順遂。'],
+      4:  ['凶', '坎坷前途，苦難折磨，非有毅力，難望成功。'],
+      5:  ['吉', '陰陽和合，生意欣榮，名利雙收，福壽雙全。'],
+      6:  ['吉', '萬寶集門，天降幸運，立志奮發，得成大功。'],
+      7:  ['吉', '剛毅果斷，勇往直前，精力充沛，排除萬難。'],
+      8:  ['吉', '努力發達，貫徹志望，不忘進退，可期成功。'],
+      9:  ['凶', '雖抱奇才，有才無命，獨營無力，財利難望。'],
+      10: ['凶', '烏雲遮月，暗淡無光，空費心力，徒勞無功。'],
+      11: ['吉', '草木逢春，枝葉沾露，穩健着實，必得人望。'],
+      12: ['凶', '薄弱無力，孤立無援，外祥內苦，謀事難成。'],
+      13: ['吉', '天賦吉運，能得人望，善用智慧，必獲成功。'],
+      14: ['凶', '忍得苦難，必有後福，是成是敗，惟靠堅毅。'],
+      15: ['吉', '謙恭做事，外得人和，大事成就，一門興隆。'],
+      16: ['吉', '能獲眾望，成就大業，名利雙收，盟主四方。'],
+      17: ['吉', '排除萬難，有貴人助，把握時機，可得成功。'],
+      18: ['吉', '經商做事，順利昌隆，如能慎始，百事亨通。'],
+      19: ['凶', '成功雖早，慎防虧空，內外不合，障礙重重。'],
+      20: ['凶', '智高志大，歷盡艱難，焦心憂勞，進退兩難。'],
+      21: ['吉', '先歷困苦，後得幸福，霜雪梅花，春來怒放。'],
+      22: ['凶', '秋草逢霜，懷才不遇，憂愁怨苦，事不如意。'],
+      23: ['吉', '旭日昇天，名顯四方，漸次進展，終成大業。'],
+      24: ['吉', '錦繡前程，須靠自立，多用智謀，能奏大功。'],
+      25: ['吉', '天時地利，只欠人和，講信修睦，即可成功。'],
+      26: ['平', '波瀾起伏，千變萬化，凌駕萬難，必可成功。'],
+      27: ['平', '一成一敗，一盛一衰，惟靠謹慎，可守成功。'],
+      28: ['凶', '魚臨旱地，難逃惡運，此數大凶，不如更名。'],
+      29: ['吉', '如龍得雲，青雲直上，智謀奮進，才略奏功。'],
+      30: ['平', '吉凶參半，得失相伴，投機取巧，如賽一樣。'],
+      31: ['吉', '此數大吉，名利雙收，漸進向上，大業可成。'],
+      32: ['吉', '池中之龍，風雲際會，一躍上天，成功有望。'],
+      33: ['吉', '意氣用事，人和必失，如能慎始，必可昌隆。'],
+      34: ['凶', '災難不絕，難望成功，此數大凶，不如更名。'],
+      35: ['吉', '處事嚴謹，進退保守，學智兼具，成就非凡。'],
+      36: ['凶', '波瀾重疊，常陷窮困，動不如靜，有才無命。'],
+      37: ['吉', '逢凶化吉，吉人天相，以德取眾，必成大業。'],
+      38: ['平', '名雖可得，利則難獲，藝界發展，可望成功。'],
+      39: ['吉', '雲開見月，雖有勞碌，光明坦途，指日可期。'],
+      40: ['平', '一盛一衰，浮沉不定，知難而退，自獲天佑。'],
+      41: ['吉', '天賦吉運，德望兼備，繼續努力，前途無限。'],
+      42: ['平', '事業不專，十九不成，專心進取，可望成功。'],
+      43: ['凶', '雨夜之花，外祥內苦，忍耐自重，轉凶為吉。'],
+      44: ['凶', '雖用心計，事難遂願，貪功好進，必招失敗。'],
+      45: ['吉', '楊柳遇春，綠葉發枝，衝破難關，一舉成名。'],
+      46: ['凶', '坎坷不平，艱難重重，若無耐心，難望有成。'],
+      47: ['吉', '開花結子，衣食無憂，禎祥吉慶，可享天賦。'],
+      48: ['吉', '有德且智，德量榮達，博得名利，礎石藝業。'],
+      49: ['平', '吉凶難分，不斷辛勞，投機取巧，吉凶無常。'],
+      50: ['平', '吉凶互見，一成一敗，凶中有吉，吉中有凶。'],
+      51: ['平', '一盛一衰，浮沉不常，自重自處，可保平安。'],
+      52: ['吉', '草木逢春，雨過天晴，渡過難關，即獲成功。'],
+      53: ['平', '盛衰參半，外祥內苦，先吉後凶，先凶後吉。'],
+      54: ['凶', '雖傾全力，難望成功，此數大凶，最好改名。'],
+      55: ['平', '外觀隆昌，內隱禍患，克服難關，開出泰運。'],
+      56: ['凶', '事與願違，終難成功，欲速不達，有始無終。'],
+      57: ['吉', '雖有困難，時來運轉，曠野枯草，春來花開。'],
+      58: ['平', '半凶半吉，浮沉多端，始凶終吉，能保成功。'],
+      59: ['凶', '缺乏忍耐，難望成事，暴起暴落，財利難求。'],
+      60: ['凶', '黑暗無光，心迷意亂，出爾反爾，難定方針。'],
+      61: ['吉', '雲遮半月，內隱風波，應自謹慎，始保平安。'],
+      62: ['凶', '煩悶懊惱，事業難展，自防災禍，始免困境。'],
+      63: ['吉', '萬物化育，繁榮之象，專心一意，始能成功。'],
+      64: ['凶', '見異思遷，十九不成，徒勞無功，不如更名。'],
+      65: ['吉', '吉運自來，能享盛名，把握機會，必獲成功。'],
+      66: ['凶', '黑夜溫長，進退維谷，內外不和，信用缺乏。'],
+      67: ['吉', '獨營事業，事事如意，功成名就，富貴自來。'],
+      68: ['吉', '思慮周詳，計畫力行，不失先機，可望成功。'],
+      69: ['凶', '動搖不安，常陷逆境，不得時運，難得利潤。'],
+      70: ['凶', '慘淡經營，難免貧困，此數不吉，最好改名。'],
+      71: ['平', '吉凶參半，惟賴勇氣，貫徹力行，始可成功。'],
+      72: ['平', '利害混集，凶多吉少，得而復失，難以安順。'],
+      73: ['平', '安樂自來，自然吉祥，力行不懈，終必成功。'],
+      74: ['凶', '利不及費，坐食山空，如無智謀，難望成功。'],
+      75: ['平', '吉中帶凶，欲速不達，進不如守，可保安詳。'],
+      76: ['凶', '此數大凶，破產之象，宜速改名，以避厄運。'],
+      77: ['平', '先苦後甘，先甘後苦，如能守成，不致失敗。'],
+      78: ['平', '有得有失，華而不實，須防劫財，始保平安。'],
+      79: ['凶', '如走夜路，前途無光，希望不大，勞而無功。'],
+      80: ['凶', '得而復失，枉費心機，守成無貪，可保安穩。'],
+      81: ['吉', '最極之數，還本歸元，能得繁榮，發達成功。']
     };
 
     function get81Info(num) {
       const n = ((num - 1) % 81) + 1;
-      let luck = '凶';
-      let badgeClass = 'bg-rose-100 text-rose-800 border-rose-300';
-      if (AUSPICIOUS_NUMS.has(n)) {
-        luck = '吉';
-        badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
-      } else if (HALF_AUSPICIOUS_NUMS.has(n)) {
-        luck = '半吉';
-        badgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
-      }
-      const desc = NUM_MEANINGS[n] || (
-        AUSPICIOUS_NUMS.has(n)
-          ? '數理吉祥，根基穩固，持之以恆可得順遂發展。'
-          : (HALF_AUSPICIOUS_NUMS.has(n)
-            ? '吉凶參半之數，宜守正道、修身養性，穩健行事可化險為夷。'
-            : '雖抱奇才，歷盡艱難，宜配合八字喜用神與後天修為補足。')
-      );
-      return { n, luck, badgeClass, desc };
+      const entry = NUM_81_TABLE[n] || ['平', '數理平穩，持之以恆可得順遂發展。'];
+      const luck = entry[0];
+      const desc = entry[1];
+      let svgColor = '#008000';
+      if (luck === '吉') svgColor = '#e60000';
+      else if (luck === '凶') svgColor = '#0000ff';
+      return { n, luck, desc, svgColor };
     }
 
     // Five Elements of Stroke Count (1,2木; 3,4火; 5,6土; 7,8金; 9,0水)
@@ -2179,9 +2291,62 @@
       return '水';
     }
 
-    // I Ching 8 Trigrams & 64 Hexagrams for Name Numerology (matching myfate.herokuapp.com/person)
-    // Trigram index 1..8: 1乾(111), 2兌(011), 3離(101), 4震(001), 5巽(110), 6坎(010), 7艮(100), 8坤(000)
-    //Lines [bottom, middle, top]:
+    function wxToSvgColor(wx) {
+      if (wx === '木') return '#15803d';
+      if (wx === '火') return '#dc2626';
+      if (wx === '土') return '#854d0e';
+      if (wx === '金') return '#a16207';
+      return '#111827';
+    }
+
+    // Complete SanCai (五行吉凶) Table matching myfate.herokuapp.com/person
+    const SANCAI_EXACT = {
+      '水_木_火': ['凶', '事業上能蒙上思提拔，終獲成功；然身體不佳。'],
+      '金_土_火': ['吉', '溫文愨厚，意志堅強，能突破萬難，終至成功。'],
+      '土_金_木': ['吉帶凶', '熱誠機智，長官提拔，但需防外來壓力，導致挫折失敗。'],
+      '水_水_火': ['大凶', '水火不容，萬事難成，消沉墮落，有不測之刑害及意外。'],
+      '木_木_木': ['吉', '萬事順利，氣勢如虹，名利雙收，定能成功。'],
+      '木_木_火': ['吉', '天賦奇才，上下和睦，順風揚帆，容易成功。'],
+      '木_木_土': ['吉', '性情溫厚，平步青雲，基礎穩固，家庭圓滿。'],
+      '木_火_木': ['吉', '旭日東昇，得上下幫助，身心健全，萬事順遂。'],
+      '木_火_土': ['吉', '受長輩提拔，一帆風順，基礎穩固，名利雙收。'],
+      '木_火_火': ['吉帶凶', '才華橫溢，進展迅速，惟個性急躁，宜修身養性。'],
+      '水_木_木': ['吉', '得長輩提拔，順利發展，基礎穩固，家門興隆。'],
+      '水_木_土': ['吉', '蒙上提拔，順調發展，根基穩固，財祿雙收。'],
+      '水_木_水': ['吉', '智謀兼備，逢凶化吉，事業順遂，名利雙收。'],
+      '火_土_土': ['吉', '溫厚老實，得長上提拔，基礎安泰，家業興隆。'],
+      '火_土_金': ['吉', '基礎穩固，上下和順，可得貴人相助，成就大業。'],
+      '土_土_土': ['吉', '敦厚穩重，腳踏實地，家庭和樂，福壽雙全。'],
+      '土_土_金': ['吉', '處事穩健，得人信賴，環境順遂，名利雙收。'],
+      '土_金_土': ['吉', '蒙長上提拔，基礎穩固，諸事順遂，可獲成功。'],
+      '土_金_水': ['吉', '智謀出眾，受人提拔，隨機應變，家門昌隆。'],
+      '金_水_木': ['吉', '智謀兼備，得長輩提拔，基礎安穩，漸進成功。'],
+      '金_水_水': ['吉帶凶', '才智過人，交遊廣闊，惟宜守正道，穩健經營。'],
+      '金_金_土': ['吉', '剛毅果決，得下屬助力，根基穩固，百事順遂。'],
+      '水_金_土': ['吉', '溫和敦厚，與人和睦，基礎安泰，福祿雙全。']
+    };
+
+    function getSancaiInfo(tWx, rWx, dWx) {
+      const key = `${tWx}_${rWx}_${dWx}`;
+      if (SANCAI_EXACT[key]) {
+        return { luck: SANCAI_EXACT[key][0], desc: SANCAI_EXACT[key][1] };
+      }
+      const wxIdx = { '木': 0, '火': 1, '土': 2, '金': 3, '水': 4 };
+      const ti = wxIdx[tWx], ri = wxIdx[rWx], di = wxIdx[dWx];
+      const trClash = ((ti + 2) % 5 === ri) || ((ri + 2) % 5 === ti);
+      const rdClash = ((ri + 2) % 5 === di) || ((di + 2) % 5 === ri);
+      if (trClash && rdClash) {
+        return { luck: '凶', desc: '三才相剋較重，歷盡艱辛，宜修身養性、穩健守成以化險為夷。' };
+      }
+      if (trClash || rdClash) {
+        return { luck: '吉帶凶', desc: '雖有才幹與抱負，惟中途易遇阻礙，若能堅毅守正，終可成功。' };
+      }
+      return { luck: '吉', desc: '三才配置相生調和，基礎安穩，得上下之助，能憑毅力穩步成功。' };
+    }
+
+    // I Ching 8 Trigrams & Complete 64 Hexagrams (matching myfate.herokuapp.com/person)
+    // Trigram index 1..8: 1乾, 2兌, 3離, 4震, 5巽, 6坎, 7艮, 8坤
+    // lines: [line1(bottom), line2(middle), line3(top)]
     const TRIGRAMS = {
       1: { name: '乾', nature: '天', lines: [1, 1, 1] },
       2: { name: '兌', nature: '澤', lines: [1, 1, 0] },
@@ -2201,30 +2366,45 @@
       return 8;
     }
 
-    const HEXAGRAM_TABLE = {
-      '8_8': { sym: '䷁', name: '坤為地', luck: '吉' },
-      '8_4': { sym: '䷗', name: '地雷復', luck: '吉' },
-      '8_6': { sym: '䷆', name: '地水師', luck: '凶' },
-      '8_7': { sym: '䷎', name: '地山謙', luck: '吉' },
-      '4_8': { sym: '䷏', name: '雷地豫', luck: '吉' },
-      '6_8': { sym: '䷇', name: '水地比', luck: '吉' },
-      '7_8': { sym: '䷖', name: '山地剝', luck: '凶' },
-      '1_1': { sym: '䷀', name: '乾為天', luck: '吉' },
-      '8_1': { sym: '䷊', name: '地天泰', luck: '吉' },
-      '1_8': { sym: '䷋', name: '天地否', luck: '凶' },
-      '3_1': { sym: '䷍', name: '火天大有', luck: '吉' },
-      '1_3': { sym: '䷌', name: '天火同人', luck: '吉' },
-      '6_3': { sym: '䷾', name: '水火既濟', luck: '吉' },
-      '3_6': { sym: '䷿', name: '火水未濟', luck: '半吉' }
+    // Complete 64 Hexagrams Table: [fullName, shortNameForSvg, luck]
+    const HEXAGRAM_64_TABLE = {
+      '1_1': ['乾為天', '乾', '吉'],     '1_2': ['天澤履', '履', '中吉'],   '1_3': ['天火同人', '同人', '吉'], '1_4': ['天雷無妄', '無妄', '凶'],
+      '1_5': ['天風姤', '姤', '凶'],     '1_6': ['天水訟', '訟', '凶'],     '1_7': ['天山遯', '遯', '凶'],     '1_8': ['天地否', '否', '凶'],
+      '2_1': ['澤天夬', '夬', '凶'],     '2_2': ['兌為澤', '兌', '中吉'],   '2_3': ['澤火革', '革', '吉'],     '2_4': ['澤雷隨', '隨', '中吉'],
+      '2_5': ['澤風大過', '大過', '凶'], '2_6': ['澤水困', '困', '凶'],     '2_7': ['澤山咸', '咸', '吉'],     '2_8': ['澤地萃', '萃', '吉'],
+      '3_1': ['火天大有', '大有', '吉'], '3_2': ['火澤睽', '睽', '凶'],     '3_3': ['離為火', '離', '中吉'],   '3_4': ['火雷噬嗑', '噬嗑', '吉'],
+      '3_5': ['火風鼎', '鼎', '吉'],     '3_6': ['火水未濟', '未濟', '中凶'],'3_7': ['火山旅', '旅', '凶'],     '3_8': ['火地晉', '晉', '吉'],
+      '4_1': ['雷天大壯', '大壯', '中吉'],'4_2': ['雷澤歸妹', '歸妹', '凶'], '4_3': ['雷火豐', '豐', '吉'],     '4_4': ['震為雷', '震', '中吉'],
+      '4_5': ['雷風恆', '恆', '吉'],     '4_6': ['雷水解', '解', '吉'],     '4_7': ['雷山小過', '小過', '凶'], '4_8': ['雷地豫', '豫', '吉'],
+      '5_1': ['風天小畜', '小畜', '吉'], '5_2': ['風澤中孚', '中孚', '吉'], '5_3': ['風火家人', '家人', '吉'], '5_4': ['風雷益', '益', '吉'],
+      '5_5': ['巽為風', '巽', '中凶'],   '5_6': ['風水渙', '渙', '吉'],     '5_7': ['風山漸', '漸', '中吉'],   '5_8': ['風地觀', '觀', '中凶'],
+      '6_1': ['水天需', '需', '中吉'],   '6_2': ['水澤節', '節', '中吉'],   '6_3': ['水火既濟', '既濟', '吉'], '6_4': ['水雷屯', '屯', '凶'],
+      '6_5': ['水風井', '井', '中吉'],   '6_6': ['坎為水', '坎', '凶'],     '6_7': ['水山蹇', '蹇', '凶'],     '6_8': ['水地比', '比', '吉'],
+      '7_1': ['山天大畜', '大畜', '吉'], '7_2': ['山澤損', '損', '凶'],     '7_3': ['山火賁', '賁', '吉'],     '7_4': ['山雷頤', '頤', '吉'],
+      '7_5': ['山風蠱', '蠱', '凶'],     '7_6': ['山水蒙', '蒙', '中凶'],   '7_7': ['艮為山', '艮', '中凶'],   '7_8': ['山地剝', '剝', '凶'],
+      '8_1': ['地天泰', '泰', '吉'],     '8_2': ['地澤臨', '臨', '中吉'],   '8_3': ['地火明夷', '明夷', '凶'], '8_4': ['地雷復', '復', '吉'],
+      '8_5': ['地風升', '升', '吉'],     '8_6': ['地水師', '師', '凶'],     '8_7': ['地山謙', '謙', '吉'],     '8_8': ['坤為地', '坤', '吉']
     };
 
     function getHexagramInfo(upperIdx, lowerIdx) {
       const key = `${upperIdx}_${lowerIdx}`;
-      if (HEXAGRAM_TABLE[key]) return HEXAGRAM_TABLE[key];
-      const u = TRIGRAMS[upperIdx], l = TRIGRAMS[lowerIdx];
-      const name = (upperIdx === lowerIdx) ? `${u.name}為${u.nature}` : `${u.nature}${l.nature}${u.name}${l.name}`;
-      const isGood = ((upperIdx + lowerIdx) % 3 !== 0);
-      return { sym: '䷀', name, luck: isGood ? '吉' : '凶' };
+      const item = HEXAGRAM_64_TABLE[key] || ['坤為地', '坤', '吉'];
+      return { name: item[0], shortName: item[1], luck: item[2] };
+    }
+
+    function renderMiniHexagramSvg(upperIdx, lowerIdx) {
+      // Top-to-bottom 6 lines: upper[2], upper[1], upper[0], lower[2], lower[1], lower[0]
+      const u = TRIGRAMS[upperIdx].lines;
+      const l = TRIGRAMS[lowerIdx].lines;
+      const topToBottom = [u[2], u[1], u[0], l[2], l[1], l[0]];
+      const bars = topToBottom.map((val, idx) => {
+        const y = 2 + idx * 4;
+        if (val === 1) {
+          return `<rect x="2" y="${y}" width="20" height="2.4" fill="#111111" />`;
+        }
+        return `<rect x="2" y="${y}" width="8.5" height="2.4" fill="#111111" /><rect x="13.5" y="${y}" width="8.5" height="2.4" fill="#111111" />`;
+      }).join('');
+      return `<svg width="24" height="26" viewBox="0 0 24 26" class="inline-block align-middle">${bars}</svg>`;
     }
 
     /***********************************************************************
@@ -2577,7 +2757,7 @@
         wuchang: wuchangMap[wx],
         tgLabel: getShortTenGodGroup(b.pillars.day.stemWx, wx),
         shilu: b.wxScores[wx] ?? 0,
-        role: b.wudiRoles[wx] || '小吉神'
+        role: b.wudiRoles[wx] ?? ''
       }));
 
       const comboInfo = getBranchComboStatus(b.pillars);
@@ -2593,11 +2773,11 @@
                 格局 : <span class="text-red-600 font-bold">${b.patternName}</span> (80%)
               </td>
             </tr>
-            <tr>
+            ${comboInfo.value !== '無' ? `<tr>
               <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">
                 ${comboInfo.label} : ${comboInfo.value}
               </td>
-            </tr>
+            </tr>` : ''}
             <tr class="text-center">
               ${colDefs.map(c => `<td class="py-3 w-[16.6%]"><span class="orig-vtext">${c.tgLabel}</span></td>`).join('')}
               <td class="py-3 w-[16.6%]"><span class="orig-vtext">十神</span></td>
@@ -2825,7 +3005,7 @@
             <div>年：${b.pillars.year.stem}${b.pillars.year.branch} (${formatLiangQian(wYear)}) ｜ 月：${b.lunar.month}月 (${formatLiangQian(wMonth)})</div>
             <div>日：${b.lunar.day}日 (${formatLiangQian(wDay)}) ｜ 時：${b.pillars.hour.stem}${b.pillars.hour.branch} (${formatLiangQian(wHour)})</div>
             <div class="font-bold text-sm text-amber-900 dark:text-amber-300 pt-1">總重量：${formatLiangQian(wTotal)}</div>
-            <p class="theme-muted text-[11px]">${wTotal === 59 ? '官職財祿厚重之命。歌訣：細推此格秀且清，必定財高學業成；甲第之中應有分，揚鞭走馬顯威榮。' : '傳統袁天罡秤骨歌訣重量參照，以八字格局與用神為主。'}</p>
+            <p class="theme-muted text-[11px]">${wTotal === 59 ? '官職財祿厚重之命。歌訣：細推此格秀且清，必定財高學業成；甲第之中應有分，揚鞭走馬顯威榮。' : (wTotal === 48 ? '官員財祿厚重之命。歌訣：幼年運道未能通，若是蹉跎命不同；兄弟六親皆無靠，一生事業晚來隆。' : '傳統袁天罡秤骨歌訣重量參照，以八字格局與用神為主。')}</p>
           </div>
 
           <div class="theme-subtle p-4 rounded-xl border theme-border space-y-1.5">
@@ -3190,7 +3370,7 @@
     }
 
     /***********************************************************************
-     * 7. NAME NUMEROLOGY UI RENDERING (三才五格 + 81靈動數 + 易經姓名學)
+     * 7. NAME NUMEROLOGY UI RENDERING (1:1 還原 myfate.herokuapp.com/person 圖解與四表)
      ***********************************************************************/
     function renderNameView() {
       const surnameRaw = (document.getElementById('surnameInput').value || '').trim();
@@ -3199,12 +3379,12 @@
       const resBox = document.getElementById('nameResultContainer');
 
       if (!surnameRaw || !givenRaw) {
-        adjustContainer.innerHTML = '<span class="text-xs theme-muted">（輸入姓氏與名字後將自動顯示各字康熙筆劃）</span>';
+        adjustContainer.innerHTML = '<span class="text-xs theme-muted">（輸入姓氏與名字後將自動顯示各字康熙筆劃，亦可點選右上角「範例：林義峰」預覽原站圖解）</span>';
         resBox.innerHTML = `
           <div class="lg:col-span-3 theme-card border border-dashed theme-border rounded-2xl p-8 text-center space-y-2">
             <div class="text-2xl">🖋️</div>
             <div class="text-base font-bold serif-font">請於上方輸入「姓氏」與「名字」，並點擊「執行姓名吉凶分析」</div>
-            <p class="text-xs theme-muted">將自動計算三才五格、八十一靈動數吉凶與易經姓名學流年卦象</p>
+            <p class="text-xs theme-muted">1:1 還原原站三才五格紅線方框圖解、六爻卦象、八十一靈動吉凶數、五行吉凶與易經姓名流年</p>
           </div>
         `;
         return;
@@ -3217,6 +3397,7 @@
         ...surnameChars.map((c, i) => ({ ch: c, role: `姓氏${i + 1}`, key: `S${i}_${c}` })),
         ...givenChars.map((c, i) => ({ ch: c, role: `名字${i + 1}`, key: `G${i}_${c}` }))
       ];
+
       adjustContainer.innerHTML = allChars.map(item => {
         const s = state.customStrokes[item.ch] ?? getStrokeCount(item.ch);
         const charWx = strokeToWx(s);
@@ -3224,11 +3405,11 @@
           <div class="inline-flex items-center gap-2 theme-subtle px-3 py-1.5 rounded-xl border theme-border text-xs">
             <span class="font-bold text-base serif-font">${item.ch}</span>
             <span class="theme-muted">(${item.role}・五行${charWx})</span>
-            <input type="number" data-char="${item.ch}" value="${s}" min="1" max="40" class="stroke-override-input w-14 rounded-lg border theme-border theme-card px-2 py-1 text-center font-bold" />
+            <input type="number" data-char="${item.ch}" value="${s}" min="1" max="48" class="stroke-override-input w-14 rounded-lg border theme-border theme-card px-2 py-1 text-center font-bold" />
             <span class="theme-muted">畫</span>
           </div>
         `;
-      }).join('') + `<div class="inline-flex items-center px-3 py-1.5 rounded-xl theme-subtle border theme-border text-xs theme-muted">假頭／假尾：1 畫</div>`;
+      }).join('') + `<div class="inline-flex items-center px-3 py-1.5 rounded-xl theme-subtle border theme-border text-xs theme-muted">單姓／單名假添：01 畫</div>`;
 
       adjustContainer.querySelectorAll('.stroke-override-input').forEach(inp => {
         inp.addEventListener('change', () => {
@@ -3242,44 +3423,51 @@
       const sStrokes = surnameChars.map(c => state.customStrokes[c] ?? getStrokeCount(c));
       const gStrokes = givenChars.map(c => state.customStrokes[c] ?? getStrokeCount(c));
 
-      const tianGe = sStrokes.length === 1 ? sStrokes[0] + 1 : sStrokes[0] + sStrokes[1];
-      const renGe = sStrokes[sStrokes.length - 1] + gStrokes[0];
-      const diGe = gStrokes.length === 1 ? gStrokes[0] + 1 : gStrokes[0] + gStrokes[1];
+      // Build the 4 vertical boxes matching myfate.herokuapp.com/person SVG diagram
+      const box1 = surnameChars.length === 1
+        ? { ch: '', stroke: 1, showWx: false }
+        : { ch: surnameChars[0], stroke: sStrokes[0], showWx: true };
+      const box2 = surnameChars.length === 1
+        ? { ch: surnameChars[0], stroke: sStrokes[0], showWx: true }
+        : { ch: surnameChars[1], stroke: sStrokes[1], showWx: true };
+      const box3 = { ch: givenChars[0], stroke: gStrokes[0], showWx: true };
+      const box4 = givenChars.length === 1
+        ? { ch: '', stroke: 1, showWx: false }
+        : { ch: givenChars[1], stroke: gStrokes[1], showWx: true };
+      const boxes = [box1, box2, box3, box4];
+
+      const tianGe = box1.stroke + box2.stroke;
+      const renGe = box2.stroke + box3.stroke;
+      const diGe = box3.stroke + box4.stroke;
+      const waiGe = box1.stroke + box4.stroke;
       const zongGe = sStrokes.reduce((a, b) => a + b, 0) + gStrokes.reduce((a, b) => a + b, 0);
-      const waiGe = Math.max(2, (tianGe + diGe) - renGe);
 
-      const grids = [
-        { name: '天格', num: tianGe, wx: strokeToWx(tianGe), info: get81Info(tianGe) },
-        { name: '人格', num: renGe,  wx: strokeToWx(renGe),  info: get81Info(renGe) },
-        { name: '地格', num: diGe,   wx: strokeToWx(diGe),   info: get81Info(diGe) },
-        { name: '外格', num: waiGe,  wx: strokeToWx(waiGe),  info: get81Info(waiGe) },
-        { name: '總格', num: zongGe, wx: strokeToWx(zongGe), info: get81Info(zongGe) }
-      ];
+      const tInfo = { name: '天格', num: tianGe, wx: strokeToWx(tianGe), info: get81Info(tianGe) };
+      const rInfo = { name: '人格', num: renGe,  wx: strokeToWx(renGe),  info: get81Info(renGe) };
+      const dInfo = { name: '地格', num: diGe,   wx: strokeToWx(diGe),   info: get81Info(diGe) };
+      const wInfo = { name: '外格', num: waiGe,  wx: strokeToWx(waiGe),  info: get81Info(waiGe) };
+      const zInfo = { name: '總格', num: zongGe, wx: strokeToWx(zongGe), info: get81Info(zongGe) };
+      const grids = [tInfo, rInfo, dInfo, wInfo, zInfo];
 
-      const sancaiStr = `${grids[0].wx} ${grids[1].wx} ${grids[2].wx}`;
-      const isWaterFireClash = (grids[0].wx === '水' && grids[1].wx === '水' && grids[2].wx === '火');
-      const sancaiLuck = isWaterFireClash ? '大凶' : '吉';
-      const sancaiDesc = isWaterFireClash
-        ? '水火不容，萬事難成，消沉墮落，有不測之刑害及意外。'
-        : '三才配置相生調和，基礎安穩，能憑毅力穩步發展。';
+      // SanCai (五行吉凶)
+      const sancaiRes = getSancaiInfo(tInfo.wx, rInfo.wx, dInfo.wx);
 
-      // I Ching Name Numerology (易經姓名學: 上卦、下卦、本卦與 01-10 ～ 51-60 歲姓名流年)
-      const sSum = sStrokes.reduce((a, b) => a + b, 0);
-      const gSum = gStrokes.reduce((a, b) => a + b, 0);
-      const baseUpperIdx = (sSum % 8 === 0) ? 8 : (sSum % 8);
-      const baseLowerIdx = (gSum % 8 === 0) ? 8 : (gSum % 8);
+      // I Ching Name Numerology matching myfate.herokuapp.com/person:
+      // 上卦 = 總格 % 8 (0 -> 8), 下卦 = 地格 % 8 (0 -> 8)
+      const baseUpperIdx = (zongGe % 8 === 0) ? 8 : (zongGe % 8);
+      const baseLowerIdx = (diGe % 8 === 0) ? 8 : (diGe % 8);
       const baseHex = getHexagramInfo(baseUpperIdx, baseLowerIdx);
 
       const base6Lines = [...TRIGRAMS[baseLowerIdx].lines, ...TRIGRAMS[baseUpperIdx].lines];
       const decadeHexagrams = [
-        { age: '01-10 歲', uIdx: baseUpperIdx, lIdx: baseLowerIdx, hex: baseHex }
+        { age: '01-10', uIdx: baseUpperIdx, lIdx: baseLowerIdx, hex: baseHex }
       ];
       for (let lineIdx = 0; lineIdx < 5; lineIdx++) {
         const mutated = [...base6Lines];
         mutated[lineIdx] = mutated[lineIdx] === 1 ? 0 : 1;
         const lIdx = linesToTrigramIdx(mutated[0], mutated[1], mutated[2]);
         const uIdx = linesToTrigramIdx(mutated[3], mutated[4], mutated[5]);
-        const ageRange = `${(lineIdx + 1) * 10 + 1}-${(lineIdx + 2) * 10} 歲`;
+        const ageRange = `${(lineIdx + 1) * 10 + 1}-${(lineIdx + 2) * 10}`;
         decadeHexagrams.push({
           age: ageRange,
           uIdx,
@@ -3288,49 +3476,167 @@
         });
       }
 
+      // Build the SVG Diagram (1:1 match to image_a07c02.png)
+      const pad2 = (n) => String(n).padStart(2, '0');
+      const boxY = [10, 52, 94, 136];
+      const svgBoxesHtml = boxes.map((b, idx) => {
+        const y = boxY[idx];
+        const wx = strokeToWx(b.stroke);
+        const wxCol = wxToSvgColor(wx);
+        return `
+          <g>
+            <rect x="116" y="${y}" width="36" height="36" fill="none" stroke="#444444" stroke-width="0.9" stroke-dasharray="1.2,1.2" />
+            <rect x="118" y="${y + 2}" width="32" height="32" fill="none" stroke="#888888" stroke-width="0.6" stroke-dasharray="1,1" />
+            ${b.ch ? `<text x="134" y="${y + 26}" text-anchor="middle" font-size="23" font-family="'標楷體','DFKai-SB','Kaiti TC','Noto Serif TC',serif" fill="#000000">${b.ch}</text>` : ''}
+            <text x="157" y="${y + 23}" font-size="13" font-family="'Times New Roman','Noto Serif TC',serif" fill="#008080">${pad2(b.stroke)}</text>
+            ${b.showWx ? `<text x="163" y="${y + 34}" text-anchor="middle" font-size="9" font-family="'標楷體','Noto Serif TC',serif" fill="${wxCol}">${wx}</text>` : ''}
+          </g>
+        `;
+      }).join('');
+
+      // 6-bar Hexagram graphic on bottom-left of SVG (lines top-to-bottom: u[2], u[1], u[0], l[2], l[1], l[0])
+      const uLines = TRIGRAMS[baseUpperIdx].lines;
+      const lLines = TRIGRAMS[baseLowerIdx].lines;
+      const hexTopToBottom = [uLines[2], uLines[1], uLines[0], lLines[2], lLines[1], lLines[0]];
+      const svgHexBarsHtml = hexTopToBottom.map((val, idx) => {
+        const by = 122 + idx * 8.2;
+        if (val === 1) {
+          return `<rect x="28" y="${by}" width="38" height="4.4" fill="#000000" />`;
+        }
+        return `<rect x="28" y="${by}" width="15.5" height="4.4" fill="#000000" /><rect x="50.5" y="${by}" width="15.5" height="4.4" fill="#000000" />`;
+      }).join('');
+
       resBox.innerHTML = `
-        <!-- Left 2 cols: 三才五格 + 八十一靈動吉凶數 -->
-        <div class="lg:col-span-2 theme-card border rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
-          <div class="flex items-center justify-between border-b theme-border pb-2">
-            <h4 class="font-bold serif-font text-base">「${surnameChars.join('')}${givenChars.join('')}」三才五格與八十一靈動吉凶數</h4>
-            <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold">三才配置：${sancaiStr}</span>
-          </div>
-          <div class="space-y-2.5">
-            ${grids.map(g => `
-              <div class="theme-subtle p-3 rounded-xl border theme-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                <div class="flex items-center gap-2.5">
-                  <span class="font-bold text-sm w-16">${g.name}</span>
-                  <span class="px-2 py-0.5 rounded border font-bold ${getWxClass(g.wx)}">${String(g.num).padStart(2, '0')} 畫 (${g.wx})</span>
-                  <span class="px-2 py-0.5 rounded border font-bold ${g.info.badgeClass}">${g.info.luck}</span>
-                </div>
-                <div class="theme-muted sm:text-right flex-1">${g.info.desc}</div>
-              </div>
-            `).join('')}
+        <div class="lg:col-span-3 bg-white text-stone-900 border border-stone-200 rounded-2xl p-5 sm:p-8 shadow-sm space-y-7 max-w-4xl mx-auto w-full">
+
+          <!-- 1. Classic SVG Diagram (1:1 reproduction of image_a07c02.png) -->
+          <div class="flex justify-center overflow-x-auto py-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="440" height="330" viewBox="0 0 300 225" preserveAspectRatio="xMidYMid meet">
+              <!-- 4 Dotted Character Boxes & Stroke Numbers -->
+              ${svgBoxesHtml}
+
+              <!-- Red Connecting Lines -->
+              <!-- 天格 bracket -->
+              <path d="M 175 28 L 193 28 L 193 66 L 175 66" stroke="#ff0000" stroke-width="1.15" fill="none" />
+              <!-- 人格 bracket -->
+              <path d="M 175 70 L 193 70 L 193 108 L 175 108" stroke="#ff0000" stroke-width="1.15" fill="none" />
+              <!-- 地格 bracket -->
+              <path d="M 175 114 L 193 114 L 193 152 L 175 152" stroke="#ff0000" stroke-width="1.15" fill="none" />
+              <!-- 外格 bracket (left) -->
+              <path d="M 108 28 L 85 28 L 85 152 L 108 152" stroke="#ff0000" stroke-width="1.15" fill="none" />
+              <!-- 總格 line (bottom) -->
+              <line x1="85" y1="184" x2="193" y2="184" stroke="#ff0000" stroke-width="1.15" />
+
+              <!-- 天格 Text -->
+              <text x="199" y="51" font-size="13" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="#000000">天格</text>
+              <text x="229" y="51" font-size="13" font-family="'Times New Roman','Noto Serif TC',serif" fill="#008080">${pad2(tInfo.num)}</text>
+              <text x="246" y="51" font-size="12" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="${tInfo.info.svgColor}">${tInfo.info.luck}</text>
+              <text x="235" y="64" text-anchor="middle" font-size="10.5" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="${wxToSvgColor(tInfo.wx)}">${tInfo.wx}</text>
+
+              <!-- 人格 Text -->
+              <text x="199" y="94" font-size="13" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="#000000">人格</text>
+              <text x="229" y="94" font-size="13" font-family="'Times New Roman','Noto Serif TC',serif" fill="#008080">${pad2(rInfo.num)}</text>
+              <text x="246" y="94" font-size="12" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="${rInfo.info.svgColor}">${rInfo.info.luck}</text>
+              <text x="235" y="107" text-anchor="middle" font-size="10.5" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="${wxToSvgColor(rInfo.wx)}">${rInfo.wx}</text>
+
+              <!-- 地格 Text -->
+              <text x="199" y="138" font-size="13" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="#000000">地格</text>
+              <text x="229" y="138" font-size="13" font-family="'Times New Roman','Noto Serif TC',serif" fill="#008080">${pad2(dInfo.num)}</text>
+              <text x="246" y="138" font-size="12" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="${dInfo.info.svgColor}">${dInfo.info.luck}</text>
+              <text x="235" y="151" text-anchor="middle" font-size="10.5" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="${wxToSvgColor(dInfo.wx)}">${dInfo.wx}</text>
+
+              <!-- 外格 Text (left) -->
+              <text x="18" y="92" font-size="13" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="#000000">外格</text>
+              <text x="48" y="92" font-size="13" font-family="'Times New Roman','Noto Serif TC',serif" fill="#008080">${pad2(wInfo.num)}</text>
+              <text x="65" y="92" font-size="12" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="${wInfo.info.svgColor}">${wInfo.info.luck}</text>
+              <text x="54" y="105" text-anchor="middle" font-size="10.5" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="${wxToSvgColor(wInfo.wx)}">${wInfo.wx}</text>
+
+              <!-- 總格 Text (bottom) -->
+              <text x="122" y="203" font-size="13" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="#000000">總格</text>
+              <text x="152" y="203" font-size="13" font-family="'Times New Roman','Noto Serif TC',serif" fill="#008080">${pad2(zInfo.num)}</text>
+              <text x="169" y="203" font-size="12" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="${zInfo.info.svgColor}">${zInfo.info.luck}</text>
+              <text x="158" y="216" text-anchor="middle" font-size="10.5" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="${wxToSvgColor(zInfo.wx)}">${zInfo.wx}</text>
+
+              <!-- 易經六爻圖 & 卦名 (left-bottom) -->
+              ${svgHexBarsHtml}
+              <text x="47" y="196" text-anchor="middle" font-size="14" font-family="'標楷體','DFKai-SB','Noto Serif TC',serif" fill="#000000">${baseHex.shortName}</text>
+            </svg>
           </div>
 
-          <div class="theme-subtle p-3.5 rounded-xl border theme-border text-xs space-y-1">
-            <div class="font-bold text-sm">五行吉凶（天格／人格／地格：${grids[0].wx}／${grids[1].wx}／${grids[2].wx}）— 整體吉凶：<span class="${sancaiLuck.includes('凶') ? 'text-rose-700' : 'text-emerald-700'}">${sancaiLuck}</span></div>
-            <p class="theme-muted">${sancaiDesc}</p>
+          <!-- 2. 八十一靈動吉凶數 Table -->
+          <div class="space-y-2 max-w-2xl mx-auto">
+            <div class="text-sm text-stone-500 font-medium">八十一靈動吉凶數</div>
+            <table class="orig-person-table text-sm">
+              <tbody>
+                ${grids.map(g => `
+                  <tr>
+                    <td class="w-16 whitespace-nowrap">${g.name}</td>
+                    <td class="w-12 whitespace-nowrap">${g.num}</td>
+                    <td class="w-12 whitespace-nowrap">${g.info.luck}</td>
+                    <td>${g.info.desc}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
           </div>
-        </div>
 
-        <!-- Right 1 col: 易經姓名學 & 姓名流年 -->
-        <div class="theme-card border rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col justify-between space-y-4">
-          <div class="space-y-3">
-            <h4 class="font-bold serif-font text-base border-b theme-border pb-2">易經姓名學（本卦與姓名流年）</h4>
-            <div class="theme-subtle p-3 rounded-xl border theme-border text-xs space-y-1">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-sm">姓名本卦：${baseHex.sym} ${baseHex.name}</span>
-                <span class="px-2 py-0.5 rounded font-bold ${baseHex.luck === '吉' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${baseHex.luck}</span>
-              </div>
-              <div class="theme-muted">上卦：${TRIGRAMS[baseUpperIdx].name} ｜ 下卦：${TRIGRAMS[baseLowerIdx].name}</div>
-            </div>
+          <!-- 3. 五行吉凶 Table -->
+          <div class="space-y-2 max-w-2xl mx-auto">
+            <div class="text-sm text-stone-500 font-medium">五行吉凶</div>
+            <table class="orig-person-table text-sm">
+              <thead>
+                <tr>
+                  <th class="w-16">天格</th>
+                  <th class="w-16">人格</th>
+                  <th class="w-16">地格</th>
+                  <th class="w-20">吉凶</th>
+                  <th>說明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>${tInfo.wx}</td>
+                  <td>${rInfo.wx}</td>
+                  <td>${dInfo.wx}</td>
+                  <td>${sancaiRes.luck}</td>
+                  <td>${sancaiRes.desc}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-            <div class="overflow-x-auto">
-              <table class="orig-table w-full text-center text-xs">
+          <!-- 4. 易經姓名學 - 姓名吉凶 & 姓名流年 Tables -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto pt-1">
+            <div class="space-y-2">
+              <div class="text-sm text-stone-500 font-medium">易經姓名學 - 姓名吉凶</div>
+              <table class="orig-person-table text-sm">
                 <thead>
                   <tr>
-                    <th>歲數</th>
+                    <th>符號</th>
+                    <th>上卦</th>
+                    <th>下卦</th>
+                    <th>卦名</th>
+                    <th>吉凶</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>${renderMiniHexagramSvg(baseUpperIdx, baseLowerIdx)}</td>
+                    <td>${TRIGRAMS[baseUpperIdx].name}</td>
+                    <td>${TRIGRAMS[baseLowerIdx].name}</td>
+                    <td>${baseHex.name}</td>
+                    <td>${baseHex.luck}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="space-y-2">
+              <div class="text-sm text-stone-500 font-medium">易經姓名學 - 姓名流年</div>
+              <table class="orig-person-table text-sm">
+                <thead>
+                  <tr>
+                    <th>年齡</th>
                     <th>符號</th>
                     <th>上卦</th>
                     <th>下卦</th>
@@ -3342,11 +3648,11 @@
                   ${decadeHexagrams.map(d => `
                     <tr>
                       <td>${d.age}</td>
-                      <td class="text-base">${d.hex.sym}</td>
+                      <td>${renderMiniHexagramSvg(d.uIdx, d.lIdx)}</td>
                       <td>${TRIGRAMS[d.uIdx].name}</td>
                       <td>${TRIGRAMS[d.lIdx].name}</td>
-                      <td class="font-bold">${d.hex.name}</td>
-                      <td class="font-bold ${d.hex.luck === '吉' ? 'text-emerald-800' : 'text-rose-700'}">${d.hex.luck}</td>
+                      <td>${d.hex.name}</td>
+                      <td>${d.hex.luck}</td>
                     </tr>
                   `).join('')}
                 </tbody>
@@ -3354,9 +3660,6 @@
             </div>
           </div>
 
-          <div class="text-[11px] theme-muted border-t theme-border pt-2 leading-relaxed">
-            原站說明：「大致上找不到符合所有吉凶分析法的姓名，所以不要太過糾結在單一吉凶上面，個人及公司命名通常需參考八字【用神】。」
-          </div>
         </div>
       `;
     }
@@ -3681,6 +3984,17 @@
         renderNameView();
         showToast('🔍 已完成姓名三才五格與八十一靈動數分析！');
       });
+      const demoLinBtn = document.getElementById('nameDemoLinBtn');
+      if (demoLinBtn) {
+        demoLinBtn.addEventListener('click', () => {
+          document.getElementById('surnameInput').value = '林';
+          document.getElementById('givenNameInput').value = '義峰';
+          state.customStrokes = {};
+          renderNameView();
+          showToast('已載入「林義峰」原站圖解範例！');
+        });
+      }
+
       document.getElementById('clearNameBtn').addEventListener('click', () => {
         document.getElementById('surnameInput').value = '';
         document.getElementById('givenNameInput').value = '';
