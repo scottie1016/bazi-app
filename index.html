@@ -991,6 +991,7 @@
 
   <script>
   (() => {
+    "use strict";
     /***********************************************************************
      * 1. COMPLETE 1900-2050 LUNAR CALENDAR & ASTRONOMICAL SOLAR TERM ENGINE
      ***********************************************************************/
@@ -3112,7 +3113,7 @@
       const gridContainer = document.getElementById('ziweiTraditionalGrid');
       gridContainer.innerHTML = gridCells.map(cell => {
         if (cell.type === 'center') {
-          const虛歲 = 2026 - b.solar.year + 1;
+          const virtualAge = 2026 - b.solar.year + 1;
           return `
             <div class="ziwei-center theme-subtle border theme-border rounded-xl p-4 flex flex-col justify-between">
               <div class="space-y-1.5 text-xs">
@@ -3124,7 +3125,7 @@
                 <div><strong>農曆生日：</strong>民國 ${b.lunar.year - 1911} 年 ${b.lunar.isLeap ? '閏' : ''}${b.lunar.month} 月 ${b.lunar.day} 日 ${BRANCHES[b.hourOpt.branchIdx]} 時生</div>
                 <div><strong>生辰八字：</strong>${b.pillars.year.stem}${b.pillars.year.branch} 年 ${b.pillars.month.stem}${b.pillars.month.branch} 月 ${b.pillars.day.stem}${b.pillars.day.branch} 日 ${b.pillars.hour.stem}${b.pillars.hour.branch} 時</div>
                 <div class="grid grid-cols-2 gap-2 pt-1">
-                  <div class="theme-card p-2 rounded-lg border theme-border"><strong>命宮：</strong>${BRANCHES[z.mingBranchIdx]} ｜ <strong>身宮：</strong>${BRANCHES[z.shenBranchIdx]} ｜ <strong>虛歲：</strong>${虛歲}</div>
+                  <div class="theme-card p-2 rounded-lg border theme-border"><strong>命宮：</strong>${BRANCHES[z.mingBranchIdx]} ｜ <strong>身宮：</strong>${BRANCHES[z.shenBranchIdx]} ｜ <strong>虛歲：</strong>${virtualAge}</div>
                   <div class="theme-card p-2 rounded-lg border theme-border"><strong>命主：</strong>${z.mingzhu} ｜ <strong>身主：</strong>${z.shenzhu} ｜ <strong>子年斗君：</strong>${z.doujun}</div>
                 </div>
               </div>
@@ -3194,7 +3195,9 @@
     function renderNameView() {
       const surnameRaw = (document.getElementById('surnameInput').value || '').trim();
       const givenRaw = (document.getElementById('givenNameInput').value || '').trim();
-            
+      const adjustContainer = document.getElementById('charStrokeAdjustContainer');
+      const resBox = document.getElementById('nameResultContainer');
+
       if (!surnameRaw || !givenRaw) {
         adjustContainer.innerHTML = '<span class="text-xs theme-muted">（輸入姓氏與名字後將自動顯示各字康熙筆劃）</span>';
         resBox.innerHTML = `
@@ -3214,8 +3217,6 @@
         ...surnameChars.map((c, i) => ({ ch: c, role: `姓氏${i + 1}`, key: `S${i}_${c}` })),
         ...givenChars.map((c, i) => ({ ch: c, role: `名字${i + 1}`, key: `G${i}_${c}` }))
       ];
-
-      const adjustContainer = document.getElementById('charStrokeAdjustContainer');
       adjustContainer.innerHTML = allChars.map(item => {
         const s = state.customStrokes[item.ch] ?? getStrokeCount(item.ch);
         const charWx = strokeToWx(s);
@@ -3287,7 +3288,6 @@
         });
       }
 
-      const resBox = document.getElementById('nameResultContainer');
       resBox.innerHTML = `
         <!-- Left 2 cols: 三才五格 + 八十一靈動吉凶數 -->
         <div class="lg:col-span-2 theme-card border rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
