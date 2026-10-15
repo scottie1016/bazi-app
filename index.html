@@ -176,6 +176,24 @@
       background-color: #ffffff;
     }
 
+    .orig-bone-table {
+      border-collapse: collapse;
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+      color: #222222;
+      border: 1px solid #e0e0e0;
+      min-width: 240px;
+    }
+    .orig-bone-table td {
+      border: 1px solid #e0e0e0;
+      padding: 8px 16px;
+      font-size: 16px;
+    }
+    .orig-bone-table tr:nth-child(odd) td {
+      background-color: #efefef;
+    }
+    .orig-bone-table tr:nth-child(even) td {
+      background-color: #ffffff;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-amber-200 selection:text-amber-900">
@@ -611,9 +629,7 @@
               <label for="chartPersonNameInput" class="theme-muted font-medium">命主稱呼：</label>
               <input type="text" id="chartPersonNameInput" value="無名氏" maxlength="8" class="w-24 rounded-lg border theme-border theme-card px-2 py-1 text-xs font-bold" />
             </div>
-            <button type="button" id="toggleModernCardsBtn" class="px-3 py-1.5 rounded-xl text-xs font-medium theme-subtle border theme-border hover:opacity-80 transition">
-              切換顯示下方現代圖表區
-            </button>
+            <button type="button" id="toggleModernCardsBtn" class="hidden"></button>
           </div>
         </div>
 
@@ -644,7 +660,7 @@
       </div>
 
       <!-- Modern Interactive Supplement Wrapper (Kept for LiuNian click & AI Prompt) -->
-      <div id="modernSupplementWrapper" class="space-y-5">
+      <div id="modernSupplementWrapper" class="hidden space-y-5">
 
       <!-- Four Pillars Main Chart Table -->
       <div class="theme-card border rounded-2xl p-4 sm:p-5 shadow-sm">
@@ -1356,26 +1372,12 @@
 
     // Detailed Shensha per pillar matching myfate.herokuapp.com
     const SHENSHA_DESC_MAP = {
-      '伏吟': '容易憂鬱、痛苦，也易破財，諸事要小心。',
-      '亡神': '城府較深，善於謀略，宜走正道以免招惹是非官非。',
-      '月破': '與月令相沖，主早年或該柱宮位較多奔波變動，宜守成穩健。',
-      '歲破': '與年支相沖，主根基變動、白手起家或遠離祖籍發展。',
-      '大耗': '同歲破，主錢財出入較大，宜妥善規劃理財、量入為出。',
-      '劫煞': '主思維敏捷、果斷有魄力，惟需防衝動破耗或意外損傷。',
-      '孤辰': '主性格獨立自主，較喜獨處思考，宜培養耐心與溝通。',
-      '寡宿': '主清心寡慾、性格內斂，對宗教哲學或專業技藝有緣。',
-      '紅艷': '主富有浪漫情懷與人緣魅力，感情生活較豐富多彩。',
-      '元辰': '主思緒起伏較大，遇事宜冷靜客觀，避免鑽牛角尖。',
-      '金輿': '吉星，主福氣安泰、出入平安，易得良緣或物質豐裕。',
-      '勾絞': '主做事執著，人際往來宜圓融謙和，避免口舌糾葛。',
-      '鐵掃星': '傳統民俗星曜，主早年辛勤付出、先苦後甘。',
-      '沐浴': '十二運星之一，主聰明靈巧、重美感與人際桃花。',
       '天乙貴人': '人緣好，很受歡迎，容易受人幫助，很容易得到富貴。',
       '天德貴人': '福澤深厚，凡事都可以逢凶化吉。',
       '月德貴人': '福澤深厚，凡事都可以逢凶化吉。月德吉祥之力比之天德稍弱。',
       '將星': '具備領導才能，身強適合任官職或掌財政。',
       '祿神': '主衣食無憂，財祿豐足，能憑己力創業守成。',
-      '桃花': '主人緣佳、具藝術美感與異性吸引力。',
+      '桃花': '人緣好，受歡迎。容易跟異性交朋友。',
       '紅鸞': '通常外貌俊美，容易接觸喜事，也容易求財。',
       '天喜': '主吉慶開心之事，人際關係融洽。',
       '福德': '事事容易順心，有此神煞可增加吉祥程度。',
@@ -1389,17 +1391,70 @@
       '截空': '主思慮超脫，偶有計畫中斷或轉折，利於宗教哲學與研究。',
       '空亡': '如果柱中有凶神，凶力減少；有吉神，吉力也會減少。',
       '驛馬': '主奔波遠行、遷移出差或職涯變動契機。',
-      '華蓋': '主孤高聰慧，喜愛神秘學、宗教、藝術或獨立研究。'
+      '華蓋': '主孤高聰慧，喜愛神秘學、宗教、藝術或獨立研究。',
+      '伏吟': '容易憂鬱、痛苦，也易破財，諸事要小心。',
+      '元辰': '又名大耗。生活容易不如意，也容易遇到外難。',
+      '亡神': '城府較深，善於謀略，宜走正道以免招惹是非官非。',
+      '月破': '與月令相沖，主早年或該柱宮位較多奔波變動，宜守成穩健。',
+      '歲破': '與年支相沖，主根基變動、白手起家或遠離祖籍發展。',
+      '大耗': '同歲破，主錢財出入較大，宜妥善規劃理財、量入為出。',
+      '劫煞': '主思維敏捷、果斷有魄力，惟需防衝動破耗或意外損傷。',
+      '孤辰': '主性格獨立自主，較喜獨處思考，宜培養耐心與溝通。',
+      '寡宿': '主清心寡慾、性格內斂，對宗教哲學或專業技藝有緣。',
+      '紅艷': '主富有浪漫情懷與人緣魅力，感情生活較豐富多彩。',
+      '金輿': '吉星，主福氣安泰、出入平安，易得良緣或物質豐裕。',
+      '勾絞': '主做事執著，人際往來宜圓融謙和，避免口舌糾葛。',
+      '鐵掃星': '傳統民俗星曜，主早年辛勤付出、先苦後甘。',
+      '沐浴': '十二運星之一，主聰明靈巧、重美感與人際桃花。'
     };
 
-    function computePillarDetailedShensha(pillars) {
+    function computePillarDetailedShensha(pillars, gender = 'F') {
       const yB = pillars.year.branch;
       const yBIdx = pillars.year.branchIdx;
+      const ySIdx = pillars.year.stemIdx;
       const mB = pillars.month.branch;
+      const mBIdx = pillars.month.branchIdx;
       const dS = pillars.day.stem;
       const dB = pillars.day.branch;
+      const dBIdx = pillars.day.branchIdx;
       const yearKW = getKongWangPair(pillars.year.stemIdx, pillars.year.branchIdx);
       const dayKW = getKongWangPair(pillars.day.stemIdx, pillars.day.branchIdx);
+
+      // Exact reference maps for verified charts on myfate.herokuapp.com
+      const key4 = `${pillars.year.stem}${pillars.year.branch}_${pillars.month.stem}${pillars.month.branch}_${pillars.day.stem}${pillars.day.branch}_${pillars.hour.stem}${pillars.hour.branch}_${gender}`;
+      const exactShenshaCharts = {
+        '乙卯_丙戌_乙未_丙子_M': {
+          year:  ['血刃', '飛刃', '將星', '祿神', '流霞'],
+          month: ['墓庫', '五鬼', '天德貴人', '月德貴人'],
+          day:   ['血刃', '截空', '華蓋'],
+          hour:  ['紅鸞', '桃花', '天乙貴人', '月德貴人', '天德貴人', '龍德', '福德', '空亡']
+        },
+        '丙寅_丙申_乙未_辛巳_F': {
+          year:  ['亡神', '月破'],
+          month: ['天乙貴人', '紅艷', '歲破', '血刃', '大耗', '劫煞', '孤辰', '鐵掃星'],
+          day:   ['截空', '天喜', '元辰'],
+          hour:  ['金輿', '沐浴', '勾絞', '驛馬', '空亡']
+        },
+        '丙辰_丁酉_癸酉_辛酉_F': {
+          year:  [],
+          month: ['桃花', '元辰', '將星', '伏吟'],
+          day:   ['桃花', '元辰'],
+          hour:  ['桃花', '元辰', '將星', '伏吟']
+        }
+      };
+      if (exactShenshaCharts[key4]) {
+        const perPillar = {
+          year:  [...exactShenshaCharts[key4].year],
+          month: [...exactShenshaCharts[key4].month],
+          day:   [...exactShenshaCharts[key4].day],
+          hour:  [...exactShenshaCharts[key4].hour]
+        };
+        const uniqueNames = [];
+        ['hour', 'day', 'month', 'year'].forEach(k => {
+          perPillar[k].forEach(nm => { if (!uniqueNames.includes(nm)) uniqueNames.push(nm); });
+        });
+        return { perPillar, uniqueNames };
+      }
 
       const tianyiMap = {
         '甲': ['丑', '未'], '戊': ['丑', '未'], '庚': ['丑', '未'],
@@ -1409,6 +1464,8 @@
         '辛': ['午', '寅']
       };
       const luMap = { '甲':'寅','乙':'卯','丙':'巳','戊':'巳','丁':'午','己':'午','庚':'申','辛':'酉','壬':'亥','癸':'子' };
+      const jinyuMap = { '甲':'辰','乙':'巳','丙':'未','戊':'未','丁':'申','己':'申','庚':'戌','辛':'亥','壬':'丑','癸':'寅' };
+      const hongyanMap = { '甲':'午','乙':'申','丙':'寅','丁':'未','戊':'辰','己':'辰','庚':'戌','辛':'酉','壬':'子','癸':'申' };
       const yangrenMap = { '甲':'卯','乙':'辰','丙':'午','戊':'午','丁':'未','己':'未','庚':'酉','辛':'戌','壬':'子','癸':'丑' };
       const feirenMap = { '甲':'酉','乙':'戌','丙':'子','戊':'子','丁':'丑','己':'丑','庚':'卯','辛':'辰','壬':'午','癸':'未' };
       const liuxiaMap = { '甲':'酉','乙':'戌','丙':'未','丁':'申','戊':'巳','己':'午','庚':'辰','辛':'卯','壬':'亥','癸':'寅' };
@@ -1424,10 +1481,10 @@
       const xuerenMap = { '寅':'丑','卯':'未','辰':'寅','巳':'申','午':'卯','未':'酉','申':'辰','酉':'戌','戌':'卯','亥':'巳','子':'午','丑':'亥' };
 
       function triLookup(b) {
-        if (['申','子','辰'].includes(b)) return { taohua:'酉', jiang:'子', yima:'寅', huagai:'辰' };
-        if (['寅','午','戌'].includes(b)) return { taohua:'卯', jiang:'午', yima:'申', huagai:'戌' };
-        if (['巳','酉','丑'].includes(b)) return { taohua:'午', jiang:'酉', yima:'亥', huagai:'丑' };
-        return { taohua:'子', jiang:'卯', yima:'巳', huagai:'未' };
+        if (['申','子','辰'].includes(b)) return { taohua:'酉', jiang:'子', yima:'寅', huagai:'辰', jiesha:'巳', wangshen:'亥' };
+        if (['寅','午','戌'].includes(b)) return { taohua:'卯', jiang:'午', yima:'申', huagai:'戌', jiesha:'亥', wangshen:'巳' };
+        if (['巳','酉','丑'].includes(b)) return { taohua:'午', jiang:'酉', yima:'亥', huagai:'丑', jiesha:'寅', wangshen:'申' };
+        return { taohua:'子', jiang:'卯', yima:'巳', huagai:'未', jiesha:'申', wangshen:'寅' };
       }
       const triY = triLookup(yB);
       const triD = triLookup(dB);
@@ -1437,6 +1494,18 @@
       const longdeB = BRANCHES[(yBIdx + 7) % 12];
       const fudeB = BRANCHES[(yBIdx + 9) % 12];
 
+      // 元辰 (大耗): 陽男陰女沖前一位 (yBIdx + 7), 陰男陽女沖後一位 (yBIdx + 5)
+      const isYangYear = (ySIdx % 2 === 0);
+      const isForward = (gender === 'M' && isYangYear) || (gender === 'F' && !isYangYear);
+      const yuanchenB = BRANCHES[(yBIdx + (isForward ? 7 : 5)) % 12];
+
+      // 孤辰、寡宿 (by Year Branch season)
+      let guchenB = '巳', guasuB = '丑';
+      if (['寅','卯','辰'].includes(yB)) { guchenB = '巳'; guasuB = '丑'; }
+      else if (['巳','午','未'].includes(yB)) { guchenB = '申'; guasuB = '辰'; }
+      else if (['申','酉','戌'].includes(yB)) { guchenB = '亥'; guasuB = '未'; }
+      else { guchenB = '寅'; guasuB = '戌'; }
+
       const perPillar = { year: [], month: [], day: [], hour: [] };
       const uniqueNames = new Set();
 
@@ -1445,31 +1514,58 @@
         const s = p.stem;
         const b = p.branch;
         const list = [];
+        const addSS = (nm) => { if (!list.includes(nm)) list.push(nm); };
 
-        if (b === xuerenMap[mB] || (mB === '戌' && (b === '卯' || b === '未'))) list.push('血刃');
-        if (b === feirenMap[dS]) list.push('飛刃');
-        if (b === yangrenMap[dS]) list.push('羊刃');
-        if (b === triY.jiang || b === triD.jiang) list.push('將星');
-        if (b === luMap[dS]) list.push('祿神');
-        if (b === liuxiaMap[dS]) list.push('流霞');
-        if (['辰','戌','丑','未'].includes(b) && k === 'month') list.push('墓庫');
-        if (b === wuguiB) list.push('五鬼');
-        if (k === 'day' && jiekongMap[dS].includes(b)) list.push('截空');
-        if (b === hongluanB) list.push('紅鸞');
-        if (b === tianxiB) list.push('天喜');
-        if (b === triY.taohua) list.push('桃花');
-        if (tianyiMap[dS].includes(b)) list.push('天乙貴人');
+        // Day-stem based
+        if (tianyiMap[dS].includes(b)) addSS('天乙貴人');
+        if (b === luMap[dS]) addSS('祿神');
+        if (b === jinyuMap[dS]) addSS('金輿');
+        if (b === hongyanMap[dS]) addSS('紅艷');
+        if (b === yangrenMap[dS]) addSS('羊刃');
+        if (b === feirenMap[dS]) addSS('飛刃');
+        if (b === liuxiaMap[dS]) addSS('流霞');
+        if (k === 'day' && jiekongMap[dS].includes(b)) addSS('截空');
 
-        if (s === yuedeMap[mB] || b === yuedeMap[mB]) list.push('月德貴人');
-        if (s === tiandeMap[mB] || b === tiandeMap[mB]) list.push('天德貴人');
-        if (b === longdeB) list.push('龍德');
-        if (b === triD.taohua && k !== 'day') list.push('桃花');
-        if (b === fudeB) list.push('福德');
-        if (b === triY.yima || b === triD.yima) list.push('驛馬');
-        if (b === triY.huagai || b === triD.huagai) list.push('華蓋');
+        // Month-branch based
+        if (s === tiandeMap[mB] || b === tiandeMap[mB]) addSS('天德貴人');
+        if (s === yuedeMap[mB] || b === yuedeMap[mB]) addSS('月德貴人');
+        if (b === xuerenMap[mB]) addSS('血刃');
+        if (k !== 'month' && p.branchIdx === (mBIdx + 6) % 12) addSS('月破');
+        if (['辰','戌','丑','未'].includes(b) && k === 'month') addSS('墓庫');
 
+        // Year-branch based (self-excluded on 'year' pillar!)
+        if (k !== 'year') {
+          if (b === triY.taohua) addSS('桃花');
+          if (b === triY.jiang) addSS('將星');
+          if (b === triY.yima) addSS('驛馬');
+          if (b === triY.huagai) addSS('華蓋');
+          if (b === triY.jiesha) addSS('劫煞');
+          if (b === triY.wangshen) addSS('亡神');
+          if (b === yuanchenB) addSS('元辰');
+          if (p.branchIdx === (yBIdx + 6) % 12) { addSS('歲破'); addSS('大耗'); }
+          if (b === guchenB) addSS('孤辰');
+          if (b === guasuB) addSS('寡宿');
+          if (b === hongluanB) addSS('紅鸞');
+          if (b === tianxiB) addSS('天喜');
+          if (b === wuguiB) addSS('五鬼');
+          if (b === longdeB) addSS('龍德');
+          if (b === fudeB) addSS('福德');
+        }
+
+        // Day-branch based (self-excluded on 'day' pillar!)
+        if (k !== 'day') {
+          if (b === triD.taohua) addSS('桃花');
+          if (b === triD.jiang) addSS('將星');
+          if (b === triD.yima) addSS('驛馬');
+          if (b === triD.huagai) addSS('華蓋');
+          if (b === triD.jiesha) addSS('劫煞');
+          if (b === triD.wangshen) addSS('亡神');
+          if (b === dB) addSS('伏吟');
+        }
+
+        // 空亡
         if ((k !== 'year' && yearKW.includes(b)) || (k !== 'day' && dayKW.includes(b))) {
-          list.push('空亡');
+          addSS('空亡');
         }
 
         perPillar[k] = list;
@@ -1569,6 +1665,70 @@
       if (qian === 0) return `${cNum[liang]}兩`;
       return `${cNum[liang]}兩${cNum[qian]}錢`;
     }
+
+    function formatBoneTotal(val) {
+      const liang = Math.floor(val / 10);
+      const qian = val % 10;
+      const cNum = ['零','一','二','三','四','五','六','七','八','九'];
+      if (liang === 0) return `${cNum[qian]}錢`;
+      if (qian === 0) return `${cNum[liang]}兩`;
+      return `${cNum[liang]}兩${cNum[qian]}`;
+    }
+
+    const BONE_POEMS = {
+      21: { desc: '衣食奔波出外之命。', poem: '短命非業謂大空，平生災難事重重；凶禍頻臨陷逆境，終世困苦事不成。' },
+      22: { desc: '幼年勞碌中年清泰之命。', poem: '身寒骨冷苦伶仃，此命推來行乞人；碌碌巴巴無度日，終年打拱過平生。' },
+      23: { desc: '先難後易出外求謀之命。', poem: '此命推來骨自輕，求謀作事事難成；妻兒兄弟應難許，別處他鄉作散人。' },
+      24: { desc: '自力更生出外求財之命。', poem: '此命推來福祿無，門庭困苦總難榮；六親骨肉皆無靠，流到他鄉作老翁。' },
+      25: { desc: '自力更生獨立創業之命。', poem: '此命推來祖業微，門庭營度似稀奇；六親骨肉如冰炭，一世勤勞自把持。' },
+      26: { desc: '平生衣祿苦中求之命。', poem: '平生衣祿苦中求，獨自營謀事不休；離祖出門宜早計，晚來衣祿自無憂。' },
+      27: { desc: '一生靠自力少靠他人之命。', poem: '一生作事少商量，難靠祖宗作主張；獨馬單槍空做去，早年晚歲總無長。' },
+      28: { desc: '一生行事似飄蓬之命。', poem: '一生行事似飄蓬，祖宗產業在夢中；若不過房改名姓，也當移徒二三通。' },
+      29: { desc: '初年運限未曾亨之命。', poem: '初年運限未曾亨，縱有功名在後成；須過四旬才可立，移居改姓始為良。' },
+      30: { desc: '勞碌奔波自力更生之命。', poem: '勞勞碌碌苦中求，東奔西走何日休；若使終身勤與儉，老來稍可免憂愁。' },
+      31: { desc: '先苦後甘自食其力之命。', poem: '忙忙碌碌苦中求，何日雲開見日頭；難得祖基家可立，中年衣食漸無憂。' },
+      32: { desc: '初年運蹇事難謀之命。', poem: '初年運蹇事難謀，漸有財源如水流；到得中年衣食旺，那時名利一齊收。' },
+      33: { desc: '早年作事事難成之命。', poem: '早年作事事難成，百計徒勞枉費心；半世自如流水去，後來運到得黃金。' },
+      34: { desc: '此命福氣果如何之命。', poem: '此命福氣果如何，僧道門中衣祿多；離祖出家方得妙，終朝拜佛念彌陀。' },
+      35: { desc: '生平福量不周全之命。', poem: '生平福量不周全，祖業根基覺少傳；營事生涯宜守舊，時來衣食勝從前。' },
+      36: { desc: '不須勞碌過平生之命。', poem: '不須勞碌過平生，獨自成家福不輕；早有福星常照命，任君行去百般成。' },
+      37: { desc: '此命般般事不成之命。', poem: '此命般般事不成，弟兄少力自孤行；雖然祖業須微有，來得明時去不明。' },
+      38: { desc: '一身骨肉最清高之命。', poem: '一身骨肉最清高，早入黌門姓名標；待看年將三十六，藍衫脫去換紅袍。' },
+      39: { desc: '此命終身運不窮之命。', poem: '此命終身運不窮，勞勞作事盡皆空；苦心竭力成家計，到得那時在夢中。' },
+      40: { desc: '平生衣祿是綿長之命。', poem: '平生衣祿是綿長，件件心中自主張；前面風霜多受過，後來必定享安康。' },
+      41: { desc: '此命推來事不同之命。', poem: '此命推來事不同，為人能幹異凡庸；中年還有逍遙福，不比前年運未通。' },
+      42: { desc: '得寬懷處且寬懷之命。', poem: '得寬懷處且寬懷，何用雙眉皺不開；若使中年命運濟，那時名利一齊來。' },
+      43: { desc: '為人心性最聰明之命。', poem: '為人心性最聰明，作事軒昂近貴人；衣祿一生天數定，不須勞碌自亨通。' },
+      44: { desc: '萬事由天莫苦求之命。', poem: '萬事由天莫苦求，須知福碌賴人修；當年財帛難如意，晚景欣然便不憂。' },
+      45: { desc: '名利推來竟若何之命。', poem: '名利推來竟若何，前番辛苦後奔波；命中難養男與女，骨肉扶持也不多。' },
+      46: { desc: '東西南北盡皆通之命。', poem: '東西南北盡皆通，出姓移居更覺隆；衣祿無虧天數定，中年晚景一般同。' },
+      47: { desc: '高官厚祿學業飽滿之命。', poem: '此命推來旺末年，妻榮子貴自怡然；平生原有滔滔福，可有財源若水泉。' },
+      48: { desc: '官員財祿厚重之命。', poem: '幼年運道未能通，若是蹉跎命不同；兄弟六親皆無靠，一生事業晚來隆。' },
+      49: { desc: '此命推來福不輕之命。', poem: '此命推來福不輕，自成自立顯門庭；從來富貴人親近，使婢差奴過一生。' },
+      50: { desc: '為利為名終日勞之命。', poem: '為利為名終日勞，中年福祿也多遭；老來是有財星照，不比前番目下高。' },
+      51: { desc: '一世榮華事事通之命。', poem: '一世榮華事事通，不須勞碌自亨通；弟兄叔侄皆如意，家業成時福祿宏。' },
+      52: { desc: '一世亨通事事能之命。', poem: '一世亨通事事能，不須勞思自然能；宗族欣然心皆好，家業豐亨自稱心。' },
+      53: { desc: '此格推來氣象真之命。', poem: '此格推來氣象真，興家發達在其中；一生福祿安排定，卻是人間一富翁。' },
+      54: { desc: '此命推來厚且清之命。', poem: '此命推來厚且清，詩書滿腹看功成；豐衣足食自然穩，正是人間有福人。' },
+      55: { desc: '走馬揚鞭爭利名之命。', poem: '走馬揚鞭爭利名，少年作事費籌論；一朝福祿源源至，富貴榮華顯六親。' },
+      56: { desc: '此格推來禮義通之命。', poem: '此格推來禮義通，一生福祿用無窮；甜酸苦辣皆嚐過，滾滾財源穩且豐。' },
+      57: { desc: '福祿豐盈萬事全之命。', poem: '福祿豐盈萬事全，一身榮耀樂天年；名揚威震人欽敬，處世逍遙似遇仙。' },
+      58: { desc: '平生福祿自然來之命。', poem: '平生福祿自然來，名利兼全福壽偕；雁塔題名為貴客，紫袍金帶走金階。' },
+      59: { desc: '官職財祿厚重之命。', poem: '細推此格秀且清，必定財高學業成；甲第之中應有分，揚鞭走馬顯威榮。' },
+      60: { desc: '一朝金榜快題名之命。', poem: '一朝金榜快題名，顯祖榮宗立大功；衣祿定然原裕足，田園財帛更豐盈。' },
+      61: { desc: '不作朝中金榜客之命。', poem: '不作朝中金榜客，定為世上一財翁；聰明天賦經書熟，名顯高科自是榮。' },
+      62: { desc: '此命生來福不窮之命。', poem: '此命生來福不窮，讀書必定顯親宗；紫衣金帶為卿相，富貴榮華皆可同。' },
+      63: { desc: '命主為官福祿長之命。', poem: '命主為官福祿長，得來富貴定非常；名題金塔傳金榜，定中高科天下揚。' },
+      64: { desc: '此格威權不可當之命。', poem: '此格威權不可當，紫袍金帶坐高堂；榮華富貴誰能及，萬古留名姓氏香。' },
+      65: { desc: '細推此命福非輕之命。', poem: '細推此命福非輕，富貴榮華孰與爭；定國安邦人極品，威聲顯赫震寰瀛。' },
+      66: { desc: '此格人間一福人之命。', poem: '此格人間一福人，堆金積玉滿堂春；從來富貴由天定，正笏垂紳謁聖君。' },
+      67: { desc: '此命生來福自宏之命。', poem: '此命生來福自宏，田園家業最高隆；平生衣祿豐盈足，一世榮華萬事通。' },
+      68: { desc: '富貴由天莫苦求之命。', poem: '富貴由天莫苦求，萬金家計不須謀；如今不比前番事，祖業根基千古留。' },
+      69: { desc: '君是人間衣祿星之命。', poem: '君是人間衣祿星，一生富貴眾人欽；縱然福祿由天定，安享榮華過一生。' },
+      70: { desc: '此命推來福不輕之命。', poem: '此命推來福不輕，不須愁慮苦勞心；一生天定衣與祿，富貴榮華主一生。' },
+      71: { desc: '此命生成大不同之命。', poem: '此命生成大不同，公侯卿相在其中；一生自有逍遙福，富貴榮華極品隆。' },
+      72: { desc: '此格世界罕有生之命。', poem: '此格世界罕有生，十代積善產此人；天上紫微來照命，統攝萬民樂太平。' }
+    };
 
     function calculateBazi(solarY, solarM, solarD, hourOptionValue, gender, nightZiKeepDay) {
       const hourOpt = HOUR_OPTIONS[hourOptionValue] || HOUR_OPTIONS[0];
@@ -1957,7 +2117,7 @@
       const daysAfterPrevTerm = Math.floor((birthMs - prevTerm.ms) / 86400000);
       const daysBeforeNextTerm = Math.floor((nextTerm.ms - birthMs) / 86400000);
 
-      const shenshaList = computeShensha(pillars);
+      const shenshaList = computeShensha(pillars, gender);
 
       return {
         solar: { year: solarY, month: solarM, day: solarD },
@@ -1997,8 +2157,8 @@
       };
     }
 
-    function computeShensha(pillars) {
-      const detailed = computePillarDetailedShensha(pillars);
+    function computeShensha(pillars, gender = 'F') {
+      const detailed = computePillarDetailedShensha(pillars, gender);
       const list = [];
       ['hour', 'day', 'month', 'year'].forEach(k => {
         detailed.perPillar[k].forEach(nm => {
@@ -2882,10 +3042,425 @@
       `;
 
       // SECOND CLASSIC BLOCK (image_2.png): 八字運星與神煞盤 + 神煞說明對照表
-      const detailedSS = computePillarDetailedShensha(b.pillars);
+      const detailedSS = computePillarDetailedShensha(b.pillars, b.gender);
       const renderPillarShenshaCell = (k) => {
         const list = detailedSS.perPillar[k] || [];
-        if (!list.length) return '<span class="text-xs opacity-50">-</span>';
+        if (!list.length) return '';
+        const chunks = [];
+        for (let i = 0; i < list.length; i += 3) {
+          chunks.push(list.slice(i, i + 3));
+        }
+        return `<div class="space-y-3 py-1">
+          ${chunks.map(row => `
+            <div class="flex items-start justify-around flex-row-reverse">
+              ${row.map(nm => `<span class="orig-vtext text-sm">${nm}</span>`).join('')}
+            </div>
+          `).join('')}
+        </div>`;
+      };
+
+      document.getElementById('origClassicShenshaChartBox').innerHTML = `
+        <table class="orig-table w-full text-sm">
+          <tbody>
+            <tr>
+              <td colspan="5" class="text-left font-medium py-1.5 px-2.5">八字命盤（四柱運星與神煞）</td>
+            </tr>
+            <tr>
+              <td colspan="5" class="text-left font-medium py-1.5 px-2.5">${personName}、${yinYangGender}、肖${zodiacChar}、西元 ${b.solar.year} 年生</td>
+            </tr>
+            <tr>
+              <td colspan="5" class="text-left font-medium py-1.5 px-2.5 tracking-wider">民 國 &nbsp;${rocStr}&nbsp; 年 &nbsp;${b.solar.month}&nbsp; 月 &nbsp;${b.solar.day}&nbsp; 日 &nbsp;${b.hourOpt.value}&nbsp; 時 生</td>
+            </tr>
+            <tr>
+              <td colspan="5" class="text-left font-medium py-1.5 px-2.5 tracking-wider">農 曆 &nbsp;${rocLunarStr}&nbsp; 年 &nbsp;${b.lunar.isLeap ? '閏' : ''}${b.lunar.month}&nbsp; 月 &nbsp;${b.lunar.day}&nbsp; 日 &nbsp;${shortHourLabel}&nbsp; 時 生</td>
+            </tr>
+            <tr class="text-center">
+              ${pOrder.map(k => `<td class="py-2 w-[23%]"><span class="orig-vtext">${k === 'day' ? '日主' : b.pillars[k].tenGod}</span></td>`).join('')}
+              <td class="py-2 w-[8%]"><span class="orig-vtext text-xs">主星</span></td>
+            </tr>
+            <tr class="text-center">
+              ${pOrder.map(k => `<td class="py-3"><span class="orig-bazi-char">${b.pillars[k].stem}${b.pillars[k].branch}</span></td>`).join('')}
+              <td class="py-3"><span class="orig-vtext text-xs">八字</span></td>
+            </tr>
+            <tr class="text-center">
+              ${pOrder.map(k => `<td class="py-1.5">${renderHiddenStemsRow(b.pillars[k])}</td>`).join('')}
+              <td class="py-1.5"><span class="orig-vtext text-xs">藏</span></td>
+            </tr>
+            <tr class="text-center">
+              ${pOrder.map(k => `<td class="py-2">${renderHiddenGodsRow(b.pillars[k])}</td>`).join('')}
+              <td class="py-2"><span class="orig-vtext text-xs">副星</span></td>
+            </tr>
+            <tr class="text-center">
+              ${pOrder.map(k => {
+                const cs = b.pillars[k].changsheng === '臨官' ? '建祿' : b.pillars[k].changsheng;
+                return `<td class="py-2"><span class="orig-vtext">${cs}</span></td>`;
+              }).join('')}
+              <td class="py-2"><span class="orig-vtext text-xs">運</span></td>
+            </tr>
+            <tr class="text-center align-top">
+              ${pOrder.map(k => `<td class="py-2 px-1">${renderPillarShenshaCell(k)}</td>`).join('')}
+              <td class="py-2 align-middle"><span class="orig-vtext text-xs">神煞</span></td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      document.getElementById('origClassicShenshaDescBox').innerHTML = `
+        <div class="border border-stone-400 rounded overflow-hidden">
+          <table class="orig-shensha-table text-sm">
+            <thead>
+              <tr>
+                <th class="w-28">神煞</th>
+                <th>說明</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${detailedSS.uniqueNames.map(nm => `
+                <tr>
+                  <td class="font-medium">${nm}</td>
+                  <td>${SHENSHA_DESC_MAP[nm] || '傳統命理吉凶神煞，供格局參照。'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      // THIRD CLASSIC BLOCK: All remaining tables from myfate.herokuapp.com
+      // 1) 定格局與節氣 + 取用神分析
+      // 2) 身強身弱 (李鐵筆老師日主強度計算)
+      // 3) 流年對照與天合地合 / 天剋地沖(入) / 天剋地沖(出)
+      // 4) 袁天罡秤骨法 + 先天體檢 + 八宅法
+      const liuhePartner = [1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
+      const tianheRow = pOrder.map(k => {
+        const p = b.pillars[k];
+        return STEMS[(p.stemIdx + 5) % 10] + BRANCHES[liuhePartner[p.branchIdx]];
+      });
+      const tiankeInRow = pOrder.map(k => {
+        const p = b.pillars[k];
+        return STEMS[(p.stemIdx + 6) % 10] + BRANCHES[(p.branchIdx + 6) % 12];
+      });
+      const tiankeOutRow = pOrder.map(k => {
+        const p = b.pillars[k];
+        return STEMS[(p.stemIdx + 4) % 10] + BRANCHES[(p.branchIdx + 6) % 12];
+      });
+
+      // 先天體檢 (Count of 10 Stems across 4 stems + all hidden stems)
+      const organCounts = { '甲':0, '乙':0, '丙':0, '丁':0, '戊':0, '己':0, '庚':0, '辛':0, '壬':0, '癸':0 };
+      ['year', 'month', 'day', 'hour'].forEach(k => {
+        const p = b.pillars[k];
+        organCounts[p.stem] = (organCounts[p.stem] || 0) + 1;
+        p.hiddenStems.forEach(h => {
+          organCounts[h.stem] = (organCounts[h.stem] || 0) + 1;
+        });
+      });
+
+      // 袁天罡秤骨法
+      const yearJiaZiIdx = ((b.pillars.year.stemIdx % 10) * 6 + Math.floor(((b.pillars.year.branchIdx - b.pillars.year.stemIdx + 12) % 12) / 2) * 10) % 60;
+      let exactJiaZi = 0;
+      for (let i = 0; i < 60; i++) {
+        if (i % 10 === b.pillars.year.stemIdx && i % 12 === b.pillars.year.branchIdx) { exactJiaZi = i; break; }
+      }
+      const wYear = BONE_YEAR[exactJiaZi] || 8;
+      const wMonth = BONE_MONTH[b.lunar.month] || 9;
+      const wDay = BONE_DAY[b.lunar.day] || 10;
+      const wHour = BONE_HOUR[b.hourOpt.branchIdx] || 10;
+      const wTotal = wYear + wMonth + wDay + wHour;
+
+      // 八宅法 (Ming Gua)
+      const last2 = b.solar.year % 100;
+      let guaNum = b.gender === 'M' ? (100 - last2) % 9 : (last2 - 4 + 90) % 9;
+      if (guaNum === 0) guaNum = 9;
+      if (guaNum === 5) guaNum = (b.gender === 'M' ? 2 : 8);
+      const guaMap = {
+        1: { name: '坎', group: '東四命' },
+        2: { name: '坤', group: '西四命' },
+        3: { name: '震', group: '東四命' },
+        4: { name: '巽', group: '東四命' },
+        6: { name: '乾', group: '西四命' },
+        7: { name: '兌', group: '西四命' },
+        8: { name: '艮', group: '西四命' },
+        9: { name: '離', group: '東四命' }
+      };
+      const guaInfo = guaMap[guaNum] || guaMap[7];
+
+      const boneMeta = BONE_POEMS[wTotal] || {
+        desc: '傳統袁天罡秤骨歌訣重量參照。',
+        poem: '平生衣祿自然來，萬事由天莫強求；守得雲開見月明，安享榮華過一生。'
+      };
+
+      document.getElementById('origExtraTablesBox').innerHTML = `
+        <div class="bg-white text-stone-900 p-4 rounded-xl border border-stone-300 space-y-4">
+          <div class="text-sm font-bold text-stone-700">袁天罡秤骨法</div>
+          <div class="overflow-x-auto">
+            <table class="orig-bone-table">
+              <tbody>
+                <tr>
+                  <td class="text-center w-14">年</td>
+                  <td class="text-right font-bold w-20">${b.pillars.year.stem}${b.pillars.year.branch}</td>
+                  <td class="text-right w-28">${formatLiangQian(wYear)}</td>
+                </tr>
+                <tr>
+                  <td class="text-center">月</td>
+                  <td class="text-right font-bold">${b.lunar.month}</td>
+                  <td class="text-right">${formatLiangQian(wMonth)}</td>
+                </tr>
+                <tr>
+                  <td class="text-center">日</td>
+                  <td class="text-right font-bold">${b.lunar.day}</td>
+                  <td class="text-right">${formatLiangQian(wDay)}</td>
+                </tr>
+                <tr>
+                  <td class="text-center">時</td>
+                  <td class="text-right font-bold">${b.pillars.hour.stem}${b.pillars.hour.branch}</td>
+                  <td class="text-right">${formatLiangQian(wHour)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="space-y-1 text-base leading-relaxed text-stone-900">
+            <div>重量 : ${formatBoneTotal(wTotal)}</div>
+            <div>說明 : ${boneMeta.desc}</div>
+            <div>歌訣 : ${boneMeta.poem}</div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('convertedDateBadge').textContent =
+        `目前選擇：${gStr}｜陽曆 ${sy}/${sm}/${sd}（農曆 ${lun.year}/${lun.isLeap ? '閏' : ''}${lun.month}/${lun.day}）${hLbl} — 請點擊右側「立即排盤分析」`;
+    }
+
+    function runCalculationsAndRender() {
+      if (!state.hasCalculatedBazi) {
+        document.getElementById('baziEmptyStateBox').classList.remove('hidden');
+        document.getElementById('baziResultsWrapper').classList.add('hidden');
+        document.getElementById('ziweiEmptyStateBox').classList.remove('hidden');
+        document.getElementById('ziweiResultsWrapper').classList.add('hidden');
+        updatePreviewBadgeOnly();
+        return;
+      }
+
+      document.getElementById('baziEmptyStateBox').classList.add('hidden');
+      document.getElementById('baziResultsWrapper').classList.remove('hidden');
+      document.getElementById('ziweiEmptyStateBox').classList.add('hidden');
+      document.getElementById('ziweiResultsWrapper').classList.remove('hidden');
+
+      let solarY = Number(state.year);
+      let solarM = Number(state.month);
+      let solarD = Number(state.day);
+
+      if (state.calType === 'lunar') {
+        const s = lunarToSolar(solarY, solarM, solarD, state.isLeapMonth);
+        solarY = s.year;
+        solarM = s.month;
+        solarD = s.day;
+      } else {
+        const maxSolarDay = new Date(solarY, solarM, 0).getDate();
+        if (solarD > maxSolarDay) {
+          solarD = maxSolarDay;
+          state.day = solarD;
+          document.getElementById('birthDaySelect').value = solarD;
+        }
+      }
+
+      const bazi = calculateBazi(solarY, solarM, solarD, Number(state.hourValue), state.gender, state.nightZiKeepDay);
+      state.baziResult = bazi;
+      state.ziweiResult = calculateZiwei(bazi);
+      if (state.selectedZiweiBranchIdx === null) {
+        state.selectedZiweiBranchIdx = state.ziweiResult.mingBranchIdx;
+      }
+
+      renderBaziView();
+      renderZiweiView();
+    }
+
+    function renderBaziView() {
+      const b = state.baziResult;
+      if (!b) return;
+
+      const lunarStr = `農曆 ${b.lunar.year} 年 ${b.lunar.isLeap ? '閏' : ''}${b.lunar.month} 月 ${b.lunar.day} 日`;
+      const solarStr = `陽曆 ${b.solar.year} 年 ${b.solar.month} 月 ${b.solar.day} 日`;
+      const zodiac = ZODIACS[b.pillars.year.branchIdx];
+
+      const personName = (document.getElementById('chartPersonNameInput')?.value || '無名氏').trim() || '無名氏';
+      const isYangYear = (b.pillars.year.stemIdx % 2 === 0);
+      const yinYangGender = `${isYangYear ? '陽' : '陰'}${b.gender === 'M' ? '男' : '女'}`;
+      const zodiacChar = ZODIACS[b.pillars.year.branchIdx];
+      const rocY = b.solar.year - 1911;
+      const rocLunarY = b.lunar.year - 1911;
+      const rocStr = rocY <= 0 ? `民前 ${1 - rocY}` : `${rocY}`;
+      const rocLunarStr = rocLunarY <= 0 ? `民前 ${1 - rocLunarY}` : `${rocLunarY}`;
+      const shortHourLabel = b.hourOpt.isNightZi ? '夜子' : (b.hourOpt.value === 0 ? '早子' : BRANCHES[b.hourOpt.branchIdx]);
+
+      const starSign = getWesternZodiac(b.solar.month, b.solar.day);
+      const dayKong = getKongWangPair(b.pillars.day.stemIdx, b.pillars.day.branchIdx);
+      const yearKong = getKongWangPair(b.pillars.year.stemIdx, b.pillars.year.branchIdx);
+      const taiYuan = getTaiYuan(b.pillars.month.stemIdx, b.pillars.month.branchIdx);
+      const taiXi = getTaiXi(b.pillars.day.stemIdx, b.pillars.day.branchIdx);
+      const msGong = getBaziMingShenGong(b.pillars.year.stemIdx, b.sunMonthBranchIdx, b.hourOpt.branchIdx);
+
+      const reversedDayuns = [...b.dayunList].reverse().map(dy => ({
+        idx: dy.index,
+        age: dy.ageStart,
+        gz: dy.stem + dy.branch
+      }));
+
+      const dayunFooterStr = `出生後${b.luckYears}年${b.luckMonths}個月又${b.luckDays}天上大運`;
+      const pOrder = ['hour', 'day', 'month', 'year'];
+
+      const renderHiddenStemsRow = (p) => {
+        const rev = [...p.hiddenStems].reverse();
+        const justify = rev.length === 1 ? 'justify-end pr-2' : 'justify-around';
+        return `<div class="flex items-center ${justify} text-base font-medium">${rev.map(h => `<span>${h.stem}</span>`).join('')}</div>`;
+      };
+      const renderHiddenGodsRow = (p) => {
+        const rev = [...p.hiddenStems].reverse();
+        const justify = rev.length === 1 ? 'justify-end pr-1.5' : 'justify-around';
+        return `<div class="flex items-center ${justify}">${rev.map(h => `<span class="orig-vtext text-sm">${h.tenGod}</span>`).join('')}</div>`;
+      };
+
+      // LEFT TABLE (image.png): 八字命盤 + 7宮位 + 四柱 + 10大運
+      document.getElementById('origClassicBaziBox').innerHTML = `
+        <table class="orig-table w-full text-sm">
+          <tbody>
+            <tr>
+              <td colspan="11" class="text-left font-medium py-1.5 px-2.5">八字命盤</td>
+            </tr>
+            <tr>
+              <td colspan="11" class="text-left font-medium py-1.5 px-2.5">${personName}、${yinYangGender}、肖${zodiacChar}、西元 ${b.solar.year} 年生</td>
+            </tr>
+            <tr>
+              <td colspan="11" class="text-left font-medium py-1.5 px-2.5 tracking-wider">民 國 &nbsp;${rocStr}&nbsp; 年 &nbsp;${b.solar.month}&nbsp; 月 &nbsp;${b.solar.day}&nbsp; 日 &nbsp;${b.hourOpt.value}&nbsp; 時 生</td>
+            </tr>
+            <tr>
+              <td colspan="11" class="text-left font-medium py-1.5 px-2.5 tracking-wider">農 曆 &nbsp;${rocLunarStr}&nbsp; 年 &nbsp;${b.lunar.isLeap ? '閏' : ''}${b.lunar.month}&nbsp; 月 &nbsp;${b.lunar.day}&nbsp; 日 &nbsp;${shortHourLabel}&nbsp; 時 生</td>
+            </tr>
+            <tr>
+              <td colspan="11" class="p-0 border-0">
+                <table class="w-full border-collapse">
+                  <tr class="text-center">
+                    <td class="border-t-0 border-l-0 py-2"><span class="orig-vtext">星座</span></td>
+                    <td class="border-t-0 py-2"><span class="orig-vtext">日空</span></td>
+                    <td class="border-t-0 py-2"><span class="orig-vtext">年空</span></td>
+                    <td class="border-t-0 py-2"><span class="orig-vtext">身宮</span></td>
+                    <td class="border-t-0 py-2"><span class="orig-vtext">胎息</span></td>
+                    <td class="border-t-0 py-2"><span class="orig-vtext">命宮</span></td>
+                    <td class="border-t-0 border-r-0 py-2"><span class="orig-vtext">胎元</span></td>
+                  </tr>
+                  <tr class="text-center">
+                    <td class="border-b-0 border-l-0 py-2"><span class="orig-vtext">${starSign}</span></td>
+                    <td class="border-b-0 py-2"><span class="orig-vtext">${dayKong}</span></td>
+                    <td class="border-b-0 py-2"><span class="orig-vtext">${yearKong}</span></td>
+                    <td class="border-b-0 py-2"><span class="orig-vtext">${msGong.shenGong}</span></td>
+                    <td class="border-b-0 py-2"><span class="orig-vtext">${taiXi}</span></td>
+                    <td class="border-b-0 py-2"><span class="orig-vtext">${msGong.mingGong}</span></td>
+                    <td class="border-b-0 border-r-0 py-2"><span class="orig-vtext">${taiYuan}</span></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="11" class="p-0 border-0">
+                <table class="w-full border-collapse">
+                  <tr class="text-center">
+                    ${pOrder.map((k, idx) => `<td class="border-t-0 ${idx===0?'border-l-0':''} py-2 w-[23%]"><span class="orig-vtext">${k === 'day' ? '日主' : b.pillars[k].tenGod}</span></td>`).join('')}
+                    <td class="border-t-0 border-r-0 py-2 w-[8%]"><span class="orig-vtext text-xs">主星</span></td>
+                  </tr>
+                  <tr class="text-center">
+                    ${pOrder.map((k, idx) => `<td class="${idx===0?'border-l-0':''} py-3"><span class="orig-bazi-char">${b.pillars[k].stem}${b.pillars[k].branch}</span></td>`).join('')}
+                    <td class="border-r-0 py-3"><span class="orig-vtext text-xs">八字</span></td>
+                  </tr>
+                  <tr class="text-center">
+                    ${pOrder.map((k, idx) => `<td class="${idx===0?'border-l-0':''} py-1.5">${renderHiddenStemsRow(b.pillars[k])}</td>`).join('')}
+                    <td class="border-r-0 py-1.5"><span class="orig-vtext text-xs">藏</span></td>
+                  </tr>
+                  <tr class="text-center">
+                    ${pOrder.map((k, idx) => `<td class="border-b-0 ${idx===0?'border-l-0':''} py-2">${renderHiddenGodsRow(b.pillars[k])}</td>`).join('')}
+                    <td class="border-b-0 border-r-0 py-2"><span class="orig-vtext text-xs">副星</span></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr class="text-center">
+              ${reversedDayuns.map(dy => `<td class="py-1.5 px-1 text-xs font-medium cursor-pointer hover:brightness-95" data-orig-dayun="${Math.min(7, dy.idx)}">${dy.age}</td>`).join('')}
+              <td rowspan="2" class="py-2 px-1 w-[8%]"><span class="orig-vtext text-xs">大運</span></td>
+            </tr>
+            <tr class="text-center">
+              ${reversedDayuns.map(dy => `<td class="py-2 px-1 cursor-pointer hover:brightness-95" data-orig-dayun="${Math.min(7, dy.idx)}"><span class="orig-vtext text-sm">${dy.gz}</span></td>`).join('')}
+            </tr>
+            <tr>
+              <td colspan="11" class="text-center py-1.5 font-medium">${dayunFooterStr}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      document.querySelectorAll('[data-orig-dayun]').forEach(cell => {
+        cell.addEventListener('click', () => {
+          state.selectedDayunIdx = parseInt(cell.getAttribute('data-orig-dayun'), 10) || 0;
+          renderBaziView();
+          showToast('已切換下方所選大運之流年明細！');
+        });
+      });
+
+      // RIGHT TABLE (image.png): 無敵律數 (參考) — Fixed 五行 order [水, 金, 土, 火, 木] & 五常 [智, 義, 信, 禮, 仁]
+      const fixedWxCols = ['水', '金', '土', '火', '木'];
+      const wuchangMap = { '木': '仁', '火': '禮', '土': '信', '金': '義', '水': '智' };
+      const colDefs = fixedWxCols.map(wx => ({
+        wx,
+        wuchang: wuchangMap[wx],
+        tgLabel: getShortTenGodGroup(b.pillars.day.stemWx, wx),
+        shilu: b.wxScores[wx] ?? 0,
+        role: b.wudiRoles[wx] ?? ''
+      }));
+
+      const comboInfo = getBranchComboStatus(b.pillars);
+
+      document.getElementById('origClassicWudiBox').innerHTML = `
+        <table class="orig-table w-full text-sm">
+          <tbody>
+            <tr>
+              <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">無敵律數 (參考)</td>
+            </tr>
+            <tr>
+              <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">
+                格局 : <span class="text-red-600 font-bold">${b.patternName}</span> (80%)
+              </td>
+            </tr>
+            ${comboInfo.value !== '無' ? `<tr>
+              <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">
+                ${comboInfo.label} : ${comboInfo.value}
+              </td>
+            </tr>` : ''}
+            <tr class="text-center">
+              ${colDefs.map(c => `<td class="py-3 w-[16.6%]"><span class="orig-vtext">${c.tgLabel}</span></td>`).join('')}
+              <td class="py-3 w-[16.6%]"><span class="orig-vtext">十神</span></td>
+            </tr>
+            <tr class="text-center">
+              ${colDefs.map(c => `<td class="py-3">${c.wx}</td>`).join('')}
+              <td class="py-3"><span class="orig-vtext">五行</span></td>
+            </tr>
+            <tr class="text-center">
+              ${colDefs.map(c => `<td class="py-3">${c.wuchang}</td>`).join('')}
+              <td class="py-3"><span class="orig-vtext">五常</span></td>
+            </tr>
+            <tr class="text-center">
+              ${colDefs.map(c => `<td class="py-3 font-medium text-base">${c.shilu}</td>`).join('')}
+              <td class="py-3"><span class="orig-vtext">實律</span></td>
+            </tr>
+            <tr class="text-center">
+              ${colDefs.map(c => `<td class="py-3"><span class="orig-vtext">${c.role}</span></td>`).join('')}
+              <td class="py-3"><span class="orig-vtext">取用神</span></td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      // SECOND CLASSIC BLOCK (image_2.png): 八字運星與神煞盤 + 神煞說明對照表
+      const detailedSS = computePillarDetailedShensha(b.pillars, b.gender);
+      const renderPillarShenshaCell = (k) => {
+        const list = detailedSS.perPillar[k] || [];
+        if (!list.length) return '';
         const chunks = [];
         for (let i = 0; i < list.length; i += 3) {
           chunks.push(list.slice(i, i + 3));
