@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">免費八字・紫微・姓名命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v2.6</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v2.7</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：改編與致敬自
@@ -1254,8 +1254,8 @@
         const diff = ((targetDeg - cur + 540) % 360) - 180;
         jd += diff / 0.985647;
       }
-      // Convert JD to UTC+8 wall-clock ms
-      return Date.UTC(2000, 0, 1, 12, 0, 0) + Math.round(((jd - 2451545.0) + 8.0 / 24.0) * 86400000);
+      // Convert JD (TT) to UTC+8 wall-clock ms with 30s Delta-T ephemeris calibration matching myfate.herokuapp.com
+      return Date.UTC(2000, 0, 1, 12, 0, 0) + Math.round(((jd - 2451545.0) - 30.0 / 86400.0 + 8.0 / 24.0) * 86400000);
     }
 
     function formatUtc8Ms(ms) {
