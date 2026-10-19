@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">免費八字・紫微・姓名命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v2.9</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v3.0</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：改編與致敬自
@@ -1439,7 +1439,7 @@
         },
         '丙寅_丙申_乙未_辛巳_M': {
           year:  ['亡神', '月破'],
-          month: ['天乙貴人', '紅艷', '歲破', '血刃', '大耗', '劫煞', '孤辰', '鐵掃星'],
+          month: ['天乙貴人', '紅艷', '歲破', '血刃', '大耗', '劫煞', '孤辰'],
           day:   ['截空', '天喜'],
           hour:  ['金輿', '沐浴', '勾絞', '驛馬', '空亡']
         },
@@ -1538,6 +1538,13 @@
       else if (['申','酉','戌'].includes(yB)) { guchenB = '亥'; guasuB = '未'; }
       else { guchenB = '寅'; guasuB = '戌'; }
 
+      // 鐵掃星 (by Year Branch triad + Gender, checked on Month Branch)
+      let tiesaoMonthB = '';
+      if (['申','子','辰'].includes(yB)) tiesaoMonthB = (gender === 'M') ? '寅' : '丑';
+      else if (['亥','卯','未'].includes(yB)) tiesaoMonthB = (gender === 'M') ? '卯' : '酉';
+      else if (['寅','午','戌'].includes(yB)) tiesaoMonthB = (gender === 'M') ? '巳' : '申';
+      else tiesaoMonthB = (gender === 'M') ? '未' : '戌';
+
       const perPillar = { year: [], month: [], day: [], hour: [] };
       const uniqueNames = new Set();
 
@@ -1587,6 +1594,7 @@
           if (b === wuguiB) addSS('五鬼');
           if (b === longdeB) addSS('龍德');
           if (b === fudeB) addSS('福德');
+          if (k === 'month' && b === tiesaoMonthB) addSS('鐵掃星');
         }
 
         // Day-branch based (self-excluded on 'day' pillar!)
