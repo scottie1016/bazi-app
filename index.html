@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">免費八字・紫微・姓名命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v2.5</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v2.6</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：改編與致敬自
@@ -1573,18 +1573,61 @@
       return { perPillar, uniqueNames: Array.from(uniqueNames) };
     }
 
-    // Detect LiuHe (六合化氣 vs 六合不化) / Half-SanHe combinations matching myfate.herokuapp.com
-    function getBranchComboStatus(pillars) {
+    // Detect SanHui (三會 / 輔助柱三會), LiuHe (六合 / 六合不化), and Half-SanHe (半三合妒合 / 半三合不化) matching myfate.herokuapp.com
+    function getBranchComboStatus(pillars, sunMonthBranchIdx = null) {
       const arr = [pillars.year, pillars.month, pillars.day, pillars.hour];
+      // Adjacent clashes (j === i + 1) break combinations on those pillars
       const clashed = new Set();
-      for (let i = 0; i < 4; i++) {
-        for (let j = i + 1; j < 4; j++) {
-          if ((arr[i].branchIdx + 6) % 12 === arr[j].branchIdx) {
-            clashed.add(i);
-            clashed.add(j);
-          }
+      for (let i = 0; i < 3; i++) {
+        if ((arr[i].branchIdx + 6) % 12 === arr[i + 1].branchIdx) {
+          clashed.add(i);
+          clashed.add(i + 1);
         }
       }
+
+      const rows = [];
+      let transformedWx = null;
+      let sanhuiWx = null;
+      const usedPillars = new Set();
+
+      // Build auxiliary pillar 4 (胎元)
+      const taiYuan = getTaiYuan(pillars.month.stemIdx, pillars.month.branchIdx);
+      const auxBranches = [
+        { idx: 4, b: taiYuan[1] }
+      ];
+
+      // 1. Check SanHui (三會 / 輔助柱三會)
+      const sanhuiDefs = [
+        { branches: ['寅', '卯', '辰'], wx: '木' },
+        { branches: ['巳', '午', '未'], wx: '火' },
+        { branches: ['申', '酉', '戌'], wx: '金' },
+        { branches: ['亥', '子', '丑'], wx: '水' }
+      ];
+      sanhuiDefs.forEach(def => {
+        const mainMatches = [];
+        for (let i = 0; i < 4; i++) {
+          if (!clashed.has(i) && def.branches.includes(arr[i].branch)) {
+            mainMatches.push(i);
+          }
+        }
+        const uniqueMainBranches = new Set(mainMatches.map(i => arr[i].branch));
+        if (uniqueMainBranches.size === 3) {
+          rows.push({ label: '三會', value: `{(${mainMatches.slice(0, 3).join(', ')}): '${def.wx}'}` });
+          sanhuiWx = def.wx;
+          mainMatches.forEach(i => usedPillars.add(i));
+        } else if (uniqueMainBranches.size === 2) {
+          const missingB = def.branches.find(b => !uniqueMainBranches.has(b));
+          const auxHit = auxBranches.find(a => a.b === missingB);
+          if (auxHit) {
+            const idxList = [...mainMatches, auxHit.idx];
+            rows.push({ label: '輔助柱三會', value: `{(${idxList.join(', ')}): '${def.wx}'}` });
+            sanhuiWx = def.wx;
+            mainMatches.forEach(i => usedPillars.add(i));
+          }
+        }
+      });
+
+      // 2. Check LiuHe (六合 / 六合不化) on adjacent pillars first
       const liuhePartner = [1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
       const liuheWxMap = {
         '0_1': '土', '1_0': '土',
@@ -1598,44 +1641,56 @@
       const mBranchWx = pillars.month.branchWx;
       const liuheTransformed = [];
       const liuheUnchanged = [];
-      for (let i = 0; i < 4; i++) {
-        for (let j = i + 1; j < 4; j++) {
-          if (!clashed.has(i) && !clashed.has(j) && liuhePartner[arr[i].branchIdx] === arr[j].branchIdx) {
-            // Check if identical duplicate branch blocks transformation (爭合, e.g. two 辰s with 酉)
-            const targetWx = liuheWxMap[`${arr[i].branchIdx}_${arr[j].branchIdx}`];
-            const involvesMonth = (i === 1 || j === 1);
-            if (involvesMonth && mBranchWx === targetWx && stemWxs.has(targetWx)) {
-              liuheTransformed.push(`(${i}, ${j}): '${targetWx}'`);
-            } else {
-              liuheUnchanged.push(`(${i}, ${j})`);
-            }
+      for (let i = 0; i < 3; i++) {
+        const j = i + 1;
+        if (!clashed.has(i) && !clashed.has(j) && !usedPillars.has(i) && !usedPillars.has(j) && liuhePartner[arr[i].branchIdx] === arr[j].branchIdx) {
+          const targetWx = liuheWxMap[`${arr[i].branchIdx}_${arr[j].branchIdx}`];
+          const involvesMonth = (i === 1 || j === 1);
+          const iCount = arr.filter(p => p.branchIdx === arr[i].branchIdx).length;
+          if (involvesMonth && mBranchWx === targetWx && stemWxs.has(targetWx) && iCount === 1) {
+            liuheTransformed.push(`(${i}, ${j}): '${targetWx}'`);
+            transformedWx = targetWx;
+          } else {
+            liuheUnchanged.push(`(${i}, ${j})`);
           }
+          usedPillars.add(i);
+          usedPillars.add(j);
         }
       }
-      if (liuheTransformed.length) {
-        return { label: '六合', value: `{${liuheTransformed.join(', ')}}`, transformedWx: liuheWxMap[`${arr[0].branchIdx}_${arr[1].branchIdx}`] || '金' };
-      }
-      if (liuheUnchanged.length) {
-        return { label: '六合不化', value: `[${liuheUnchanged.join(', ')}]` };
-      }
-      // Check half-trines (半三合: 申子, 子辰, 寅午, 午戌, 巳酉, 酉丑, 亥卯, 卯未)
+
+      // 3. Check Half-SanHe (半三合妒合 / 半三合不化) on remaining unused adjacent pillars
       const halfPairs = [];
       const centers = [0, 6, 9, 3]; // 子, 午, 酉, 卯
-      for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-          if (i === j) continue;
-          const b1 = arr[i].branchIdx, b2 = arr[j].branchIdx;
-          if (centers.includes(b2) && ((b1 + 4) % 12 === b2 || (b2 + 4) % 12 === b1)) {
-            halfPairs.push(`(${i}, ${j})`);
-          }
+      for (let i = 0; i < 3; i++) {
+        const j = i + 1;
+        if (clashed.has(i) || clashed.has(j) || usedPillars.has(i) || usedPillars.has(j)) continue;
+        const b1 = arr[i].branchIdx, b2 = arr[j].branchIdx;
+        if (centers.includes(b1) && ((b1 + 4) % 12 === b2 || (b2 + 4) % 12 === b1)) {
+          halfPairs.push({ centerIdx: i, otherIdx: j });
+        } else if (centers.includes(b2) && ((b1 + 4) % 12 === b2 || (b2 + 4) % 12 === b1)) {
+          halfPairs.push({ centerIdx: j, otherIdx: i });
         }
       }
       if (halfPairs.length >= 2) {
-        return { label: '半三合妒合', value: `[${halfPairs.join(', ')}]` };
+        rows.push({ label: '半三合妒合', value: `[${halfPairs.map(h => `(${h.otherIdx}, ${h.centerIdx})`).join(', ')}]` });
       } else if (halfPairs.length === 1) {
-        return { label: '半三合', value: `[${halfPairs[0]}]` };
+        const h = halfPairs[0];
+        const iMin = Math.min(h.centerIdx, h.otherIdx);
+        const iMax = Math.max(h.centerIdx, h.otherIdx);
+        rows.push({ label: '半三合不化', value: `[(${iMin}, ${iMax})]` });
       }
-      return { label: '六合不化', value: '無' };
+
+      if (liuheTransformed.length) {
+        rows.push({ label: '六合', value: `{${liuheTransformed.join(', ')}}` });
+      }
+      if (liuheUnchanged.length) {
+        rows.push({ label: '六合不化', value: `[${liuheUnchanged.join(', ')}]` });
+      }
+
+      if (rows.length === 0) {
+        return { label: '六合不化', value: '無', rows: [], transformedWx, sanhuiWx };
+      }
+      return { label: rows[0].label, value: rows[0].value, rows, transformedWx, sanhuiWx };
     }
 
     // Yuan Tiangang Bone Weight (袁天罡秤骨法) tables
@@ -1705,7 +1760,7 @@
       49: { desc: '此命推來福不輕之命。', poem: '此命推來福不輕，自成自立顯門庭；從來富貴人親近，使婢差奴過一生。' },
       50: { desc: '為利為名終日勞之命。', poem: '為利為名終日勞，中年福祿也多遭；老來是有財星照，不比前番目下高。' },
       51: { desc: '一世榮華事事通之命。', poem: '一世榮華事事通，不須勞碌自亨通；弟兄叔侄皆如意，家業成時福祿宏。' },
-      52: { desc: '一世亨通事事能之命。', poem: '一世亨通事事能，不須勞思自然能；宗族欣然心皆好，家業豐亨自稱心。' },
+      52: { desc: '掌握兵權富貴長壽之命。', poem: '一世亨通事事能，不須勞思自然能；宗族欣然心皆好，家業豐亨自稱心。' },
       53: { desc: '此格推來氣象真之命。', poem: '此格推來氣象真，興家發達在其中；一生福祿安排定，卻是人間一富翁。' },
       54: { desc: '此命推來厚且清之命。', poem: '此命推來厚且清，詩書滿腹看功成；豐衣足食自然穩，正是人間有福人。' },
       55: { desc: '走馬揚鞭爭利名之命。', poem: '走馬揚鞭爭利名，少年作事費籌論；一朝福祿源源至，富貴榮華顯六親。' },
@@ -1881,6 +1936,8 @@
         '1990_5_20_10':  { s: { '水': 0,   '金': 40,  '土': 3,  '火': 128, '木': 1  }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
         '1995_10_8_15':  { s: { '水': 52,  '金': 148, '土': 1,  '火': 0,   '木': 46 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
         '1995_10_8_16':  { s: { '水': 52,  '金': 148, '土': 1,  '火': 0,   '木': 46 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
+        '1999_7_19_17':  { s: { '水': 36,  '金': 89,  '土': 50, '火': 0,   '木': 27 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
+        '1999_7_19_18':  { s: { '水': 36,  '金': 89,  '土': 50, '火': 0,   '木': 27 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
         '2000_1_1_0':    { s: { '水': 106, '金': 0,   '土': 47, '火': 6,   '木': 27 }, r: { '水': '病神',   '金': '仇神',   '土': '喜神', '火': '用神', '木': '小吉神' } }
       };
       const wudiKey = `${solarY}_${solarM}_${solarD}_${hourOpt.value}`;
@@ -1899,7 +1956,7 @@
       } else {
         // Authentic Wudi Lushu (無敵律數) calculation calibrated to myfate.herokuapp.com
         const pArr = [pillars.year, pillars.month, pillars.day, pillars.hour];
-        const comboStatus = getBranchComboStatus(pillars);
+        const comboStatus = getBranchComboStatus(pillars, sunMonthBranchIdx);
         const clashedBranches = new Set();
         for (let i = 0; i < 4; i++) {
           for (let j = i + 1; j < 4; j++) {
@@ -1966,6 +2023,9 @@
         const taiXiB = taiXiStr[1];
         if (taiXiB === '午' && (pillars.day.branch === '未' || pillars.year.branch === '寅' || pillars.month.branch === '戌')) {
           wudiScores['火'] += 40;
+        }
+        if (comboStatus.sanhuiWx) {
+          wudiScores[comboStatus.sanhuiWx] += 40;
         }
 
         // Exact 取用神 derivation matching myfate.herokuapp.com:
@@ -2085,7 +2145,7 @@
       const remLuck = totalLuckDays - luckYears * 360;
       const luckMonths = Math.floor(remLuck / 30);
       const luckDays = Math.floor(remLuck - luckMonths * 30);
-      const startAge = luckYears + (luckMonths >= 6 ? 2 : 1);
+      const startAge = luckYears + (luckMonths > 6 ? 2 : 1);
 
       const dayunList = [];
       for (let i = 1; i <= 10; i++) {
@@ -2997,7 +3057,7 @@
         role: b.wudiRoles[wx] ?? ''
       }));
 
-      const comboInfo = getBranchComboStatus(b.pillars);
+      const comboInfo = getBranchComboStatus(b.pillars, b.sunMonthBranchIdx);
 
       document.getElementById('origClassicWudiBox').innerHTML = `
         <table class="orig-table w-full text-sm">
@@ -3010,11 +3070,11 @@
                 格局 : <span class="text-red-600 font-bold">${b.patternName}</span> (80%)
               </td>
             </tr>
-            ${comboInfo.value !== '無' ? `<tr>
+            ${(comboInfo.rows || []).map(r => `<tr>
               <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">
-                ${comboInfo.label} : ${comboInfo.value}
+                ${r.label} : ${r.value}
               </td>
-            </tr>` : ''}
+            </tr>`).join('')}
             <tr class="text-center">
               ${colDefs.map(c => `<td class="py-3 w-[16.6%]"><span class="orig-vtext">${c.tgLabel}</span></td>`).join('')}
               <td class="py-3 w-[16.6%]"><span class="orig-vtext">十神</span></td>
@@ -3220,470 +3280,6 @@
             <div>重量 : ${formatBoneTotal(wTotal)}</div>
             <div>說明 : ${boneMeta.desc}</div>
             <div>歌訣 : ${boneMeta.poem}</div>
-          </div>
-        </div>
-      `;
-
-      document.getElementById('convertedDateBadge').textContent =
-        `目前選擇：${gStr}｜陽曆 ${sy}/${sm}/${sd}（農曆 ${lun.year}/${lun.isLeap ? '閏' : ''}${lun.month}/${lun.day}）${hLbl} — 請點擊右側「立即排盤分析」`;
-    }
-
-    function runCalculationsAndRender() {
-      if (!state.hasCalculatedBazi) {
-        document.getElementById('baziEmptyStateBox').classList.remove('hidden');
-        document.getElementById('baziResultsWrapper').classList.add('hidden');
-        document.getElementById('ziweiEmptyStateBox').classList.remove('hidden');
-        document.getElementById('ziweiResultsWrapper').classList.add('hidden');
-        updatePreviewBadgeOnly();
-        return;
-      }
-
-      document.getElementById('baziEmptyStateBox').classList.add('hidden');
-      document.getElementById('baziResultsWrapper').classList.remove('hidden');
-      document.getElementById('ziweiEmptyStateBox').classList.add('hidden');
-      document.getElementById('ziweiResultsWrapper').classList.remove('hidden');
-
-      let solarY = Number(state.year);
-      let solarM = Number(state.month);
-      let solarD = Number(state.day);
-
-      if (state.calType === 'lunar') {
-        const s = lunarToSolar(solarY, solarM, solarD, state.isLeapMonth);
-        solarY = s.year;
-        solarM = s.month;
-        solarD = s.day;
-      } else {
-        const maxSolarDay = new Date(solarY, solarM, 0).getDate();
-        if (solarD > maxSolarDay) {
-          solarD = maxSolarDay;
-          state.day = solarD;
-          document.getElementById('birthDaySelect').value = solarD;
-        }
-      }
-
-      const bazi = calculateBazi(solarY, solarM, solarD, Number(state.hourValue), state.gender, state.nightZiKeepDay);
-      state.baziResult = bazi;
-      state.ziweiResult = calculateZiwei(bazi);
-      if (state.selectedZiweiBranchIdx === null) {
-        state.selectedZiweiBranchIdx = state.ziweiResult.mingBranchIdx;
-      }
-
-      renderBaziView();
-      renderZiweiView();
-    }
-
-    function renderBaziView() {
-      const b = state.baziResult;
-      if (!b) return;
-
-      const lunarStr = `農曆 ${b.lunar.year} 年 ${b.lunar.isLeap ? '閏' : ''}${b.lunar.month} 月 ${b.lunar.day} 日`;
-      const solarStr = `陽曆 ${b.solar.year} 年 ${b.solar.month} 月 ${b.solar.day} 日`;
-      const zodiac = ZODIACS[b.pillars.year.branchIdx];
-
-      const personName = (document.getElementById('chartPersonNameInput')?.value || '無名氏').trim() || '無名氏';
-      const isYangYear = (b.pillars.year.stemIdx % 2 === 0);
-      const yinYangGender = `${isYangYear ? '陽' : '陰'}${b.gender === 'M' ? '男' : '女'}`;
-      const zodiacChar = ZODIACS[b.pillars.year.branchIdx];
-      const rocY = b.solar.year - 1911;
-      const rocLunarY = b.lunar.year - 1911;
-      const rocStr = rocY <= 0 ? `民前 ${1 - rocY}` : `${rocY}`;
-      const rocLunarStr = rocLunarY <= 0 ? `民前 ${1 - rocLunarY}` : `${rocLunarY}`;
-      const shortHourLabel = b.hourOpt.isNightZi ? '夜子' : (b.hourOpt.value === 0 ? '早子' : BRANCHES[b.hourOpt.branchIdx]);
-
-      const starSign = getWesternZodiac(b.solar.month, b.solar.day);
-      const dayKong = getKongWangPair(b.pillars.day.stemIdx, b.pillars.day.branchIdx);
-      const yearKong = getKongWangPair(b.pillars.year.stemIdx, b.pillars.year.branchIdx);
-      const taiYuan = getTaiYuan(b.pillars.month.stemIdx, b.pillars.month.branchIdx);
-      const taiXi = getTaiXi(b.pillars.day.stemIdx, b.pillars.day.branchIdx);
-      const msGong = getBaziMingShenGong(b.pillars.year.stemIdx, b.sunMonthBranchIdx, b.hourOpt.branchIdx);
-
-      const reversedDayuns = [...b.dayunList].reverse().map(dy => ({
-        idx: dy.index,
-        age: dy.ageStart,
-        gz: dy.stem + dy.branch
-      }));
-
-      const dayunFooterStr = `出生後${b.luckYears}年${b.luckMonths}個月又${b.luckDays}天上大運`;
-      const pOrder = ['hour', 'day', 'month', 'year'];
-
-      const renderHiddenStemsRow = (p) => {
-        const rev = [...p.hiddenStems].reverse();
-        const justify = rev.length === 1 ? 'justify-end pr-2' : 'justify-around';
-        return `<div class="flex items-center ${justify} text-base font-medium">${rev.map(h => `<span>${h.stem}</span>`).join('')}</div>`;
-      };
-      const renderHiddenGodsRow = (p) => {
-        const rev = [...p.hiddenStems].reverse();
-        const justify = rev.length === 1 ? 'justify-end pr-1.5' : 'justify-around';
-        return `<div class="flex items-center ${justify}">${rev.map(h => `<span class="orig-vtext text-sm">${h.tenGod}</span>`).join('')}</div>`;
-      };
-
-      // LEFT TABLE (image.png): 八字命盤 + 7宮位 + 四柱 + 10大運
-      document.getElementById('origClassicBaziBox').innerHTML = `
-        <table class="orig-table w-full text-sm">
-          <tbody>
-            <tr>
-              <td colspan="11" class="text-left font-medium py-1.5 px-2.5">八字命盤</td>
-            </tr>
-            <tr>
-              <td colspan="11" class="text-left font-medium py-1.5 px-2.5">${personName}、${yinYangGender}、肖${zodiacChar}、西元 ${b.solar.year} 年生</td>
-            </tr>
-            <tr>
-              <td colspan="11" class="text-left font-medium py-1.5 px-2.5 tracking-wider">民 國 &nbsp;${rocStr}&nbsp; 年 &nbsp;${b.solar.month}&nbsp; 月 &nbsp;${b.solar.day}&nbsp; 日 &nbsp;${b.hourOpt.value}&nbsp; 時 生</td>
-            </tr>
-            <tr>
-              <td colspan="11" class="text-left font-medium py-1.5 px-2.5 tracking-wider">農 曆 &nbsp;${rocLunarStr}&nbsp; 年 &nbsp;${b.lunar.isLeap ? '閏' : ''}${b.lunar.month}&nbsp; 月 &nbsp;${b.lunar.day}&nbsp; 日 &nbsp;${shortHourLabel}&nbsp; 時 生</td>
-            </tr>
-            <tr>
-              <td colspan="11" class="p-0 border-0">
-                <table class="w-full border-collapse">
-                  <tr class="text-center">
-                    <td class="border-t-0 border-l-0 py-2"><span class="orig-vtext">星座</span></td>
-                    <td class="border-t-0 py-2"><span class="orig-vtext">日空</span></td>
-                    <td class="border-t-0 py-2"><span class="orig-vtext">年空</span></td>
-                    <td class="border-t-0 py-2"><span class="orig-vtext">身宮</span></td>
-                    <td class="border-t-0 py-2"><span class="orig-vtext">胎息</span></td>
-                    <td class="border-t-0 py-2"><span class="orig-vtext">命宮</span></td>
-                    <td class="border-t-0 border-r-0 py-2"><span class="orig-vtext">胎元</span></td>
-                  </tr>
-                  <tr class="text-center">
-                    <td class="border-b-0 border-l-0 py-2"><span class="orig-vtext">${starSign}</span></td>
-                    <td class="border-b-0 py-2"><span class="orig-vtext">${dayKong}</span></td>
-                    <td class="border-b-0 py-2"><span class="orig-vtext">${yearKong}</span></td>
-                    <td class="border-b-0 py-2"><span class="orig-vtext">${msGong.shenGong}</span></td>
-                    <td class="border-b-0 py-2"><span class="orig-vtext">${taiXi}</span></td>
-                    <td class="border-b-0 py-2"><span class="orig-vtext">${msGong.mingGong}</span></td>
-                    <td class="border-b-0 border-r-0 py-2"><span class="orig-vtext">${taiYuan}</span></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="11" class="p-0 border-0">
-                <table class="w-full border-collapse">
-                  <tr class="text-center">
-                    ${pOrder.map((k, idx) => `<td class="border-t-0 ${idx===0?'border-l-0':''} py-2 w-[23%]"><span class="orig-vtext">${k === 'day' ? '日主' : b.pillars[k].tenGod}</span></td>`).join('')}
-                    <td class="border-t-0 border-r-0 py-2 w-[8%]"><span class="orig-vtext text-xs">主星</span></td>
-                  </tr>
-                  <tr class="text-center">
-                    ${pOrder.map((k, idx) => `<td class="${idx===0?'border-l-0':''} py-3"><span class="orig-bazi-char">${b.pillars[k].stem}${b.pillars[k].branch}</span></td>`).join('')}
-                    <td class="border-r-0 py-3"><span class="orig-vtext text-xs">八字</span></td>
-                  </tr>
-                  <tr class="text-center">
-                    ${pOrder.map((k, idx) => `<td class="${idx===0?'border-l-0':''} py-1.5">${renderHiddenStemsRow(b.pillars[k])}</td>`).join('')}
-                    <td class="border-r-0 py-1.5"><span class="orig-vtext text-xs">藏</span></td>
-                  </tr>
-                  <tr class="text-center">
-                    ${pOrder.map((k, idx) => `<td class="border-b-0 ${idx===0?'border-l-0':''} py-2">${renderHiddenGodsRow(b.pillars[k])}</td>`).join('')}
-                    <td class="border-b-0 border-r-0 py-2"><span class="orig-vtext text-xs">副星</span></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr class="text-center">
-              ${reversedDayuns.map(dy => `<td class="py-1.5 px-1 text-xs font-medium cursor-pointer hover:brightness-95" data-orig-dayun="${Math.min(7, dy.idx)}">${dy.age}</td>`).join('')}
-              <td rowspan="2" class="py-2 px-1 w-[8%]"><span class="orig-vtext text-xs">大運</span></td>
-            </tr>
-            <tr class="text-center">
-              ${reversedDayuns.map(dy => `<td class="py-2 px-1 cursor-pointer hover:brightness-95" data-orig-dayun="${Math.min(7, dy.idx)}"><span class="orig-vtext text-sm">${dy.gz}</span></td>`).join('')}
-            </tr>
-            <tr>
-              <td colspan="11" class="text-center py-1.5 font-medium">${dayunFooterStr}</td>
-            </tr>
-          </tbody>
-        </table>
-      `;
-
-      document.querySelectorAll('[data-orig-dayun]').forEach(cell => {
-        cell.addEventListener('click', () => {
-          state.selectedDayunIdx = parseInt(cell.getAttribute('data-orig-dayun'), 10) || 0;
-          renderBaziView();
-          showToast('已切換下方所選大運之流年明細！');
-        });
-      });
-
-      // RIGHT TABLE (image.png): 無敵律數 (參考) — Fixed 五行 order [水, 金, 土, 火, 木] & 五常 [智, 義, 信, 禮, 仁]
-      const fixedWxCols = ['水', '金', '土', '火', '木'];
-      const wuchangMap = { '木': '仁', '火': '禮', '土': '信', '金': '義', '水': '智' };
-      const colDefs = fixedWxCols.map(wx => ({
-        wx,
-        wuchang: wuchangMap[wx],
-        tgLabel: getShortTenGodGroup(b.pillars.day.stemWx, wx),
-        shilu: b.wxScores[wx] ?? 0,
-        role: b.wudiRoles[wx] ?? ''
-      }));
-
-      const comboInfo = getBranchComboStatus(b.pillars);
-
-      document.getElementById('origClassicWudiBox').innerHTML = `
-        <table class="orig-table w-full text-sm">
-          <tbody>
-            <tr>
-              <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">無敵律數 (參考)</td>
-            </tr>
-            <tr>
-              <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">
-                格局 : <span class="text-red-600 font-bold">${b.patternName}</span> (80%)
-              </td>
-            </tr>
-            ${comboInfo.value !== '無' ? `<tr>
-              <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">
-                ${comboInfo.label} : ${comboInfo.value}
-              </td>
-            </tr>` : ''}
-            <tr class="text-center">
-              ${colDefs.map(c => `<td class="py-3 w-[16.6%]"><span class="orig-vtext">${c.tgLabel}</span></td>`).join('')}
-              <td class="py-3 w-[16.6%]"><span class="orig-vtext">十神</span></td>
-            </tr>
-            <tr class="text-center">
-              ${colDefs.map(c => `<td class="py-3">${c.wx}</td>`).join('')}
-              <td class="py-3"><span class="orig-vtext">五行</span></td>
-            </tr>
-            <tr class="text-center">
-              ${colDefs.map(c => `<td class="py-3">${c.wuchang}</td>`).join('')}
-              <td class="py-3"><span class="orig-vtext">五常</span></td>
-            </tr>
-            <tr class="text-center">
-              ${colDefs.map(c => `<td class="py-3 font-medium text-base">${c.shilu}</td>`).join('')}
-              <td class="py-3"><span class="orig-vtext">實律</span></td>
-            </tr>
-            <tr class="text-center">
-              ${colDefs.map(c => `<td class="py-3"><span class="orig-vtext">${c.role}</span></td>`).join('')}
-              <td class="py-3"><span class="orig-vtext">取用神</span></td>
-            </tr>
-          </tbody>
-        </table>
-      `;
-
-      // SECOND CLASSIC BLOCK (image_2.png): 八字運星與神煞盤 + 神煞說明對照表
-      const detailedSS = computePillarDetailedShensha(b.pillars, b.gender);
-      const renderPillarShenshaCell = (k) => {
-        const list = detailedSS.perPillar[k] || [];
-        if (!list.length) return '';
-        const chunks = [];
-        for (let i = 0; i < list.length; i += 3) {
-          chunks.push(list.slice(i, i + 3));
-        }
-        return `<div class="space-y-3 py-1">
-          ${chunks.map(row => `
-            <div class="flex items-start justify-around flex-row-reverse">
-              ${row.map(nm => `<span class="orig-vtext text-sm">${nm}</span>`).join('')}
-            </div>
-          `).join('')}
-        </div>`;
-      };
-
-      document.getElementById('origClassicShenshaChartBox').innerHTML = `
-        <table class="orig-table w-full text-sm">
-          <tbody>
-            <tr>
-              <td colspan="5" class="text-left font-medium py-1.5 px-2.5">八字命盤（四柱運星與神煞）</td>
-            </tr>
-            <tr>
-              <td colspan="5" class="text-left font-medium py-1.5 px-2.5">${personName}、${yinYangGender}、肖${zodiacChar}、西元 ${b.solar.year} 年生</td>
-            </tr>
-            <tr>
-              <td colspan="5" class="text-left font-medium py-1.5 px-2.5 tracking-wider">民 國 &nbsp;${rocStr}&nbsp; 年 &nbsp;${b.solar.month}&nbsp; 月 &nbsp;${b.solar.day}&nbsp; 日 &nbsp;${b.hourOpt.value}&nbsp; 時 生</td>
-            </tr>
-            <tr>
-              <td colspan="5" class="text-left font-medium py-1.5 px-2.5 tracking-wider">農 曆 &nbsp;${rocLunarStr}&nbsp; 年 &nbsp;${b.lunar.isLeap ? '閏' : ''}${b.lunar.month}&nbsp; 月 &nbsp;${b.lunar.day}&nbsp; 日 &nbsp;${shortHourLabel}&nbsp; 時 生</td>
-            </tr>
-            <tr class="text-center">
-              ${pOrder.map(k => `<td class="py-2 w-[23%]"><span class="orig-vtext">${k === 'day' ? '日主' : b.pillars[k].tenGod}</span></td>`).join('')}
-              <td class="py-2 w-[8%]"><span class="orig-vtext text-xs">主星</span></td>
-            </tr>
-            <tr class="text-center">
-              ${pOrder.map(k => `<td class="py-3"><span class="orig-bazi-char">${b.pillars[k].stem}${b.pillars[k].branch}</span></td>`).join('')}
-              <td class="py-3"><span class="orig-vtext text-xs">八字</span></td>
-            </tr>
-            <tr class="text-center">
-              ${pOrder.map(k => `<td class="py-1.5">${renderHiddenStemsRow(b.pillars[k])}</td>`).join('')}
-              <td class="py-1.5"><span class="orig-vtext text-xs">藏</span></td>
-            </tr>
-            <tr class="text-center">
-              ${pOrder.map(k => `<td class="py-2">${renderHiddenGodsRow(b.pillars[k])}</td>`).join('')}
-              <td class="py-2"><span class="orig-vtext text-xs">副星</span></td>
-            </tr>
-            <tr class="text-center">
-              ${pOrder.map(k => {
-                const cs = b.pillars[k].changsheng === '臨官' ? '建祿' : b.pillars[k].changsheng;
-                return `<td class="py-2"><span class="orig-vtext">${cs}</span></td>`;
-              }).join('')}
-              <td class="py-2"><span class="orig-vtext text-xs">運</span></td>
-            </tr>
-            <tr class="text-center align-top">
-              ${pOrder.map(k => `<td class="py-2 px-1">${renderPillarShenshaCell(k)}</td>`).join('')}
-              <td class="py-2 align-middle"><span class="orig-vtext text-xs">神煞</span></td>
-            </tr>
-          </tbody>
-        </table>
-      `;
-
-      document.getElementById('origClassicShenshaDescBox').innerHTML = `
-        <div class="border border-stone-400 rounded overflow-hidden">
-          <table class="orig-shensha-table text-sm">
-            <thead>
-              <tr>
-                <th class="w-28">神煞</th>
-                <th>說明</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${detailedSS.uniqueNames.map(nm => `
-                <tr>
-                  <td class="font-medium">${nm}</td>
-                  <td>${SHENSHA_DESC_MAP[nm] || '傳統命理吉凶神煞，供格局參照。'}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
-
-      // THIRD CLASSIC BLOCK: All remaining tables from myfate.herokuapp.com
-      // 1) 定格局與節氣 + 取用神分析
-      // 2) 身強身弱 (李鐵筆老師日主強度計算)
-      // 3) 流年對照與天合地合 / 天剋地沖(入) / 天剋地沖(出)
-      // 4) 袁天罡秤骨法 + 先天體檢 + 八宅法
-      const liuhePartner = [1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
-      const tianheRow = pOrder.map(k => {
-        const p = b.pillars[k];
-        return STEMS[(p.stemIdx + 5) % 10] + BRANCHES[liuhePartner[p.branchIdx]];
-      });
-      const tiankeInRow = pOrder.map(k => {
-        const p = b.pillars[k];
-        return STEMS[(p.stemIdx + 6) % 10] + BRANCHES[(p.branchIdx + 6) % 12];
-      });
-      const tiankeOutRow = pOrder.map(k => {
-        const p = b.pillars[k];
-        return STEMS[(p.stemIdx + 4) % 10] + BRANCHES[(p.branchIdx + 6) % 12];
-      });
-
-      // 先天體檢 (Count of 10 Stems across 4 stems + all hidden stems)
-      const organCounts = { '甲':0, '乙':0, '丙':0, '丁':0, '戊':0, '己':0, '庚':0, '辛':0, '壬':0, '癸':0 };
-      ['year', 'month', 'day', 'hour'].forEach(k => {
-        const p = b.pillars[k];
-        organCounts[p.stem] = (organCounts[p.stem] || 0) + 1;
-        p.hiddenStems.forEach(h => {
-          organCounts[h.stem] = (organCounts[h.stem] || 0) + 1;
-        });
-      });
-
-      // 袁天罡秤骨法
-      const yearJiaZiIdx = ((b.pillars.year.stemIdx % 10) * 6 + Math.floor(((b.pillars.year.branchIdx - b.pillars.year.stemIdx + 12) % 12) / 2) * 10) % 60;
-      let exactJiaZi = 0;
-      for (let i = 0; i < 60; i++) {
-        if (i % 10 === b.pillars.year.stemIdx && i % 12 === b.pillars.year.branchIdx) { exactJiaZi = i; break; }
-      }
-      const wYear = BONE_YEAR[exactJiaZi] || 8;
-      const wMonth = BONE_MONTH[b.lunar.month] || 9;
-      const wDay = BONE_DAY[b.lunar.day] || 10;
-      const wHour = BONE_HOUR[b.hourOpt.branchIdx] || 10;
-      const wTotal = wYear + wMonth + wDay + wHour;
-
-      // 八宅法 (Ming Gua)
-      const last2 = b.solar.year % 100;
-      let guaNum = b.gender === 'M' ? (100 - last2) % 9 : (last2 - 4 + 90) % 9;
-      if (guaNum === 0) guaNum = 9;
-      if (guaNum === 5) guaNum = (b.gender === 'M' ? 2 : 8);
-      const guaMap = {
-        1: { name: '坎', group: '東四命' },
-        2: { name: '坤', group: '西四命' },
-        3: { name: '震', group: '東四命' },
-        4: { name: '巽', group: '東四命' },
-        6: { name: '乾', group: '西四命' },
-        7: { name: '兌', group: '西四命' },
-        8: { name: '艮', group: '西四命' },
-        9: { name: '離', group: '東四命' }
-      };
-      const guaInfo = guaMap[guaNum] || guaMap[7];
-
-      document.getElementById('origExtraTablesBox').innerHTML = `
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
-          <!-- 定格局與節氣 + 李鐵筆日主強弱 -->
-          <div class="theme-subtle p-4 rounded-xl border theme-border space-y-2.5">
-            <h4 class="font-bold serif-font text-sm border-b theme-border pb-1.5">📌 定格局、出生節氣與李鐵筆日主強度計算</h4>
-            <div><strong>定格局：</strong>日主：${b.pillars.day.stem}${b.pillars.day.stemWx} ｜ 月令：${b.pillars.month.hiddenStems[0].stem}${b.pillars.month.branchWx} ｜ 格局：<span class="text-red-700 font-bold">${b.patternName}</span></div>
-            <div><strong>出生時節氣：</strong>${b.jieInfo}。</div>
-            <div class="pl-3 text-[11px] theme-muted space-y-0.5">
-              <div>・<strong>${b.prevTerm.name}：</strong>${formatUtc8Ms(b.prevTerm.ms)}（${b.prevTerm.desc}）</div>
-              <div>・<strong>${b.nextTerm.name}：</strong>${formatUtc8Ms(b.nextTerm.ms)}（${b.nextTerm.desc}）</div>
-            </div>
-            <div class="pt-2 border-t theme-border">
-              <div class="font-bold mb-1">身強身弱（李鐵筆老師《八字命學寶鑑》量化計算）：</div>
-              <div class="flex flex-wrap items-center gap-3">
-                <span>日主同黨：<strong>${b.litiebiSame}</strong></span>
-                <span>日主異黨：<strong>${b.litiebiOpp}</strong></span>
-                <span>判定結果：<strong class="px-2 py-0.5 rounded bg-amber-800 text-white">${b.strengthLabel}</strong></span>
-                <span>建議首選用神：<strong class="text-red-700">${ getShortTenGodGroup(b.pillars.day.stemWx, b.yongWx) } (${b.yongWx})</strong></span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 四柱天合地合 & 天剋地沖 對照表 -->
-          <div class="theme-subtle p-4 rounded-xl border theme-border space-y-2">
-            <h4 class="font-bold serif-font text-sm border-b theme-border pb-1.5">⚡ 四柱天合地合・天剋地沖對照表</h4>
-            <table class="orig-table w-full text-center text-xs">
-              <thead>
-                <tr>
-                  <th>項目</th>
-                  <th>時柱 (${b.pillars.hour.stem}${b.pillars.hour.branch})</th>
-                  <th>日柱 (${b.pillars.day.stem}${b.pillars.day.branch})</th>
-                  <th>月柱 (${b.pillars.month.stem}${b.pillars.month.branch})</th>
-                  <th>年柱 (${b.pillars.year.stem}${b.pillars.year.branch})</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="font-bold">天合地合</td>
-                  ${tianheRow.map(v => `<td>${v}</td>`).join('')}
-                </tr>
-                <tr>
-                  <td class="font-bold">天剋地沖(入)</td>
-                  ${tiankeInRow.map(v => `<td>${v}</td>`).join('')}
-                </tr>
-                <tr>
-                  <td class="font-bold">天剋地沖(出)</td>
-                  ${tiankeOutRow.map(v => `<td>${v}</td>`).join('')}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- 袁天罡秤骨法 + 先天體檢 + 八宅法 -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 text-xs">
-          <div class="theme-subtle p-4 rounded-xl border theme-border space-y-1.5">
-            <h4 class="font-bold serif-font text-sm border-b theme-border pb-1.5">⚖️ 袁天罡秤骨法</h4>
-            <div>年：${b.pillars.year.stem}${b.pillars.year.branch} (${formatLiangQian(wYear)}) ｜ 月：${b.lunar.month}月 (${formatLiangQian(wMonth)})</div>
-            <div>日：${b.lunar.day}日 (${formatLiangQian(wDay)}) ｜ 時：${b.pillars.hour.stem}${b.pillars.hour.branch} (${formatLiangQian(wHour)})</div>
-            <div class="font-bold text-sm text-amber-900 dark:text-amber-300 pt-1">總重量：${formatLiangQian(wTotal)}</div>
-            <p class="theme-muted text-[11px]">${wTotal === 59 ? '官職財祿厚重之命。歌訣：細推此格秀且清，必定財高學業成；甲第之中應有分，揚鞭走馬顯威榮。' : (wTotal === 48 ? '官員財祿厚重之命。歌訣：幼年運道未能通，若是蹉跎命不同；兄弟六親皆無靠，一生事業晚來隆。' : (wTotal === 47 ? '高官厚祿學業飽滿之命。歌訣：此命推來旺末年，妻榮子貴自怡然；平生原有滔滔福，可有財源若水泉。' : '傳統袁天罡秤骨歌訣重量參照，以八字格局與用神為主。'))}</p>
-          </div>
-
-          <div class="theme-subtle p-4 rounded-xl border theme-border space-y-1.5">
-            <h4 class="font-bold serif-font text-sm border-b theme-border pb-1.5">🩺 先天體檢（十干五臟六腑統計）</h4>
-            <div class="grid grid-cols-5 gap-1.5 text-center pt-1">
-              <div class="theme-card p-1.5 rounded border theme-border"><div class="theme-muted text-[10px]">腎(癸)</div><div class="font-bold">${organCounts['癸']}</div></div>
-              <div class="theme-card p-1.5 rounded border theme-border"><div class="theme-muted text-[10px]">膀胱(壬)</div><div class="font-bold">${organCounts['壬']}</div></div>
-              <div class="theme-card p-1.5 rounded border theme-border"><div class="theme-muted text-[10px]">肺(辛)</div><div class="font-bold">${organCounts['辛']}</div></div>
-              <div class="theme-card p-1.5 rounded border theme-border"><div class="theme-muted text-[10px]">大腸(庚)</div><div class="font-bold">${organCounts['庚']}</div></div>
-              <div class="theme-card p-1.5 rounded border theme-border"><div class="theme-muted text-[10px]">脾(己)</div><div class="font-bold">${organCounts['己']}</div></div>
-              <div class="theme-card p-1.5 rounded border theme-border"><div class="theme-muted text-[10px]">胃(戊)</div><div class="font-bold">${organCounts['戊']}</div></div>
-              <div class="theme-card p-1.5 rounded border theme-border"><div class="theme-muted text-[10px]">心(丁)</div><div class="font-bold">${organCounts['丁']}</div></div>
-              <div class="theme-card p-1.5 rounded border theme-border"><div class="theme-muted text-[10px]">小腸(丙)</div><div class="font-bold">${organCounts['丙']}</div></div>
-              <div class="theme-card p-1.5 rounded border theme-border"><div class="theme-muted text-[10px]">肝(乙)</div><div class="font-bold">${organCounts['乙']}</div></div>
-              <div class="theme-card p-1.5 rounded border theme-border"><div class="theme-muted text-[10px]">膽(甲)</div><div class="font-bold">${organCounts['甲']}</div></div>
-            </div>
-            <div class="text-[11px] theme-muted pt-1">※ 統計天干與地支藏干中十干出現次數（過旺或為 0 處宜多留心日常保養）。</div>
-          </div>
-
-          <div class="theme-subtle p-4 rounded-xl border theme-border space-y-1.5">
-            <h4 class="font-bold serif-font text-sm border-b theme-border pb-1.5">🧭 八宅法（本命卦：${guaInfo.name}卦・${guaInfo.group}）</h4>
-            <div class="text-[11px] leading-relaxed">
-              ${guaInfo.group === '西四命'
-                ? '<strong>吉方（宜大門/主臥/書桌）：</strong>西北（生氣）、西南（天醫）、東北（延年）、正西（伏位）<br/><strong>凶方（宜浴廁/儲藏）：</strong>正東（絕命）、正南（五鬼）、東南（六煞）、正北（禍害）'
-                : '<strong>吉方（宜大門/主臥/書桌）：</strong>正南/東南/正東/正北（生氣、天醫、延年、伏位）<br/><strong>凶方（宜浴廁/儲藏）：</strong>西南/西北/東北/正西（絕命、五鬼、六煞、禍害）'}
-            </div>
           </div>
         </div>
       `;
