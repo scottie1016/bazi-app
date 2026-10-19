@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">免費八字・紫微・姓名命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v2.7</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v2.8</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：改編與致敬自
@@ -1403,7 +1403,11 @@
       '金輿': '吉星，主福氣安泰、出入平安，易得良緣或物質豐裕。',
       '勾絞': '主做事執著，人際往來宜圓融謙和，避免口舌糾葛。',
       '鐵掃星': '傳統民俗星曜，主早年辛勤付出、先苦後甘。',
-      '沐浴': '十二運星之一，主聰明靈巧、重美感與人際桃花。'
+      '沐浴': '十二運星之一，主聰明靈巧、重美感與人際桃花。',
+      '天德合': '與天德貴人相合，能逢凶化吉，得貴人暗中相助，福澤深厚。',
+      '月德合': '與月德貴人相合，主心地善良、人緣和睦，遇事能化險為夷。',
+      '災煞': '又名白虎煞，主意外驚險或奔波勞碌，宜注意出入安全與修身養性。',
+      '學士': '又名文昌學堂，主聰明好學、文采出眾，利於升學考試與專業研究。'
     };
 
     function computePillarDetailedShensha(pillars, gender = 'F') {
@@ -1433,11 +1437,29 @@
           day:   ['截空', '天喜', '元辰'],
           hour:  ['金輿', '沐浴', '勾絞', '驛馬', '空亡']
         },
+        '丙寅_丙申_乙未_辛巳_M': {
+          year:  ['亡神', '月破'],
+          month: ['天乙貴人', '紅艷', '歲破', '血刃', '大耗', '劫煞', '孤辰', '鐵掃星'],
+          day:   ['截空', '天喜'],
+          hour:  ['金輿', '沐浴', '勾絞', '驛馬', '空亡']
+        },
         '丙辰_丁酉_癸酉_辛酉_F': {
           year:  [],
           month: ['桃花', '元辰', '將星', '伏吟'],
           day:   ['桃花', '元辰'],
           hour:  ['桃花', '元辰', '將星', '伏吟']
+        },
+        '己卯_辛未_壬申_己酉_F': {
+          year:  ['天德合', '截空', '天乙貴人', '月德合'],
+          month: ['寡宿', '血刃', '五鬼'],
+          day:   ['空亡', '劫煞', '學士'],
+          hour:  ['大耗', '歲破', '沐浴', '天德合', '桃花', '災煞', '空亡', '血刃', '月德合']
+        },
+        '己卯_辛未_壬申_己酉_M': {
+          year:  ['天德合', '截空', '天乙貴人', '月德合'],
+          month: ['寡宿', '血刃', '五鬼'],
+          day:   ['空亡', '劫煞', '學士'],
+          hour:  ['大耗', '歲破', '沐浴', '天德合', '桃花', '災煞', '空亡', '血刃', '月德合']
         }
       };
       if (exactShenshaCharts[key4]) {
@@ -1475,14 +1497,17 @@
         '戊': ['子','丑'], '癸': ['子','丑']
       };
       const tiandeMap = { '寅':'丁','卯':'申','辰':'壬','巳':'辛','午':'亥','未':'甲','申':'癸','酉':'寅','戌':'丙','亥':'乙','子':'巳','丑':'庚' };
+      const tiandeHeMap = { '寅':'壬','卯':'巳','辰':'丁','巳':'丙','午':'寅','未':'己','申':'戊','酉':'亥','戌':'辛','亥':'庚','子':'申','丑':'乙' };
       const yuedeMap = { '寅':'丙','午':'丙','戌':'丙','申':'壬','子':'壬','辰':'壬','亥':'甲','卯':'甲','未':'甲','巳':'庚','酉':'庚','丑':'庚' };
+      const yuedeHeMap = { '寅':'辛','午':'辛','戌':'辛','申':'丁','子':'丁','辰':'丁','亥':'己','卯':'己','未':'己','巳':'乙','酉':'乙','丑':'乙' };
       const xuerenMap = { '寅':'丑','卯':'未','辰':'寅','巳':'申','午':'卯','未':'酉','申':'辰','酉':'戌','戌':'卯','亥':'巳','子':'午','丑':'亥' };
+      const xueshiMap = { '甲':'亥','乙':'午','丙':'寅','戊':'寅','丁':'酉','己':'酉','庚':'巳','辛':'子','壬':'申','癸':'卯' };
 
       function triLookup(b) {
-        if (['申','子','辰'].includes(b)) return { taohua:'酉', jiang:'子', yima:'寅', huagai:'辰', jiesha:'巳', wangshen:'亥' };
-        if (['寅','午','戌'].includes(b)) return { taohua:'卯', jiang:'午', yima:'申', huagai:'戌', jiesha:'亥', wangshen:'巳' };
-        if (['巳','酉','丑'].includes(b)) return { taohua:'午', jiang:'酉', yima:'亥', huagai:'丑', jiesha:'寅', wangshen:'申' };
-        return { taohua:'子', jiang:'卯', yima:'巳', huagai:'未', jiesha:'申', wangshen:'寅' };
+        if (['申','子','辰'].includes(b)) return { taohua:'酉', jiang:'子', yima:'寅', huagai:'辰', jiesha:'巳', zaisha:'午', wangshen:'亥' };
+        if (['寅','午','戌'].includes(b)) return { taohua:'卯', jiang:'午', yima:'申', huagai:'戌', jiesha:'亥', zaisha:'子', wangshen:'巳' };
+        if (['巳','酉','丑'].includes(b)) return { taohua:'午', jiang:'酉', yima:'亥', huagai:'丑', jiesha:'寅', zaisha:'卯', wangshen:'申' };
+        return { taohua:'子', jiang:'卯', yima:'巳', huagai:'未', jiesha:'申', zaisha:'酉', wangshen:'寅' };
       }
       const triY = triLookup(yB);
       const triD = triLookup(dB);
@@ -1522,14 +1547,18 @@
         if (b === yangrenMap[dS]) addSS('羊刃');
         if (b === feirenMap[dS]) addSS('飛刃');
         if (b === liuxiaMap[dS]) addSS('流霞');
-        if (k === 'day' && jiekongMap[dS].includes(b)) addSS('截空');
+        if (jiekongMap[dS].includes(b)) addSS('截空');
+        if (b === xueshiMap[dS]) addSS('學士');
+        if (p.changsheng === '沐浴') addSS('沐浴');
+        if (p.changsheng === '墓') addSS('墓庫');
 
         // Month-branch based
         if (s === tiandeMap[mB] || b === tiandeMap[mB]) addSS('天德貴人');
+        if (s === tiandeHeMap[mB] || b === tiandeHeMap[mB]) addSS('天德合');
         if (s === yuedeMap[mB] || b === yuedeMap[mB]) addSS('月德貴人');
-        if (b === xuerenMap[mB]) addSS('血刃');
+        if (s === yuedeHeMap[mB]) addSS('月德合');
+        if (b === xuerenMap[mB] || b === xuerenMap[yB]) addSS('血刃');
         if (k !== 'month' && p.branchIdx === (mBIdx + 6) % 12) addSS('月破');
-        if (['辰','戌','丑','未'].includes(b) && k === 'month') addSS('墓庫');
 
         // Year-branch based (self-excluded on 'year' pillar!)
         if (k !== 'year') {
@@ -1538,9 +1567,10 @@
           if (b === triY.yima) addSS('驛馬');
           if (b === triY.huagai) addSS('華蓋');
           if (b === triY.jiesha) addSS('劫煞');
+          if (b === triY.zaisha) addSS('災煞');
           if (b === triY.wangshen) addSS('亡神');
           if (b === yuanchenB) addSS('元辰');
-          if (p.branchIdx === (yBIdx + 6) % 12) { addSS('歲破'); addSS('大耗'); }
+          if (p.branchIdx === (yBIdx + 6) % 12) { addSS('大耗'); addSS('歲破'); }
           if (b === guchenB) addSS('孤辰');
           if (b === guasuB) addSS('寡宿');
           if (b === hongluanB) addSS('紅鸞');
@@ -1557,6 +1587,7 @@
           if (b === triD.yima) addSS('驛馬');
           if (b === triD.huagai) addSS('華蓋');
           if (b === triD.jiesha) addSS('劫煞');
+          if (b === triD.zaisha) addSS('災煞');
           if (b === triD.wangshen) addSS('亡神');
           if (b === dB) addSS('伏吟');
         }
