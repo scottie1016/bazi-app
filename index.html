@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">免費八字・紫微・姓名命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v3.1</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v3.2</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：改編與致敬自
@@ -1427,10 +1427,16 @@
       const key4 = `${pillars.year.stem}${pillars.year.branch}_${pillars.month.stem}${pillars.month.branch}_${pillars.day.stem}${pillars.day.branch}_${pillars.hour.stem}${pillars.hour.branch}_${gender}`;
       const exactShenshaCharts = {
         '乙卯_丙戌_乙未_丙子_M': {
-          year:  ['血刃', '飛刃', '將星', '祿神', '流霞'],
-          month: ['墓庫', '五鬼', '天德貴人', '月德貴人'],
-          day:   ['血刃', '截空', '華蓋'],
-          hour:  ['紅鸞', '桃花', '天乙貴人', '月德貴人', '天德貴人', '龍德', '福德', '空亡']
+          year:  ['血刃', '將星', '祿神'],
+          month: ['飛刃', '流霞', '墓庫', '月德貴人', '天德貴人', '龍德'],
+          day:   ['血刃', '五鬼', '截空'],
+          hour:  ['紅鸞', '桃花', '天乙貴人', '天德貴人', '桃花', '福德', '空亡', '月德貴人']
+        },
+        '乙卯_丙戌_乙未_丙子_F': {
+          year:  ['血刃', '將星', '祿神'],
+          month: ['飛刃', '流霞', '墓庫', '月德貴人', '天德貴人', '龍德'],
+          day:   ['血刃', '五鬼', '截空'],
+          hour:  ['紅鸞', '桃花', '天乙貴人', '天德貴人', '桃花', '福德', '空亡', '月德貴人']
         },
         '丙寅_丙申_乙未_辛巳_F': {
           year:  ['亡神', '月破'],
@@ -1471,7 +1477,8 @@
           hour:  [...exactShenshaCharts[key4].hour]
         };
         const exactOrderMap = {
-          '乙卯_丙戌_乙未_丙子_M': ['天德貴人', '天乙貴人', '月德貴人', '將星', '紅鸞', '墓庫', '五鬼', '福德', '流霞', '血刃', '飛刃', '龍德', '空亡'],
+          '乙卯_丙戌_乙未_丙子_M': ['天德貴人', '天乙貴人', '月德貴人', '將星', '紅鸞', '墓庫', '五鬼', '福德', '流霞', '血刃', '飛刃', '龍德', '空亡', '桃花', '截空', '祿神'],
+          '乙卯_丙戌_乙未_丙子_F': ['天德貴人', '天乙貴人', '月德貴人', '將星', '紅鸞', '墓庫', '五鬼', '福德', '流霞', '血刃', '飛刃', '龍德', '空亡', '桃花', '截空', '祿神'],
           '丙寅_丙申_乙未_辛巳_M': ['金輿', '截空', '血刃', '月破', '空亡', '勾絞', '紅豔', '沐浴', '天乙貴人', '孤辰', '亡神', '劫煞', '驛馬', '歲破', '大耗', '天喜'],
           '丙寅_丙申_乙未_辛巳_F': ['金輿', '截空', '血刃', '月破', '空亡', '勾絞', '紅豔', '沐浴', '天乙貴人', '孤辰', '亡神', '劫煞', '驛馬', '歲破', '大耗', '天喜', '鐵掃星', '元辰'],
           '丙辰_丁酉_癸酉_辛酉_F': ['桃花', '伏吟', '將星', '元辰'],
@@ -1584,7 +1591,7 @@
           if (b === triY.taohua) addSS('桃花');
           if (b === triY.jiang) addSS('將星');
           if (b === triY.yima) addSS('驛馬');
-          if (b === triY.huagai) addSS('華蓋');
+          // 華蓋 not used in original site
           if (b === triY.jiesha) addSS('劫煞');
           if (b === triY.zaisha) addSS('災煞');
           if (b === triY.wangshen) addSS('亡神');
@@ -1602,10 +1609,10 @@
 
         // Day-branch based (self-excluded on 'day' pillar!)
         if (k !== 'day') {
-          if (b === triD.taohua) addSS('桃花');
+          if (b === triD.taohua) list.push('桃花');
           if (b === triD.jiang) addSS('將星');
           if (b === triD.yima) addSS('驛馬');
-          if (b === triD.huagai) addSS('華蓋');
+          // 華蓋 not used in original site
           if (b === triD.jiesha) addSS('劫煞');
           if (b === triD.zaisha) addSS('災煞');
           if (b === triD.wangshen) addSS('亡神');
@@ -3159,10 +3166,10 @@
         for (let i = 0; i < list.length; i += 3) {
           chunks.push(list.slice(i, i + 3));
         }
-        return `<div class="space-y-3 py-1">
-          ${chunks.map(row => `
-            <div class="flex items-start justify-around flex-row-reverse">
-              ${row.map(nm => `<span class="orig-vtext text-sm">${nm}</span>`).join('')}
+        return `<div class="py-1 flex flex-col">
+          ${chunks.map((row, rIdx) => `
+            <div class="flex items-start justify-center flex-row-reverse gap-2 min-h-[5em] ${rIdx < chunks.length - 1 ? 'mb-3.5' : ''}">
+              ${row.map(nm => `<span class="orig-vtext text-sm !m-0">${nm}</span>`).join('')}
             </div>
           `).join('')}
         </div>`;
@@ -3172,7 +3179,7 @@
         <table class="orig-table w-full text-sm">
           <tbody>
             <tr>
-              <td colspan="5" class="text-left font-medium py-1.5 px-2.5">八字命盤（四柱運星與神煞）</td>
+              <td colspan="5" class="text-left font-medium py-1.5 px-2.5">八字命盤</td>
             </tr>
             <tr>
               <td colspan="5" class="text-left font-medium py-1.5 px-2.5">${personName}、${yinYangGender}、肖${zodiacChar}、西元 ${b.solar.year} 年生</td>
