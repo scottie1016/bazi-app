@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">免費八字・紫微・姓名命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v3.4</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v3.5</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：改編與致敬自
@@ -279,6 +279,10 @@
         <button type="button" id="tabBtnName" data-tab="name" class="service-tab-btn px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 theme-subtle hover:opacity-90">
           <span>🖋️</span>
           <span>免費姓名吉凶分析</span>
+        </button>
+        <button type="button" id="tabBtnCompass" data-tab="compass" class="service-tab-btn px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 theme-subtle hover:opacity-90">
+          <span>🧭</span>
+          <span>房屋二十四山疊圖</span>
         </button>
         <button type="button" id="tabBtnSource" data-tab="source" class="service-tab-btn px-3.5 py-2 rounded-xl text-sm font-medium transition flex items-center gap-1.5 theme-subtle hover:opacity-90">
           <span>📖</span>
@@ -890,6 +894,115 @@
       </div>
     </div>
 
+    <!-- ==================== TAB 3.5: 房屋二十四山方位與角度疊圖 ==================== -->
+    <div id="tabPanelCompass" class="hidden space-y-5">
+      <div class="theme-card border rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b theme-border pb-3">
+          <div>
+            <h3 class="text-base sm:text-lg font-bold serif-font">🧭 房屋平面圖 ×「二十四山」方位與角度雙層疊合工具</h3>
+            <p class="text-xs theme-muted mt-0.5">
+              下層為房屋平面圖，上層為透明「二十四山」羅盤。輸入人站在屋宅正中心往大門看的角度（如 270°），上層羅盤即自動轉動疊合並標示八方方位。
+            </p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button type="button" id="compassResetSampleBtn" class="px-3 py-1.5 rounded-xl text-xs font-medium theme-subtle border theme-border hover:opacity-80 transition">
+              🏡 載入範例平面圖 (270°)
+            </button>
+            <button type="button" id="compassDownloadPngBtn" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-800 hover:bg-amber-900 text-white shadow-sm transition flex items-center gap-1">
+              <span>⬇️ 下載疊合圖檔 (PNG)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Controls Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+          <!-- 1. Upload Floor Plan -->
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 theme-muted">① 下層：上傳房屋平面圖 (JPG/PNG)</label>
+            <label for="floorPlanFileInput" class="w-full cursor-pointer rounded-xl border border-dashed border-amber-700/60 theme-subtle px-3 py-2 text-xs font-bold flex items-center justify-center gap-2 hover:opacity-90 transition">
+              <span>📂 選擇或更換平面圖檔...</span>
+            </label>
+            <input type="file" id="floorPlanFileInput" accept="image/*" class="hidden" />
+          </div>
+
+          <!-- 2. Input Facing Angle (0 - 360) -->
+          <div>
+            <label for="compassAngleInput" class="block text-xs font-semibold mb-1.5 theme-muted">② 輸入角度（站屋宅中心往大門看 0°~360°）</label>
+            <div class="flex items-center gap-2">
+              <input type="number" id="compassAngleInput" value="270" min="0" max="360" step="0.5" class="w-28 rounded-xl border theme-border theme-card px-3 py-2 text-base font-bold text-amber-900 dark:text-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-600" />
+              <span class="text-sm font-bold">度 (°)</span>
+              <input type="range" id="compassAngleSlider" value="270" min="0" max="360" step="1" class="flex-1 accent-amber-800 cursor-pointer" />
+            </div>
+          </div>
+
+          <!-- 3. Door Reference Direction on Floor Plan -->
+          <div>
+            <label for="compassDoorRefSelect" class="block text-xs font-semibold mb-1.5 theme-muted">③ 平面圖上大門朝向位置（對齊基準）</label>
+            <select id="compassDoorRefSelect" class="w-full rounded-xl border theme-border theme-card px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-600">
+              <option value="270" selected>圖面左方 (預設：輸入 270° 時 270°朝左、0°朝上)</option>
+              <option value="180">圖面下方 (輸入角度對齊圖面正下方)</option>
+              <option value="0">圖面上方 (輸入角度對齊圖面正上方)</option>
+              <option value="90">圖面右方 (輸入角度對齊圖面正右方)</option>
+              <option value="direct">直接指定上層羅盤順時針旋轉角度</option>
+            </select>
+          </div>
+
+          <!-- 4. Bottom Direction Text Mode -->
+          <div>
+            <label for="compassLegendModeSelect" class="block text-xs font-semibold mb-1.5 theme-muted">④ 下方「子、艮、卯...」方位顯示模式</label>
+            <select id="compassLegendModeSelect" class="w-full rounded-xl border theme-border theme-card px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-600">
+              <option value="dynamic" selected>依疊合後圖面位置動態顯示方位 (上北下南左西右東)</option>
+              <option value="fixed">固定顯示八方本義 (子:北、艮:東北、卯:東...)</option>
+              <option value="both">同時顯示本義與疊合後角度/圖面位置</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fine-tuning Sliders for Floor Plan & Compass -->
+        <div class="pt-3 border-t theme-border grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+          <div>
+            <div class="flex justify-between mb-1"><span class="theme-muted">平面圖縮放</span><span id="fpScaleVal" class="font-mono">100%</span></div>
+            <input type="range" id="fpScaleSlider" min="40" max="180" value="100" class="w-full accent-amber-800 cursor-pointer" />
+          </div>
+          <div>
+            <div class="flex justify-between mb-1"><span class="theme-muted">平面圖水平位移</span><span id="fpOffsetXVal" class="font-mono">0px</span></div>
+            <input type="range" id="fpOffsetXSlider" min="-200" max="200" value="0" class="w-full accent-amber-800 cursor-pointer" />
+          </div>
+          <div>
+            <div class="flex justify-between mb-1"><span class="theme-muted">平面圖垂直位移</span><span id="fpOffsetYVal" class="font-mono">0px</span></div>
+            <input type="range" id="fpOffsetYSlider" min="-200" max="200" value="0" class="w-full accent-amber-800 cursor-pointer" />
+          </div>
+          <div>
+            <div class="flex justify-between mb-1"><span class="theme-muted">羅盤大小比例</span><span id="cpScaleVal" class="font-mono">100%</span></div>
+            <input type="range" id="cpScaleSlider" min="65" max="125" value="100" class="w-full accent-amber-800 cursor-pointer" />
+          </div>
+          <div>
+            <div class="flex justify-between mb-1"><span class="theme-muted">羅盤透明度</span><span id="cpOpacityVal" class="font-mono">95%</span></div>
+            <input type="range" id="cpOpacitySlider" min="30" max="100" value="95" class="w-full accent-amber-800 cursor-pointer" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Composite Output Card (1:1 matching image_57b08e.jpg) -->
+      <div class="bg-white text-stone-900 border border-stone-200 rounded-2xl p-4 sm:p-8 shadow-sm max-w-3xl mx-auto w-full space-y-6">
+        <!-- Info Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-stone-600 border-b border-stone-200 pb-2.5">
+          <div id="compassStatusSummary" class="font-bold text-stone-800"></div>
+          <div class="text-stone-500">💡 提示：可直接於下方畫布拖曳微調房屋平面圖中心位置</div>
+        </div>
+
+        <!-- 2-Layer Composite Canvas -->
+        <div class="flex justify-center">
+          <canvas id="compassCompositeCanvas" width="820" height="820" class="w-full max-w-[620px] h-auto rounded-xl cursor-move border border-stone-100 shadow-inner bg-white"></canvas>
+        </div>
+
+        <!-- Bottom 2-Column 8-Direction Legend (子、艮、卯、巽 / 午、坤、酉、乾) -->
+        <div id="compassLegendDomBox" class="max-w-lg mx-auto px-4 pt-2 pb-1 grid grid-cols-2 gap-x-12 gap-y-2.5 text-2xl sm:text-3xl font-bold tracking-wider" style="color: #6e1409; font-family: '標楷體', 'DFKai-SB', 'Kaiti TC', 'Noto Serif TC', serif;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
     <!-- ==================== TAB 4: 演算法說明與來源出處 ==================== -->
     <div id="tabPanelSource" class="hidden space-y-5">
       <div class="theme-card border rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
@@ -979,6 +1092,7 @@
             <option value="bazi">僅顯示：免費八字命盤</option>
             <option value="ziwei">僅顯示：免費紫微命盤</option>
             <option value="name">僅顯示：免費姓名吉凶分析</option>
+            <option value="compass">僅顯示：房屋二十四山疊圖</option>
           </select>
         </div>
         <div>
@@ -3932,6 +4046,382 @@
       `;
     }
 
+    /***********************************************************************
+     * 7.5 24-MOUNTAIN COMPASS & FLOOR PLAN OVERLAY ENGINE (二十四山疊圖)
+     ***********************************************************************/
+    const MOUNTAINS_24 = [
+      { name: '子', deg: 0,   isRed: true,  trigram: '坎', fixedDir: '北' },
+      { name: '癸', deg: 15,  isRed: false, trigram: '坎', fixedDir: '北偏東' },
+      { name: '丑', deg: 30,  isRed: false, trigram: '艮', fixedDir: '東北偏北' },
+      { name: '艮', deg: 45,  isRed: false, trigram: '艮', fixedDir: '東北' },
+      { name: '寅', deg: 60,  isRed: false, trigram: '艮', fixedDir: '東北偏東' },
+      { name: '甲', deg: 75,  isRed: false, trigram: '震', fixedDir: '東偏北' },
+      { name: '卯', deg: 90,  isRed: false, trigram: '震', fixedDir: '東' },
+      { name: '乙', deg: 105, isRed: false, trigram: '震', fixedDir: '東偏南' },
+      { name: '辰', deg: 120, isRed: false, trigram: '巽', fixedDir: '東南偏東' },
+      { name: '巽', deg: 135, isRed: false, trigram: '巽', fixedDir: '東南' },
+      { name: '巳', deg: 150, isRed: false, trigram: '巽', fixedDir: '東南偏南' },
+      { name: '丙', deg: 165, isRed: false, trigram: '離', fixedDir: '南偏東' },
+      { name: '午', deg: 180, isRed: true,  trigram: '離', fixedDir: '南' },
+      { name: '丁', deg: 195, isRed: false, trigram: '離', fixedDir: '南偏西' },
+      { name: '未', deg: 210, isRed: false, trigram: '坤', fixedDir: '西南偏南' },
+      { name: '坤', deg: 225, isRed: false, trigram: '坤', fixedDir: '西南' },
+      { name: '申', deg: 240, isRed: false, trigram: '坤', fixedDir: '西南偏西' },
+      { name: '庚', deg: 255, isRed: false, trigram: '兌', fixedDir: '西偏南' },
+      { name: '酉', deg: 270, isRed: false, trigram: '兌', fixedDir: '西' },
+      { name: '辛', deg: 285, isRed: false, trigram: '兌', fixedDir: '西偏北' },
+      { name: '戌', deg: 300, isRed: false, trigram: '乾', fixedDir: '西北偏西' },
+      { name: '乾', deg: 315, isRed: false, trigram: '乾', fixedDir: '西北' },
+      { name: '亥', deg: 330, isRed: false, trigram: '乾', fixedDir: '西北偏北' },
+      { name: '壬', deg: 345, isRed: false, trigram: '坎', fixedDir: '北偏西' }
+    ];
+
+    const compassState = {
+      angle: 270,
+      doorRef: '270', // '270' (left), '180' (bottom), '0' (top), '90' (right), 'direct'
+      legendMode: 'dynamic',
+      fpScale: 1.0,
+      fpOffsetX: 0,
+      fpOffsetY: 0,
+      cpScale: 1.0,
+      cpOpacity: 0.95,
+      uploadedImg: null,
+      sampleCanvas: null,
+      isDragging: false,
+      dragStartX: 0,
+      dragStartY: 0
+    };
+
+    function createSampleFloorPlanCanvas() {
+      const c = document.createElement('canvas');
+      c.width = 520;
+      c.height = 500;
+      const ctx = c.getContext('2d');
+
+      // Soft light green-cream architectural fill matching image_57b08e.jpg
+      ctx.fillStyle = '#f2f8e4';
+      ctx.fillRect(30, 30, 460, 440);
+
+      // Grid / tile subtle lines in bathroom & kitchen
+      ctx.strokeStyle = '#d4dcc8';
+      ctx.lineWidth = 1;
+      for (let x = 50; x <= 240; x += 18) {
+        ctx.beginPath(); ctx.moveTo(x, 30); ctx.lineTo(x, 105); ctx.stroke();
+      }
+      for (let y = 30; y <= 105; y += 18) {
+        ctx.beginPath(); ctx.moveTo(50, y); ctx.lineTo(240, y); ctx.stroke();
+      }
+
+      // Outer thick walls
+      ctx.strokeStyle = '#2b2b2b';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(35, 35, 450, 430);
+
+      // Pillar blocks (dark structural columns at corners)
+      ctx.fillStyle = '#222222';
+      ctx.fillRect(32, 95, 36, 36);
+      ctx.fillRect(380, 95, 36, 36);
+      ctx.fillRect(450, 290, 36, 22);
+
+      // Internal partition walls
+      ctx.lineWidth = 4;
+      // Top-left rooms
+      ctx.beginPath();
+      ctx.moveTo(35, 105); ctx.lineTo(285, 105);
+      ctx.moveTo(285, 35); ctx.lineTo(285, 175);
+      ctx.moveTo(35, 220); ctx.lineTo(240, 220);
+      ctx.moveTo(240, 195); ctx.lineTo(240, 325);
+      ctx.moveTo(95, 325); ctx.lineTo(240, 325);
+      ctx.moveTo(95, 300); ctx.lineTo(95, 465);
+      // Right-side rooms & bathroom
+      ctx.moveTo(285, 240); ctx.lineTo(485, 240);
+      ctx.moveTo(285, 240); ctx.lineTo(285, 300);
+      ctx.moveTo(285, 300); ctx.lineTo(485, 300);
+      ctx.moveTo(410, 110); ctx.lineTo(410, 240);
+      ctx.stroke();
+
+      // Door arcs (thin grey-brown architectural door swings)
+      ctx.strokeStyle = '#777777';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(285, 175, 40, Math.PI * 0.5, Math.PI);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(240, 235, 36, Math.PI * 0.5, Math.PI);
+      ctx.stroke();
+
+      // Labels (陽台)
+      ctx.fillStyle = '#666666';
+      ctx.font = 'bold 16px "Noto Sans TC", sans-serif';
+      ctx.fillText('陽台', 428, 250);
+      ctx.fillText('陽台', 48, 400);
+
+      return c;
+    }
+
+    function screenAngleTo8DirName(scrDeg) {
+      const norm = ((scrDeg % 360) + 360) % 360;
+      const dirs = ['北', '東北', '東', '東南', '南', '西南', '西', '西北'];
+      const idx = Math.round(norm / 45) % 8;
+      return dirs[idx];
+    }
+
+    function getMountainMountainByDeg(deg) {
+      const norm = ((deg % 360) + 360) % 360;
+      const idx = Math.round(norm / 15) % 24;
+      return MOUNTAINS_24[idx];
+    }
+
+    function computeCompassRotationDeg() {
+      const a = Number(compassState.angle) || 0;
+      if (compassState.doorRef === 'direct') {
+        return ((a % 360) + 360) % 360;
+      }
+      const refDeg = Number(compassState.doorRef); // e.g. 270 for Left
+      // Rotate compass so that degree `a` on the compass lands at `refDeg` on screen
+      return ((refDeg - a) % 360 + 360) % 360;
+    }
+
+    function get8KeyMountainsLegend(rotationDeg) {
+      const keyNames = [
+        { left: '子', right: '午' },
+        { left: '艮', right: '坤' },
+        { left: '卯', right: '酉' },
+        { left: '巽', right: '乾' }
+      ];
+      const lookupOne = (mName) => {
+        const m = MOUNTAINS_24.find(x => x.name === mName);
+        const scrDeg = (m.deg + rotationDeg + 360) % 360;
+        const dynDir = screenAngleTo8DirName(scrDeg);
+        if (compassState.legendMode === 'fixed') {
+          return `${mName}：${m.fixedDir}`;
+        } else if (compassState.legendMode === 'both') {
+          return `${mName}：${m.fixedDir} (圖面${dynDir})`;
+        }
+        return `${mName}：${dynDir}`;
+      };
+      return keyNames.map(pair => ({
+        leftText: lookupOne(pair.left),
+        rightText: lookupOne(pair.right)
+      }));
+    }
+
+    function drawCompassOverlayOnContext(ctx, cx, cy, radius, rotationDeg, opacity) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate((rotationDeg * Math.PI) / 180);
+      ctx.globalAlpha = opacity;
+
+      const rOuter = radius;             // Outer circle of degree ticks
+      const rTickBase = radius * 0.925;  // Inner base of degree ticks
+      const rCharMid = radius * 0.84;    // Radius for 24-Mountain characters
+      const rInnerRing = radius * 0.75;  // Inner circle of 24-Mountain band
+
+      // 1. Subtle white semi-transparent halo in the ring band so degrees & characters are always legible
+      ctx.beginPath();
+      ctx.arc(0, 0, rOuter * 1.09, 0, Math.PI * 2);
+      ctx.arc(0, 0, rInnerRing, 0, Math.PI * 2, true);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
+      ctx.fill();
+
+      // 2. Outer & inner ring circles
+      ctx.strokeStyle = '#53629e';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.arc(0, 0, rOuter, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(0, 0, rTickBase, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 3. 360 Degree ticks & every-15° degree labels
+      for (let deg = 0; deg < 360; deg++) {
+        const rad = ((deg - 90) * Math.PI) / 180;
+        const is15 = (deg % 15 === 0);
+        const is5 = (deg % 5 === 0);
+        const tickStart = rTickBase;
+        const tickEnd = is15 ? rOuter : (is5 ? rTickBase + (rOuter - rTickBase) * 0.68 : rTickBase + (rOuter - rTickBase) * 0.42);
+
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(rad) * tickStart, Math.sin(rad) * tickStart);
+        ctx.lineTo(Math.cos(rad) * tickEnd, Math.sin(rad) * tickEnd);
+        ctx.strokeStyle = '#53629e';
+        ctx.lineWidth = is15 ? 1.3 : 0.8;
+        ctx.stroke();
+
+        if (is15) {
+          ctx.save();
+          ctx.rotate((deg * Math.PI) / 180);
+          ctx.fillStyle = '#435396';
+          ctx.font = `500 ${Math.round(radius * 0.045)}px "Inter", "Noto Sans TC", sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(`${deg}°`, 0, -rOuter - radius * 0.018);
+          ctx.restore();
+        }
+      }
+
+      // 4. 24-Mountain sector divider lines (every 15° offset by 7.5°) & 24-Mountain characters
+      for (let i = 0; i < 24; i++) {
+        const m = MOUNTAINS_24[i];
+        const boundaryDeg = m.deg + 7.5;
+        const bRad = ((boundaryDeg - 90) * Math.PI) / 180;
+
+        // Divider line in the mountain band (and faint radial line to center for non-dashed boundaries)
+        const isRedDashedBoundary = ((i % 3) === 0); // 7.5°? Wait: red dashed are at 22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5 -> i = 1, 4, 7, 10, 13, 16, 19, 22
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(bRad) * rInnerRing, Math.sin(bRad) * rInnerRing);
+        ctx.lineTo(Math.cos(bRad) * rTickBase, Math.sin(bRad) * rTickBase);
+        ctx.strokeStyle = 'rgba(83, 98, 158, 0.55)';
+        ctx.lineWidth = 0.9;
+        ctx.stroke();
+
+        // Draw 24-Mountain character
+        ctx.save();
+        ctx.rotate((m.deg * Math.PI) / 180);
+        ctx.fillStyle = m.isRed ? '#c8372d' : '#4656b0';
+        ctx.font = `bold ${Math.round(radius * 0.105)}px "標楷體", "DFKai-SB", "Kaiti TC", "Noto Serif TC", serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(m.name, 0, -rCharMid);
+        ctx.restore();
+      }
+
+      // 5. Solid blue line through 0° (子) and 180° (午)
+      ctx.beginPath();
+      ctx.moveTo(0, -rTickBase);
+      ctx.lineTo(0, rTickBase);
+      ctx.strokeStyle = 'rgba(70, 86, 176, 0.65)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      // Faint 15° radial lines for 癸/丁 (15°/195°) like in image_57b08e.jpg
+      [15, -15].forEach(d => {
+        const rad = ((d - 90) * Math.PI) / 180;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(rad) * rTickBase, Math.sin(rad) * rTickBase);
+        ctx.lineTo(-Math.cos(rad) * rTickBase, -Math.sin(rad) * rTickBase);
+        ctx.strokeStyle = 'rgba(83, 98, 158, 0.25)';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      });
+
+      // 6. 4 Red Dashed Diameter Lines dividing the 8 Trigram Palaces (22.5°, 67.5°, 112.5°, 157.5°)
+      const redAngles = [22.5, 67.5, 112.5, 157.5];
+      ctx.save();
+      ctx.strokeStyle = '#d9534f';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 5]);
+      redAngles.forEach(deg => {
+        const rad = ((deg - 90) * Math.PI) / 180;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(rad) * rOuter, Math.sin(rad) * rOuter);
+        ctx.lineTo(-Math.cos(rad) * rOuter, -Math.sin(rad) * rOuter);
+        ctx.stroke();
+      });
+      ctx.restore();
+
+      // 7. Center Red Dot (太極中心點)
+      ctx.beginPath();
+      ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#c8372d';
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function renderCompassView() {
+      const canvas = document.getElementById('compassCompositeCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;
+      const H = canvas.height;
+      const cx = W / 2;
+      const cy = H / 2;
+
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, H);
+
+      // 1. Draw Lower Layer: Floor Plan (Uploaded image or default sample floor plan)
+      if (!compassState.sampleCanvas) {
+        compassState.sampleCanvas = createSampleFloorPlanCanvas();
+      }
+      const srcImg = compassState.uploadedImg || compassState.sampleCanvas;
+      const imgW = srcImg.width || 520;
+      const imgH = srcImg.height || 500;
+      const baseFit = Math.min((W * 0.64) / imgW, (H * 0.64) / imgH);
+      const drawW = imgW * baseFit * compassState.fpScale;
+      const drawH = imgH * baseFit * compassState.fpScale;
+
+      ctx.save();
+      ctx.drawImage(
+        srcImg,
+        cx - drawW / 2 + compassState.fpOffsetX,
+        cy - drawH / 2 + compassState.fpOffsetY,
+        drawW,
+        drawH
+      );
+      ctx.restore();
+
+      // 2. Compute rotation & Draw Upper Layer: 24-Mountain Compass
+      const rotationDeg = computeCompassRotationDeg();
+      const radius = (W * 0.41) * compassState.cpScale;
+      drawCompassOverlayOnContext(ctx, cx, cy, radius, rotationDeg, compassState.cpOpacity);
+
+      // 3. Update Status Summary & Bottom 8-Direction Legend
+      const facingM = getMountainMountainByDeg(compassState.angle);
+      const sittingDeg = (Number(compassState.angle) + 180) % 360;
+      const sittingM = getMountainMountainByDeg(sittingDeg);
+
+      const summaryEl = document.getElementById('compassStatusSummary');
+      if (summaryEl) {
+        summaryEl.innerHTML = `目前輸入大門角度：<span class="text-amber-800">${compassState.angle}°（向首：${facingM.name}山・${facingM.trigram}宮${facingM.fixedDir} ／ 坐山：${sittingM.name}山・${sittingM.trigram}宮${sittingM.fixedDir}）</span>`;
+      }
+
+      const legendRows = get8KeyMountainsLegend(rotationDeg);
+      const legendBox = document.getElementById('compassLegendDomBox');
+      if (legendBox) {
+        legendBox.innerHTML = legendRows.map(r => `
+          <div>${r.leftText}</div>
+          <div>${r.rightText}</div>
+        `).join('');
+      }
+    }
+
+    function exportCompositeCompassPng() {
+      const mainCanvas = document.getElementById('compassCompositeCanvas');
+      if (!mainCanvas) return;
+      const out = document.createElement('canvas');
+      out.width = 860;
+      out.height = 1080;
+      const ctx = out.getContext('2d');
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, out.width, out.height);
+      ctx.drawImage(mainCanvas, 20, 10, 820, 820);
+
+      const rotationDeg = computeCompassRotationDeg();
+      const legendRows = get8KeyMountainsLegend(rotationDeg);
+      ctx.fillStyle = '#6e1409';
+      ctx.font = 'bold 34px "標楷體", "DFKai-SB", "Kaiti TC", "Noto Serif TC", serif';
+      legendRows.forEach((r, idx) => {
+        const y = 875 + idx * 48;
+        ctx.fillText(r.leftText, 110, y);
+        ctx.fillText(r.rightText, 520, y);
+      });
+
+      const url = out.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `二十四山平面疊合圖_${compassState.angle}度.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('⬇️ 已下載「房屋平面圖＋二十四山疊合圖 (PNG)」！');
+    }
+
     function applyTheme(themeName) {
       state.theme = themeName;
       document.body.classList.remove('theme-paper', 'theme-light', 'theme-dark');
@@ -3958,6 +4448,7 @@
         bazi: document.getElementById('tabPanelBazi'),
         ziwei: document.getElementById('tabPanelZiwei'),
         name: document.getElementById('tabPanelName'),
+        compass: document.getElementById('tabPanelCompass'),
         source: document.getElementById('tabPanelSource')
       };
       Object.keys(panels).forEach(k => {
@@ -4027,7 +4518,7 @@
           applyTheme(pTheme);
         }
         const pTab = params.get('tab');
-        if (pTab && ['bazi', 'ziwei', 'name', 'source'].includes(pTab)) {
+        if (pTab && ['bazi', 'ziwei', 'name', 'compass', 'source'].includes(pTab)) {
           switchTab(pTab);
           if (params.get('embed') === '1') {
             document.getElementById('mainTabNav').classList.add('hidden');
@@ -4041,6 +4532,7 @@
       syncInputControlsFromState();
       runCalculationsAndRender();
       renderNameView();
+      renderCompassView();
       updateEmbedCodeSnippet();
 
       document.querySelectorAll('.service-tab-btn').forEach(btn => {
@@ -4261,6 +4753,144 @@
           renderNameView();
           showToast('已載入「王小明」範例！');
         });
+      }
+
+
+      // 24-Mountain Compass Overlay Events
+      const fileInp = document.getElementById('floorPlanFileInput');
+      if (fileInp) {
+        fileInp.addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = () => {
+              compassState.uploadedImg = img;
+              compassState.fpOffsetX = 0;
+              compassState.fpOffsetY = 0;
+              document.getElementById('fpOffsetXSlider').value = 0;
+              document.getElementById('fpOffsetYSlider').value = 0;
+              document.getElementById('fpOffsetXVal').textContent = '0px';
+              document.getElementById('fpOffsetYVal').textContent = '0px';
+              renderCompassView();
+              showToast('✅ 已載入您上傳的房屋平面圖並完成二十四山疊合！');
+            };
+            img.src = ev.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const angleInp = document.getElementById('compassAngleInput');
+      const angleSlider = document.getElementById('compassAngleSlider');
+      const syncAngle = (val) => {
+        let num = parseFloat(val);
+        if (isNaN(num)) num = 0;
+        num = ((num % 360) + 360) % 360;
+        compassState.angle = num;
+        if (angleInp && document.activeElement !== angleInp) angleInp.value = num;
+        if (angleSlider) angleSlider.value = Math.round(num);
+        renderCompassView();
+      };
+      if (angleInp) angleInp.addEventListener('input', (e) => syncAngle(e.target.value));
+      if (angleSlider) angleSlider.addEventListener('input', (e) => {
+        angleInp.value = e.target.value;
+        syncAngle(e.target.value);
+      });
+
+      const doorRefSel = document.getElementById('compassDoorRefSelect');
+      if (doorRefSel) {
+        doorRefSel.addEventListener('change', (e) => {
+          compassState.doorRef = e.target.value;
+          renderCompassView();
+        });
+      }
+
+      const legendModeSel = document.getElementById('compassLegendModeSelect');
+      if (legendModeSel) {
+        legendModeSel.addEventListener('change', (e) => {
+          compassState.legendMode = e.target.value;
+          renderCompassView();
+        });
+      }
+
+      const bindRange = (sliderId, labelId, stateKey, isPct, unit) => {
+        const s = document.getElementById(sliderId);
+        const l = document.getElementById(labelId);
+        if (!s) return;
+        s.addEventListener('input', () => {
+          const v = parseFloat(s.value);
+          compassState[stateKey] = isPct ? v / 100 : v;
+          if (l) l.textContent = `${v}${unit}`;
+          renderCompassView();
+        });
+      };
+      bindRange('fpScaleSlider', 'fpScaleVal', 'fpScale', true, '%');
+      bindRange('fpOffsetXSlider', 'fpOffsetXVal', 'fpOffsetX', false, 'px');
+      bindRange('fpOffsetYSlider', 'fpOffsetYVal', 'fpOffsetY', false, 'px');
+      bindRange('cpScaleSlider', 'cpScaleVal', 'cpScale', true, '%');
+      bindRange('cpOpacitySlider', 'cpOpacityVal', 'cpOpacity', true, '%');
+
+      const resetSampleBtn = document.getElementById('compassResetSampleBtn');
+      if (resetSampleBtn) {
+        resetSampleBtn.addEventListener('click', () => {
+          compassState.uploadedImg = null;
+          compassState.angle = 270;
+          compassState.doorRef = '270';
+          compassState.fpScale = 1.0;
+          compassState.fpOffsetX = 0;
+          compassState.fpOffsetY = 0;
+          compassState.cpScale = 1.0;
+          compassState.cpOpacity = 0.95;
+          document.getElementById('compassAngleInput').value = 270;
+          document.getElementById('compassAngleSlider').value = 270;
+          document.getElementById('compassDoorRefSelect').value = '270';
+          document.getElementById('fpScaleSlider').value = 100;
+          document.getElementById('fpScaleVal').textContent = '100%';
+          document.getElementById('fpOffsetXSlider').value = 0;
+          document.getElementById('fpOffsetXVal').textContent = '0px';
+          document.getElementById('fpOffsetYSlider').value = 0;
+          document.getElementById('fpOffsetYVal').textContent = '0px';
+          renderCompassView();
+          showToast('🏡 已重設為 270° 範例平面圖！');
+        });
+      }
+
+      const dlPngBtn = document.getElementById('compassDownloadPngBtn');
+      if (dlPngBtn) {
+        dlPngBtn.addEventListener('click', exportCompositeCompassPng);
+      }
+
+      // Drag floor plan directly on canvas
+      const compCanvas = document.getElementById('compassCompositeCanvas');
+      if (compCanvas) {
+        const startDrag = (clientX, clientY) => {
+          compassState.isDragging = true;
+          compassState.dragStartX = clientX - compassState.fpOffsetX;
+          compassState.dragStartY = clientY - compassState.fpOffsetY;
+        };
+        const moveDrag = (clientX, clientY) => {
+          if (!compassState.isDragging) return;
+          compassState.fpOffsetX = Math.max(-200, Math.min(200, Math.round(clientX - compassState.dragStartX)));
+          compassState.fpOffsetY = Math.max(-200, Math.min(200, Math.round(clientY - compassState.dragStartY)));
+          document.getElementById('fpOffsetXSlider').value = compassState.fpOffsetX;
+          document.getElementById('fpOffsetYSlider').value = compassState.fpOffsetY;
+          document.getElementById('fpOffsetXVal').textContent = `${compassState.fpOffsetX}px`;
+          document.getElementById('fpOffsetYVal').textContent = `${compassState.fpOffsetY}px`;
+          renderCompassView();
+        };
+        const endDrag = () => { compassState.isDragging = false; };
+        compCanvas.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+        window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+        window.addEventListener('mouseup', endDrag);
+        compCanvas.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 1) startDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+        compCanvas.addEventListener('touchmove', (e) => {
+          if (e.touches.length === 1) moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+        compCanvas.addEventListener('touchend', endDrag);
       }
 
       document.getElementById('clearNameBtn').addEventListener('click', () => {
