@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">免費八字・紫微・姓名命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v3.3</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v3.4</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：改編與致敬自
@@ -3705,7 +3705,7 @@
           <div class="lg:col-span-3 theme-card border border-dashed theme-border rounded-2xl p-8 text-center space-y-2">
             <div class="text-2xl">🖋️</div>
             <div class="text-base font-bold serif-font">請於上方輸入「姓氏」與「名字」，並點擊「執行姓名吉凶分析」</div>
-            <p class="text-xs theme-muted">1:1 還原原站三才五格紅線方框圖解、六爻卦象、八十一靈動吉凶數、五行吉凶與易經姓名流年</p>
+            <p class="text-xs theme-muted">1:1 還原原站三才五格紅線方框圖解、八十一靈動吉凶數與五行吉凶</p>
           </div>
         `;
         return;
@@ -3926,60 +3926,7 @@
             </table>
           </div>
 
-          <!-- 4. 易經姓名學 - 姓名吉凶 & 姓名流年 Tables -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto pt-1">
-            <div class="space-y-2">
-              <div class="text-sm text-stone-500 font-medium">易經姓名學 - 姓名吉凶</div>
-              <table class="orig-person-table text-sm">
-                <thead>
-                  <tr>
-                    <th>符號</th>
-                    <th>上卦</th>
-                    <th>下卦</th>
-                    <th>卦名</th>
-                    <th>吉凶</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>${renderMiniHexagramSvg(baseUpperIdx, baseLowerIdx)}</td>
-                    <td>${TRIGRAMS[baseUpperIdx].name}</td>
-                    <td>${TRIGRAMS[baseLowerIdx].name}</td>
-                    <td>${baseHex.name}</td>
-                    <td>${baseHex.luck}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
 
-            <div class="space-y-2">
-              <div class="text-sm text-stone-500 font-medium">易經姓名學 - 姓名流年</div>
-              <table class="orig-person-table text-sm">
-                <thead>
-                  <tr>
-                    <th>年齡</th>
-                    <th>符號</th>
-                    <th>上卦</th>
-                    <th>下卦</th>
-                    <th>卦名</th>
-                    <th>吉凶</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${decadeHexagrams.map(d => `
-                    <tr>
-                      <td>${d.age}</td>
-                      <td>${renderMiniHexagramSvg(d.uIdx, d.lIdx)}</td>
-                      <td>${TRIGRAMS[d.uIdx].name}</td>
-                      <td>${TRIGRAMS[d.lIdx].name}</td>
-                      <td>${d.hex.name}</td>
-                      <td>${d.hex.luck}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          </div>
 
         </div>
       `;
