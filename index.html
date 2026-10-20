@@ -211,11 +211,13 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">免費八字・紫微・姓名命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v3.5</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">無廣告純淨版 v3.8</span>
           </div>
           <p class="text-xs theme-muted">
-            來源出處：改編與致敬自
-            <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer" class="underline font-medium hover:text-amber-700">免費八字命盤 (myfate.herokuapp.com)</a>
+            來源出處：八字/姓名改編自
+            <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer" class="underline font-medium hover:text-amber-700">myfate.herokuapp.com</a>
+            ｜紫微命盤來源：
+            <a href="https://wzziweiwan.com/" target="_blank" rel="noopener noreferrer" class="underline font-medium hover:text-amber-700">萬宗紫微 (wzziweiwan.com)</a>
           </p>
         </div>
       </div>
@@ -291,10 +293,10 @@
       </div>
 
       <div class="text-xs theme-muted flex items-center gap-2">
-        <span>原站對照：</span>
+        <span>來源對照：</span>
         <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">八字</a>
         <span>·</span>
-        <a href="https://myfate.herokuapp.com/ziwei" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">紫微</a>
+        <a href="https://wzziweiwan.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700 font-semibold">萬宗紫微</a>
         <span>·</span>
         <a href="https://myfate.herokuapp.com/person" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">姓名</a>
       </div>
@@ -796,12 +798,15 @@
       </div>
     </div>
 
-    <!-- ==================== TAB 2: 免費紫微命盤 ==================== -->
+    <!-- ==================== TAB 2: 免費紫微命盤 (來源：萬宗紫微 wzziweiwan.com) ==================== -->
     <div id="tabPanelZiwei" class="hidden space-y-5">
       <div id="ziweiEmptyStateBox" class="theme-card border border-dashed theme-border rounded-2xl p-8 text-center space-y-3">
         <div class="text-2xl">✨</div>
         <div class="text-base font-bold serif-font">請於上方選擇您的出生年月日時，再點擊「⚡ 立即排盤分析」</div>
-        <p class="text-xs theme-muted">輸入生辰後將自動同步排出紫微斗數十二宮命盤、四化與三方四正星曜解析</p>
+        <p class="text-xs theme-muted">
+          紫微命盤來源：<a href="https://wzziweiwan.com/" target="_blank" rel="noopener noreferrer" class="underline font-semibold hover:text-amber-700">萬宗紫微 (https://wzziweiwan.com/)</a>
+          — 支援「三合、四化、飛星」三大命盤模式、宮干自化與三方四正命書解讀
+        </p>
         <div class="pt-1">
           <button type="button" id="emptyStateCalcZiweiBtn" class="px-5 py-2 rounded-xl text-xs font-bold bg-amber-800 hover:bg-amber-900 text-white shadow transition">
             ⚡ 依上方所選生辰立即排盤
@@ -810,20 +815,33 @@
       </div>
       <div id="ziweiResultsWrapper" class="hidden space-y-5">
       <div class="theme-card border rounded-2xl p-4 sm:p-5 shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b theme-border">
           <div>
-            <h3 class="text-base sm:text-lg font-bold serif-font flex items-center gap-2">
-              <span>紫微斗數十二宮命盤</span>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-base sm:text-lg font-bold serif-font">萬宗紫微斗數十二宮命盤</h3>
               <span id="ziweiBureauBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 font-bold"></span>
-            </h3>
-            <p class="text-xs theme-muted mt-0.5">
-              排盤規則參考勸學齋主《紫微初階》及大耕老師、輔弼居士、黃四明老師著作。點擊任一宮位可檢視「三方四正」與星曜賦性！
+              <a href="https://wzziweiwan.com/" target="_blank" rel="noopener noreferrer" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 hover:bg-amber-200 font-semibold transition">
+                來源：萬宗紫微 (wzziweiwan.com) ↗
+              </a>
+            </div>
+            <p class="text-xs theme-muted mt-1">
+              依循 <a href="https://wzziweiwan.com/" target="_blank" rel="noopener noreferrer" class="underline font-medium hover:text-amber-700">萬宗紫微 (wzziweiwan.com)</a> 三合、飛星、四化三大命盤模式排定。點擊任一宮位即可即時顯示「宮干四化飛星落宮」、「三方四正」與「命書解讀」！
             </p>
           </div>
-          <!-- View Switcher solving Original Site's Mobile Display Note -->
-          <div class="inline-flex rounded-xl border theme-border p-1 theme-subtle text-xs">
-            <button type="button" id="ziweiViewGridBtn" class="px-3 py-1 rounded-lg font-bold bg-amber-800 text-white transition">傳統十二宮方陣</button>
-            <button type="button" id="ziweiViewCardsBtn" class="px-3 py-1 rounded-lg font-bold transition">手機友善卡片視圖</button>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- 萬宗紫微三大流派模式切換 (三合 / 四化 / 飛星) -->
+            <div class="inline-flex rounded-xl border theme-border p-1 theme-subtle text-xs">
+              <button type="button" id="zwModeSanheBtn" data-zwmode="sanhe" class="zw-mode-btn px-2.5 py-1 rounded-lg font-bold bg-purple-800 text-white transition">三合盤</button>
+              <button type="button" id="zwModeSihuaBtn" data-zwmode="sihua" class="zw-mode-btn px-2.5 py-1 rounded-lg font-bold transition">四化盤 (含自化)</button>
+              <button type="button" id="zwModeFeixingBtn" data-zwmode="feixing" class="zw-mode-btn px-2.5 py-1 rounded-lg font-bold transition">飛星盤 (宮干飛化)</button>
+            </div>
+
+            <!-- 視圖切換 (傳統方陣 / 手機卡片) -->
+            <div class="inline-flex rounded-xl border theme-border p-1 theme-subtle text-xs">
+              <button type="button" id="ziweiViewGridBtn" class="px-2.5 py-1 rounded-lg font-bold bg-amber-800 text-white transition">十二宮方陣</button>
+              <button type="button" id="ziweiViewCardsBtn" class="px-2.5 py-1 rounded-lg font-bold transition">手機卡片視圖</button>
+            </div>
           </div>
         </div>
 
@@ -837,7 +855,7 @@
           <!-- Populated by JS -->
         </div>
 
-        <!-- Selected Palace Three-Sides-Four-Quarters (三方四正) & Star Nature Detail Panel -->
+        <!-- Selected Palace Three-Sides-Four-Quarters (三方四正) & WanZong MingShu Detail Panel -->
         <div id="ziweiPalaceDetailBox" class="mt-4 theme-subtle border theme-border rounded-xl p-4">
           <!-- Populated by JS -->
         </div>
@@ -895,18 +913,19 @@
     </div>
 
     <!-- ==================== TAB 3.5: 房屋二十四山方位與角度疊圖 ==================== -->
-    <div id="tabPanelCompass" class="hidden space-y-5">
-      <div class="theme-card border rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-2 border-b theme-border pb-3">
+    <div id="tabPanelCompass" class="hidden space-y-4">
+      <!-- Top Compact Settings Card -->
+      <div class="theme-card border rounded-2xl p-4 shadow-sm space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b theme-border pb-2.5">
           <div>
             <h3 class="text-base sm:text-lg font-bold serif-font">🧭 房屋平面圖 ×「二十四山」方位與角度雙層疊合工具</h3>
             <p class="text-xs theme-muted mt-0.5">
-              下層為房屋平面圖，上層為透明「二十四山」羅盤。輸入人站在屋宅正中心往大門看的角度（如 270°），上層羅盤即自動轉動疊合並標示八方方位。
+              上傳房屋平面圖後，可直接於圖上點選「大門位置」並於圖面正上方拖拉「大門角度 (0°~360°)」，即時觀看羅盤轉動與下方方位變化。
             </p>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <button type="button" id="compassResetSampleBtn" class="px-3 py-1.5 rounded-xl text-xs font-medium theme-subtle border theme-border hover:opacity-80 transition">
-              🏡 載入範例平面圖 (270°)
+              🏡 重設範例圖 (270°)
             </button>
             <button type="button" id="compassDownloadPngBtn" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-800 hover:bg-amber-900 text-white shadow-sm transition flex items-center gap-1">
               <span>⬇️ 下載疊合圖檔 (PNG)</span>
@@ -914,90 +933,111 @@
           </div>
         </div>
 
-        <!-- Controls Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <!-- Upload, Door Preset & Legend Granularity -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
           <!-- 1. Upload Floor Plan -->
           <div>
-            <label class="block text-xs font-semibold mb-1.5 theme-muted">① 下層：上傳房屋平面圖 (JPG/PNG)</label>
+            <label class="block text-xs font-semibold mb-1 theme-muted">① 下層：上傳房屋平面圖 (JPG/PNG)</label>
             <label for="floorPlanFileInput" class="w-full cursor-pointer rounded-xl border border-dashed border-amber-700/60 theme-subtle px-3 py-2 text-xs font-bold flex items-center justify-center gap-2 hover:opacity-90 transition">
               <span>📂 選擇或更換平面圖檔...</span>
             </label>
             <input type="file" id="floorPlanFileInput" accept="image/*" class="hidden" />
           </div>
 
-          <!-- 2. Input Facing Angle (0 - 360) -->
+          <!-- 2. Door Reference Direction on Floor Plan -->
           <div>
-            <label for="compassAngleInput" class="block text-xs font-semibold mb-1.5 theme-muted">② 輸入角度（站屋宅中心往大門看 0°~360°）</label>
-            <div class="flex items-center gap-2">
-              <input type="number" id="compassAngleInput" value="270" min="0" max="360" step="0.5" class="w-28 rounded-xl border theme-border theme-card px-3 py-2 text-base font-bold text-amber-900 dark:text-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-600" />
-              <span class="text-sm font-bold">度 (°)</span>
-              <input type="range" id="compassAngleSlider" value="270" min="0" max="360" step="1" class="flex-1 accent-amber-800 cursor-pointer" />
-            </div>
-          </div>
-
-          <!-- 3. Door Reference Direction on Floor Plan -->
-          <div>
-            <label for="compassDoorRefSelect" class="block text-xs font-semibold mb-1.5 theme-muted">③ 平面圖上大門朝向位置（對齊基準）</label>
+            <label for="compassDoorRefSelect" class="block text-xs font-semibold mb-1 theme-muted">② 平面圖上大門位置（可直接點選下方平面圖）</label>
             <select id="compassDoorRefSelect" class="w-full rounded-xl border theme-border theme-card px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-600">
-              <option value="270" selected>圖面左方 (預設：輸入 270° 時 270°朝左、0°朝上)</option>
-              <option value="180">圖面下方 (輸入角度對齊圖面正下方)</option>
-              <option value="0">圖面上方 (輸入角度對齊圖面正上方)</option>
-              <option value="90">圖面右方 (輸入角度對齊圖面正右方)</option>
-              <option value="direct">直接指定上層羅盤順時針旋轉角度</option>
+              <option value="custom" id="compassDoorCustomOpt">🎯 依圖面點選之大門位置 (270° 左方)</option>
+              <option value="270" selected>⬅️ 大門在圖面左方 (預設 270° 基準)</option>
+              <option value="180">⬇️ 大門在圖面下方 (180° 基準)</option>
+              <option value="0">⬆️ 大門在圖面上方 (0° 基準)</option>
+              <option value="90">➡️ 大門在圖面右方 (90° 基準)</option>
             </select>
           </div>
 
-          <!-- 4. Bottom Direction Text Mode -->
+          <!-- 3. Bottom Direction Text Precision Mode -->
           <div>
-            <label for="compassLegendModeSelect" class="block text-xs font-semibold mb-1.5 theme-muted">④ 下方「子、艮、卯...」方位顯示模式</label>
+            <label for="compassLegendModeSelect" class="block text-xs font-semibold mb-1 theme-muted">③ 下方「子、艮、卯...」動態方位顯示精度</label>
             <select id="compassLegendModeSelect" class="w-full rounded-xl border theme-border theme-card px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-600">
-              <option value="dynamic" selected>依疊合後圖面位置動態顯示方位 (上北下南左西右東)</option>
-              <option value="fixed">固定顯示八方本義 (子:北、艮:東北、卯:東...)</option>
-              <option value="both">同時顯示本義與疊合後角度/圖面位置</option>
+              <option value="dynamic24" selected>依羅盤轉動即時變化（24山精細方位：北、北偏東、東北...）</option>
+              <option value="dynamic8">依羅盤轉動即時變化（8大方位：北、東北、東、東南...）</option>
+              <option value="fixed">固定顯示後天八卦本義（子:北、午:南、卯:東、酉:西）</option>
             </select>
           </div>
         </div>
 
         <!-- Fine-tuning Sliders for Floor Plan & Compass -->
-        <div class="pt-3 border-t theme-border grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+        <div class="pt-2 border-t theme-border grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
           <div>
-            <div class="flex justify-between mb-1"><span class="theme-muted">平面圖縮放</span><span id="fpScaleVal" class="font-mono">100%</span></div>
+            <div class="flex justify-between mb-0.5"><span class="theme-muted">平面圖縮放</span><span id="fpScaleVal" class="font-mono">100%</span></div>
             <input type="range" id="fpScaleSlider" min="40" max="180" value="100" class="w-full accent-amber-800 cursor-pointer" />
           </div>
           <div>
-            <div class="flex justify-between mb-1"><span class="theme-muted">平面圖水平位移</span><span id="fpOffsetXVal" class="font-mono">0px</span></div>
+            <div class="flex justify-between mb-0.5"><span class="theme-muted">平面圖水平位移</span><span id="fpOffsetXVal" class="font-mono">0px</span></div>
             <input type="range" id="fpOffsetXSlider" min="-200" max="200" value="0" class="w-full accent-amber-800 cursor-pointer" />
           </div>
           <div>
-            <div class="flex justify-between mb-1"><span class="theme-muted">平面圖垂直位移</span><span id="fpOffsetYVal" class="font-mono">0px</span></div>
+            <div class="flex justify-between mb-0.5"><span class="theme-muted">平面圖垂直位移</span><span id="fpOffsetYVal" class="font-mono">0px</span></div>
             <input type="range" id="fpOffsetYSlider" min="-200" max="200" value="0" class="w-full accent-amber-800 cursor-pointer" />
           </div>
           <div>
-            <div class="flex justify-between mb-1"><span class="theme-muted">羅盤大小比例</span><span id="cpScaleVal" class="font-mono">100%</span></div>
+            <div class="flex justify-between mb-0.5"><span class="theme-muted">羅盤大小比例</span><span id="cpScaleVal" class="font-mono">100%</span></div>
             <input type="range" id="cpScaleSlider" min="65" max="125" value="100" class="w-full accent-amber-800 cursor-pointer" />
           </div>
           <div>
-            <div class="flex justify-between mb-1"><span class="theme-muted">羅盤透明度</span><span id="cpOpacityVal" class="font-mono">95%</span></div>
+            <div class="flex justify-between mb-0.5"><span class="theme-muted">羅盤透明度</span><span id="cpOpacityVal" class="font-mono">95%</span></div>
             <input type="range" id="cpOpacitySlider" min="30" max="100" value="95" class="w-full accent-amber-800 cursor-pointer" />
           </div>
         </div>
       </div>
 
-      <!-- Composite Output Card (1:1 matching image_57b08e.jpg) -->
-      <div class="bg-white text-stone-900 border border-stone-200 rounded-2xl p-4 sm:p-8 shadow-sm max-w-3xl mx-auto w-full space-y-6">
-        <!-- Info Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-stone-600 border-b border-stone-200 pb-2.5">
-          <div id="compassStatusSummary" class="font-bold text-stone-800"></div>
-          <div class="text-stone-500">💡 提示：可直接於下方畫布拖曳微調房屋平面圖中心位置</div>
+      <!-- Composite Output Card (Angle Slider placed right above the Canvas for real-time viewing!) -->
+      <div class="bg-white text-stone-900 border border-stone-200 rounded-2xl p-4 sm:p-6 shadow-sm max-w-3xl mx-auto w-full space-y-3">
+
+        <!-- Direct Angle Input & Slider RIGHT ABOVE the Diagram -->
+        <div class="bg-amber-50/70 border border-amber-200/80 rounded-xl p-3 space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <label for="compassAngleInput" class="text-xs sm:text-sm font-bold text-stone-800">
+              🎯 輸入角度（站屋宅中心往大門看 0°~360°）：
+            </label>
+            <div class="flex items-center gap-2 flex-1 min-w-[240px]">
+              <input type="number" id="compassAngleInput" value="270" min="0" max="360" step="0.5" class="w-24 rounded-xl border border-stone-300 bg-white px-3 py-1.5 text-base font-bold text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-600" />
+              <span class="text-sm font-bold text-stone-800">度 (°)</span>
+              <input type="range" id="compassAngleSlider" value="270" min="0" max="360" step="1" class="flex-1 accent-amber-800 cursor-pointer h-2" />
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-amber-200/60 text-xs">
+            <div id="compassStatusSummary" class="font-bold text-stone-800"></div>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="inline-flex rounded-lg border border-stone-300 p-0.5 bg-white text-[11px]">
+                <button type="button" id="canvasModeDoorBtn" class="px-2.5 py-1 rounded-md font-bold bg-amber-800 text-white transition">
+                  🚪 點圖設定大門位置
+                </button>
+                <button type="button" id="canvasModePanBtn" class="px-2.5 py-1 rounded-md font-bold text-stone-600 hover:bg-stone-100 transition">
+                  ✋ 拖曳移動平面圖
+                </button>
+              </div>
+              <label class="inline-flex items-center gap-1 cursor-pointer text-stone-700 font-medium">
+                <input type="checkbox" id="showDoorMarkerCheck" checked class="rounded text-amber-800 focus:ring-amber-600" />
+                <span>顯示大門點</span>
+              </label>
+              <label class="inline-flex items-center gap-1 cursor-pointer text-stone-700 font-medium">
+                <input type="checkbox" id="showCardinalLabelsCheck" checked class="rounded text-amber-800 focus:ring-amber-600" />
+                <span>標示東西南北</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- 2-Layer Composite Canvas -->
         <div class="flex justify-center">
-          <canvas id="compassCompositeCanvas" width="820" height="820" class="w-full max-w-[620px] h-auto rounded-xl cursor-move border border-stone-100 shadow-inner bg-white"></canvas>
+          <canvas id="compassCompositeCanvas" width="820" height="820" class="w-full max-w-[560px] h-auto rounded-xl cursor-crosshair border border-stone-100 bg-white"></canvas>
         </div>
 
         <!-- Bottom 2-Column 8-Direction Legend (子、艮、卯、巽 / 午、坤、酉、乾) -->
-        <div id="compassLegendDomBox" class="max-w-lg mx-auto px-4 pt-2 pb-1 grid grid-cols-2 gap-x-12 gap-y-2.5 text-2xl sm:text-3xl font-bold tracking-wider" style="color: #6e1409; font-family: '標楷體', 'DFKai-SB', 'Kaiti TC', 'Noto Serif TC', serif;">
+        <div id="compassLegendDomBox" class="max-w-lg mx-auto px-4 pt-1 pb-1 grid grid-cols-2 gap-x-10 gap-y-2 text-2xl sm:text-3xl font-bold tracking-wider" style="color: #6e1409; font-family: '標楷體', 'DFKai-SB', 'Kaiti TC', 'Noto Serif TC', serif;">
           <!-- Populated by JS -->
         </div>
       </div>
@@ -1021,8 +1061,11 @@
             <h4 class="font-bold serif-font text-amber-900 dark:text-amber-300">📌 原始網站與作者出處</h4>
             <ul class="space-y-1.5 text-xs leading-relaxed">
               <li><strong>原始網站名稱：</strong><a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer" class="underline font-semibold">免費八字命盤 (https://myfate.herokuapp.com/)</a></li>
-              <li><strong>子服務網址：</strong>
-                <a href="https://myfate.herokuapp.com/ziwei" target="_blank" rel="noopener noreferrer" class="underline">免費紫微命盤 (/ziwei)</a>、
+              <li><strong>紫微命盤來源網站：</strong>
+                <a href="https://wzziweiwan.com/" target="_blank" rel="noopener noreferrer" class="underline font-semibold">萬宗紫微 (https://wzziweiwan.com/)</a>（支援三合、四化、飛星三大命盤模式）
+              </li>
+              <li><strong>八字與姓名子服務網址：</strong>
+                <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer" class="underline">免費八字命盤</a>、
                 <a href="https://myfate.herokuapp.com/person" target="_blank" rel="noopener noreferrer" class="underline">免費姓名吉凶分析 (/person)</a>
               </li>
               <li><strong>原作者團隊：</strong>科技命理網 (心靈) ／ 凱心健康團隊 (身體)</li>
@@ -1037,7 +1080,7 @@
               <li><strong>日主強弱算法：</strong>參考李鐵筆老師《八字命學寶鑑》傳統得令得地算法與現代量化對照。</li>
               <li><strong>無敵律數與取用神：</strong>參考陳德生老師《無敵律數》。</li>
               <li><strong>科學八字與定格局：</strong>參考黃冠寰／江幸芬教授《科學斷八字》及林相如老師《科學的八字》。</li>
-              <li><strong>紫微斗數排盤：</strong>參考勸學齋主《紫微初階》，以及大耕老師、輔弼居士、黃四明老師相關著作。</li>
+              <li><strong>紫微斗數排盤：</strong>來源改編自 <a href="https://wzziweiwan.com/" target="_blank" rel="noopener noreferrer" class="underline font-semibold">萬宗紫微 (https://wzziweiwan.com/)</a> 三合、飛星、四化三大命盤體系，並結合經典斗數文獻校驗。</li>
             </ul>
           </div>
         </div>
@@ -1061,7 +1104,7 @@
         <span class="font-semibold text-stone-700 dark:text-stone-200">資料與架構出處：</span>
         <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700 font-medium">免費八字命盤 (myfate.herokuapp.com)</a>
         <span>｜</span>
-        <a href="https://myfate.herokuapp.com/ziwei" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">免費紫微命盤</a>
+        <a href="https://wzziweiwan.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700 font-medium">萬宗紫微 (wzziweiwan.com)</a>
         <span>｜</span>
         <a href="https://myfate.herokuapp.com/person" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">免費姓名吉凶分析</a>
         <span id="footerExtraCredits" class="hidden sm:inline">（參考：黃恆堉、李鐵筆、陳德生、黃冠寰/江幸芬、林相如、勸學齋主等著作｜原作者聯絡：pyfate@gmail.com）</span>
@@ -2465,7 +2508,9 @@
     };
 
     const BOSHI_12 = ['博士', '力士', '青龍', '小耗', '將軍', '奏書', '飛廉', '喜神', '病符', '大耗', '伏兵', '官府'];
-    const ZIWEI_CHANGSHENG_12 = ['長生', '沐浴', '冠帶', '建祿', '帝旺', '衰', '病', '死', '墓', '絕', '胎', '養'];
+    const ZIWEI_CHANGSHENG_12 = ['長生', '沐浴', '冠帶', '臨官', '帝旺', '衰', '病', '死', '墓', '絕', '胎', '養'];
+    const SUIQIAN_12 = ['歲建', '晦氣', '喪門', '貫索', '官符', '小耗', '歲破', '龍德', '白虎', '天德', '弔客', '病符'];
+    const JIANGQIAN_12 = ['將星', '攀鞍', '歲驛', '息神', '華蓋', '劫煞', '災煞', '天煞', '指背', '咸池', '月煞', '亡神'];
 
     function calculateZiwei(baziData) {
       const lunarM = baziData.lunar.month;
@@ -2494,9 +2539,16 @@
           isShen: b === shenBranchIdx,
           majorStars: [],
           minorStars: [],
+          zaStars: [],
+          zihuaList: [],      // 宮干自化 (本宮天干使本宮星曜四化)
+          xiangxinList: [],   // 向心四化 (對宮天干使本宮星曜四化)
+          feixingMap: {},     // 該宮干飛出之四化 { 祿: {star, targetBranchIdx, targetRole}, ... }
           boshi: '',
           changsheng: '',
-          daxian: ''
+          suiqian: '',
+          jiangqian: '',
+          daxian: '',
+          xiaoxian: ''
         });
       }
 
@@ -2536,7 +2588,7 @@
       ziweiOffsets.forEach(item => {
         const idx = (ziweiPos + item.offset + 120) % 12;
         const br = STAR_BRIGHTNESS[item.star][idx];
-        palaces[idx].majorStars.push({ name: item.star, brightness: br, sihua: SIHUA_TABLE[yearStem][item.star] || '' });
+        palaces[idx].majorStars.push({ name: item.star, brightness: br, sihua: SIHUA_TABLE[yearStem][item.star] || '', zihua: '' });
       });
 
       const tianfuPos = (4 - ziweiPos + 12) % 12;
@@ -2553,10 +2605,10 @@
       tianfuOffsets.forEach(item => {
         const idx = (tianfuPos + item.offset + 120) % 12;
         const br = STAR_BRIGHTNESS[item.star][idx];
-        palaces[idx].majorStars.push({ name: item.star, brightness: br, sihua: SIHUA_TABLE[yearStem][item.star] || '' });
+        palaces[idx].majorStars.push({ name: item.star, brightness: br, sihua: SIHUA_TABLE[yearStem][item.star] || '', zihua: '' });
       });
 
-      // Minor & Auxiliary Stars matching myfate.herokuapp.com/ziwei
+      // 六吉、六煞、祿馬 (萬宗紫微核心輔煞曜)
       const zuofuPos = (4 + (lunarM - 1) + 12) % 12;
       const youbiPos = (10 - (lunarM - 1) + 120) % 12;
       const wenchangPos = (10 - hourBranchIdx + 120) % 12;
@@ -2566,7 +2618,8 @@
         palaces[(bIdx + 120) % 12].minorStars.push({
           name: starName,
           isLucky,
-          sihua: SIHUA_TABLE[yearStem][starName] || ''
+          sihua: SIHUA_TABLE[yearStem][starName] || '',
+          zihua: ''
         });
       };
       addMinor(zuofuPos, '左輔', true);
@@ -2574,7 +2627,6 @@
       addMinor(wenchangPos, '文昌', true);
       addMinor(wenquPos, '文曲', true);
 
-      // 天魁、天鉞
       const kuiYueMap = [
         [1, 7], [0, 8], [11, 9], [11, 9], [1, 7],
         [0, 8], [1, 7], [6, 2], [3, 5], [3, 5]
@@ -2583,39 +2635,108 @@
       addMinor(kuiPos, '天魁', true);
       addMinor(yuePos, '天鉞', true);
 
-      // 祿存、擎羊、陀羅
       const lucunMap = [2, 3, 5, 6, 5, 6, 8, 9, 11, 0];
       const lucunPos = lucunMap[yearStemIdx];
       addMinor(lucunPos, '祿存', true);
       addMinor((lucunPos + 1) % 12, '擎羊', false);
       addMinor((lucunPos + 11) % 12, '陀羅', false);
 
-      // 火星、鈴星
       let huoStart = 2, lingStart = 10;
-      if ([2, 6, 10].includes(yearBranchIdx)) { huoStart = 1; lingStart = 3; } // 寅午戌: 丑/卯
-      else if ([8, 0, 4].includes(yearBranchIdx)) { huoStart = 2; lingStart = 10; } // 申子辰: 寅/戌
-      else if ([5, 9, 1].includes(yearBranchIdx)) { huoStart = 3; lingStart = 10; } // 巳酉丑: 卯/戌
-      else { huoStart = 9; lingStart = 10; } // 亥卯未: 酉/戌
+      if ([2, 6, 10].includes(yearBranchIdx)) { huoStart = 1; lingStart = 3; }
+      else if ([8, 0, 4].includes(yearBranchIdx)) { huoStart = 2; lingStart = 10; }
+      else if ([5, 9, 1].includes(yearBranchIdx)) { huoStart = 3; lingStart = 10; }
+      else { huoStart = 9; lingStart = 10; }
       addMinor((huoStart + hourBranchIdx) % 12, '火星', false);
       addMinor((lingStart + hourBranchIdx) % 12, '鈴星', false);
 
-      // 地劫、地空
       addMinor((11 + hourBranchIdx) % 12, '地劫', false);
       addMinor((11 - hourBranchIdx + 12) % 12, '地空', false);
 
-      // 天馬、紅鸞、天喜、天刑、天姚
       const tianmaMap = { 2:8, 6:8, 10:8, 8:2, 0:2, 4:2, 5:11, 9:11, 1:11, 11:5, 3:5, 7:5 };
-      addMinor(tianmaMap[yearBranchIdx], '命馬', true);
-      const hongluanPos = (3 - yearBranchIdx + 12) % 12;
-      addMinor(hongluanPos, '紅鸞', true);
-      addMinor((hongluanPos + 6) % 12, '天喜', true);
-      addMinor((9 + lunarM - 1) % 12, '天刑', false);
-      addMinor((1 + lunarM - 1) % 12, '天姚', false);
-      addMinor((4 + yearBranchIdx) % 12, '龍池', true);
-      addMinor((10 - yearBranchIdx + 12) % 12, '鳳閣', true);
+      addMinor(tianmaMap[yearBranchIdx], '天馬', true);
 
-      // 博士十二神 (from 祿存, 陽男陰女順行, 陰男陽女逆行) & 長生十二神 & 大限
+      // 乙丙級雜曜 (萬宗紫微完整雜曜配置)
+      const addZa = (bIdx, starName) => {
+        palaces[(bIdx + 120) % 12].zaStars.push(starName);
+      };
+      const hongluanPos = (3 - yearBranchIdx + 12) % 12;
+      addZa(hongluanPos, '紅鸞');
+      addZa((hongluanPos + 6) % 12, '天喜');
+      addZa((9 + lunarM - 1) % 12, '天刑');
+      addZa((1 + lunarM - 1) % 12, '天姚');
+      addZa((4 + yearBranchIdx) % 12, '龍池');
+      addZa((10 - yearBranchIdx + 12) % 12, '鳳閣');
+      addZa((6 + yearBranchIdx) % 12, '天虛');
+      addZa((6 - yearBranchIdx + 12) % 12, '天哭');
+      addZa((wenquPos + 2) % 12, '台輔');
+      addZa((wenquPos + 10) % 12, '封誥');
+      addZa((mingBranchIdx + yearBranchIdx) % 12, '天才');
+      addZa((shenBranchIdx + yearBranchIdx) % 12, '天壽');
+
+      // 孤辰、寡宿
+      let guchenPos = 2, guasuPos = 10;
+      if ([11, 0, 1].includes(yearBranchIdx)) { guchenPos = 2; guasuPos = 10; }
+      else if ([2, 3, 4].includes(yearBranchIdx)) { guchenPos = 5; guasuPos = 1; }
+      else if ([5, 6, 7].includes(yearBranchIdx)) { guchenPos = 8; guasuPos = 4; }
+      else { guchenPos = 11; guasuPos = 7; }
+      addZa(guchenPos, '孤辰');
+      addZa(guasuPos, '寡宿');
+
+      // 三台、八座、恩光、天貴
+      addZa((zuofuPos + lunarD - 1) % 12, '三台');
+      addZa((youbiPos - (lunarD - 1) + 120) % 12, '八座');
+      addZa((wenchangPos + lunarD - 2 + 120) % 12, '恩光');
+      addZa((wenquPos + lunarD - 2 + 120) % 12, '天貴');
+
+      // 計算萬宗紫微「四化盤（宮干自化 & 向心四化）」與「飛星盤（十二宮干飛四化落宮）」
+      const findStarPalaceIdx = (starName) => {
+        for (let i = 0; i < 12; i++) {
+          if (palaces[i].majorStars.some(s => s.name === starName)) return i;
+          if (palaces[i].minorStars.some(s => s.name === starName)) return i;
+        }
+        return 0;
+      };
+
+      for (let i = 0; i < 12; i++) {
+        const p = palaces[i];
+        const oppP = palaces[(i + 6) % 12];
+        const stemMap = SIHUA_TABLE[p.stem] || {};
+        const oppStemMap = SIHUA_TABLE[oppP.stem] || {};
+
+        // 記錄該宮干飛出之祿權科忌落入哪一宮
+        Object.keys(stemMap).forEach(starName => {
+          const huaType = stemMap[starName]; // '祿' | '權' | '科' | '忌'
+          const targetIdx = findStarPalaceIdx(starName);
+          p.feixingMap[huaType] = {
+            star: starName,
+            targetBranchIdx: targetIdx,
+            targetBranch: BRANCHES[targetIdx],
+            targetRole: palaces[targetIdx].roleName,
+            isSelf: targetIdx === i,
+            isOpposite: targetIdx === (i + 6) % 12
+          };
+        });
+
+        // 檢查本宮星曜是否有「自化 (↑)」或對宮飛入之「向心四化 (↓)」
+        [...p.majorStars, ...p.minorStars].forEach(st => {
+          if (stemMap[st.name]) {
+            st.zihua = stemMap[st.name];
+            p.zihuaList.push(`自化${stemMap[st.name]}(${st.name})`);
+          }
+          if (oppStemMap[st.name]) {
+            p.xiangxinList.push(`向心${oppStemMap[st.name]}(${st.name})`);
+          }
+        });
+      }
+
+      // 博士十二神、長生十二神、歲前十二神、將前十二神、大限與小限
       const isForward = baziData.isForward;
+      let jiangStart = 0;
+      if ([2, 6, 10].includes(yearBranchIdx)) jiangStart = 6;      // 寅午戌將星在午
+      else if ([8, 0, 4].includes(yearBranchIdx)) jiangStart = 0;  // 申子辰將星在子
+      else if ([5, 9, 1].includes(yearBranchIdx)) jiangStart = 9;  // 巳酉丑將星在酉
+      else jiangStart = 3;                                         // 亥卯未將星在卯
+
       for (let i = 0; i < 12; i++) {
         const pIdx = isForward ? (mingBranchIdx + i) % 12 : (mingBranchIdx - i + 12) % 12;
         const start = bureau.num + i * 10;
@@ -2626,10 +2747,28 @@
 
         const csIdx = isForward ? (bureau.csStart + i) % 12 : (bureau.csStart - i + 120) % 12;
         palaces[csIdx].changsheng = ZIWEI_CHANGSHENG_12[i];
+
+        palaces[(yearBranchIdx + i) % 12].suiqian = SUIQIAN_12[i];
+        palaces[(jiangStart + i) % 12].jiangqian = JIANGQIAN_12[i];
       }
 
-      // 子年斗君 (子起正月逆數生月，順數生時)
       const doujunIdx = (0 - (lunarM - 1) + hourBranchIdx + 24) % 12;
+
+      // 生年四化總覽
+      const natalSihuaSummary = [];
+      const yMap = SIHUA_TABLE[yearStem] || {};
+      ['祿', '權', '科', '忌'].forEach(hType => {
+        const starName = Object.keys(yMap).find(k => yMap[k] === hType);
+        if (starName) {
+          const tIdx = findStarPalaceIdx(starName);
+          natalSihuaSummary.push({
+            type: hType,
+            star: starName,
+            palaceRole: palaces[tIdx].roleName,
+            branch: BRANCHES[tIdx]
+          });
+        }
+      });
 
       return {
         bureau,
@@ -2638,6 +2777,7 @@
         mingzhu: MINGZHU_STARS[mingBranchIdx],
         shenzhu: SHENZHU_STARS[yearBranchIdx],
         doujun: BRANCHES[doujunIdx],
+        natalSihuaSummary,
         palaces
       };
     }
@@ -2903,6 +3043,7 @@
       nightZiKeepDay: true,
       selectedDayunIdx: 0,
       ziweiViewMode: 'grid',
+      ziweiChartMode: 'sanhe',
       selectedZiweiBranchIdx: null,
       baziResult: null,
       ziweiResult: null,
@@ -3668,7 +3809,25 @@
       const b = state.baziResult;
       if (!z || !b) return;
 
-      document.getElementById('ziweiBureauBadge').textContent = `${z.bureau.name}・命主${z.mingzhu}・身主${z.shenzhu}・子年斗君${z.doujun}`;
+      const mode = state.ziweiChartMode || 'sanhe';
+      const selIdx = state.selectedZiweiBranchIdx ?? z.mingBranchIdx;
+      const selPalace = z.palaces[selIdx];
+      const oppIdx = (selIdx + 6) % 12;
+      const tri1Idx = (selIdx + 4) % 12;
+      const tri2Idx = (selIdx + 8) % 12;
+
+      // Sync mode buttons
+      document.querySelectorAll('.zw-mode-btn').forEach(btn => {
+        const m = btn.getAttribute('data-zwmode');
+        if (m === mode) {
+          btn.className = 'zw-mode-btn px-2.5 py-1 rounded-lg font-bold bg-purple-800 text-white transition';
+        } else {
+          btn.className = 'zw-mode-btn px-2.5 py-1 rounded-lg font-bold transition';
+        }
+      });
+
+      document.getElementById('ziweiBureauBadge').textContent =
+        `${z.bureau.name}・命主${z.mingzhu}・身主${z.shenzhu}・斗君${z.doujun}`;
 
       const gridCells = [
         { type: 'palace', bIdx: 5 },
@@ -3686,40 +3845,105 @@
         { type: 'palace', bIdx: 11 }
       ];
 
+      const sihuaBadgeColor = (type) => {
+        if (type === '祿') return 'bg-emerald-600 text-white';
+        if (type === '權') return 'bg-red-600 text-white';
+        if (type === '科') return 'bg-blue-600 text-white';
+        return 'bg-purple-700 text-white'; // 忌
+      };
+
+      // Check which飞星 (flying sihua) from selPalace land in palace p
+      const getFlyingHitsOnPalace = (pIdx) => {
+        const hits = [];
+        ['祿', '權', '科', '忌'].forEach(hType => {
+          const f = selPalace.feixingMap[hType];
+          if (f && f.targetBranchIdx === pIdx) {
+            hits.push({ type: hType, star: f.star });
+          }
+        });
+        return hits;
+      };
+
       const renderPalaceContent = (p) => {
-        const isSelected = p.branchIdx === state.selectedZiweiBranchIdx;
+        const isSelected = p.branchIdx === selIdx;
+        const isSanheRelated = (p.branchIdx === oppIdx || p.branchIdx === tri1Idx || p.branchIdx === tri2Idx);
+        let sanheTag = '';
+        if (isSelected) sanheTag = '<span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-700 text-white font-bold">本宮</span>';
+        else if (p.branchIdx === oppIdx) sanheTag = '<span class="text-[10px] px-1.5 py-0.2 rounded bg-sky-700 text-white font-bold">對宮</span>';
+        else if (p.branchIdx === tri1Idx || p.branchIdx === tri2Idx) sanheTag = '<span class="text-[10px] px-1.5 py-0.2 rounded bg-teal-700 text-white font-bold">三合</span>';
+
+        const flyingHits = getFlyingHitsOnPalace(p.branchIdx);
+
         const majorHtml = p.majorStars.length
-          ? p.majorStars.map(s => `
-              <span class="inline-flex items-center gap-0.5 font-bold text-red-700 dark:text-red-400">
-                <span>${s.name}</span>
-                <span class="text-[10px] font-normal text-stone-500">(${s.brightness})</span>
-                ${s.sihua ? `<span class="px-1 rounded text-[10px] bg-red-600 text-white">${s.sihua}</span>` : ''}
-              </span>
-            `).join(' ')
+          ? p.majorStars.map(s => {
+              const flyHit = flyingHits.find(h => h.star === s.name);
+              return `
+                <span class="inline-flex items-center gap-0.5 font-bold text-red-700 dark:text-red-400">
+                  <span>${s.name}</span>
+                  <span class="text-[10px] font-normal text-stone-500">(${s.brightness})</span>
+                  ${s.sihua ? `<span class="px-1 rounded text-[10px] ${sihuaBadgeColor(s.sihua)}" title="生年化${s.sihua}">${s.sihua}</span>` : ''}
+                  ${(mode === 'sihua' || mode === 'feixing') && s.zihua ? `<span class="px-1 rounded text-[10px] border border-red-500 text-red-700 dark:text-red-300 font-bold" title="宮干自化${s.zihua}">↑${s.zihua}</span>` : ''}
+                  ${mode === 'feixing' && flyHit ? `<span class="px-1 rounded text-[10px] bg-amber-500 text-stone-950 font-extrabold" title="${selPalace.roleName}(${selPalace.stem})飛化${flyHit.type}">飛${flyHit.type}</span>` : ''}
+                </span>
+              `;
+            }).join(' ')
           : '<span class="theme-muted text-[11px]">（無主星・借對宮）</span>';
 
-        const minorHtml = p.minorStars.map(s => `
-          <span class="inline-flex items-center gap-0.5 text-[11px] ${s.isLucky ? 'text-emerald-700 dark:text-emerald-400' : 'text-stone-600 dark:text-stone-400'}">
-            <span>${s.name}</span>
-            ${s.sihua ? `<span class="px-1 rounded text-[10px] bg-amber-600 text-white">${s.sihua}</span>` : ''}
-          </span>
-        `).join(' ');
+        const minorHtml = p.minorStars.map(s => {
+          const flyHit = flyingHits.find(h => h.star === s.name);
+          return `
+            <span class="inline-flex items-center gap-0.5 text-[11px] ${s.isLucky ? 'text-emerald-700 dark:text-emerald-400 font-medium' : 'text-stone-600 dark:text-stone-400'}">
+              <span>${s.name}</span>
+              ${s.sihua ? `<span class="px-1 rounded text-[10px] ${sihuaBadgeColor(s.sihua)}">${s.sihua}</span>` : ''}
+              ${(mode === 'sihua' || mode === 'feixing') && s.zihua ? `<span class="px-1 rounded text-[10px] border border-red-500 text-red-700 dark:text-red-300 font-bold">↑${s.zihua}</span>` : ''}
+              ${mode === 'feixing' && flyHit ? `<span class="px-1 rounded text-[10px] bg-amber-500 text-stone-950 font-extrabold">飛${flyHit.type}</span>` : ''}
+            </span>
+          `;
+        }).join(' ');
+
+        const zaHtml = p.zaStars.map(zn => `<span class="text-[10px] theme-muted">${zn}</span>`).join(' ');
+
+        const sihuaExtraRow = (mode === 'sihua' && (p.zihuaList.length || p.xiangxinList.length))
+          ? `<div class="mt-1 pt-1 border-t border-dashed theme-border flex flex-wrap gap-1 text-[10px]">
+              ${p.zihuaList.map(ztxt => `<span class="px-1 rounded bg-rose-100 text-rose-800 font-semibold">↑${ztxt}</span>`).join('')}
+              ${p.xiangxinList.map(xtxt => `<span class="px-1 rounded bg-indigo-100 text-indigo-800 font-semibold">↓${xtxt}</span>`).join('')}
+            </div>`
+          : '';
+
+        const feixingBannerRow = (mode === 'feixing' && flyingHits.length)
+          ? `<div class="mt-1 pt-1 border-t border-dashed border-amber-500/60 flex flex-wrap gap-1 text-[10px]">
+              ${flyingHits.map(h => `<span class="px-1.5 py-0.2 rounded bg-amber-500 text-stone-950 font-bold">🚀 【${selPalace.roleName}】飛${h.type}入此 (${h.star})</span>`).join('')}
+            </div>`
+          : '';
+
+        let borderHighlight = 'theme-card theme-border hover:opacity-90';
+        if (isSelected) {
+          borderHighlight = 'ring-2 ring-amber-700 bg-amber-500/10 border-amber-700';
+        } else if (mode === 'feixing' && flyingHits.length) {
+          borderHighlight = 'ring-2 ring-purple-600 bg-purple-500/5 border-purple-600';
+        } else if (mode === 'sanhe' && isSanheRelated) {
+          borderHighlight = 'ring-1 ring-sky-600/60 bg-sky-500/5 border-sky-600/50';
+        }
 
         return `
-          <div data-palace-idx="${p.branchIdx}" class="ziwei-palace-cell cursor-pointer rounded-xl border p-2.5 flex flex-col justify-between min-h-[136px] transition ${
-            isSelected ? 'ring-2 ring-amber-700 bg-amber-500/10 border-amber-700' : 'theme-card theme-border hover:opacity-90'
-          }">
+          <div data-palace-idx="${p.branchIdx}" class="ziwei-palace-cell cursor-pointer rounded-xl border p-2.5 flex flex-col justify-between min-h-[155px] transition ${borderHighlight}">
             <div>
               <div class="flex items-center justify-between gap-1 border-b theme-border pb-1 mb-1.5">
-                <span class="font-bold text-xs px-1.5 py-0.5 rounded ${p.isMing ? 'bg-red-700 text-white' : 'theme-subtle'}">【本${p.roleName}${p.isShen ? '[身]' : ''}】</span>
-                <span class="text-xs font-bold serif-font">${p.stem}${p.branch}</span>
+                <div class="flex items-center gap-1 flex-wrap">
+                  <span class="font-bold text-xs px-1.5 py-0.5 rounded ${p.isMing ? 'bg-red-700 text-white' : 'theme-subtle'}">${p.roleName}${p.isShen ? '·身' : ''}</span>
+                  ${sanheTag}
+                </div>
+                <span class="text-xs font-bold serif-font text-purple-900 dark:text-purple-300">${p.stem}${p.branch}</span>
               </div>
               <div class="text-xs leading-snug flex flex-wrap gap-1.5 mb-1">${majorHtml}</div>
-              <div class="flex flex-wrap gap-1">${minorHtml}</div>
+              <div class="flex flex-wrap gap-1 mb-1">${minorHtml}</div>
+              <div class="flex flex-wrap gap-1">${zaHtml}</div>
+              ${sihuaExtraRow}
+              ${feixingBannerRow}
             </div>
             <div class="mt-2 pt-1 border-t theme-border flex items-center justify-between text-[10px] theme-muted">
-              <span>大限 ${p.daxian}</span>
-              <span>${p.boshi}・${p.changsheng}</span>
+              <span class="font-semibold">大限 ${p.daxian}</span>
+              <span>${p.boshi}・${p.suiqian}・${p.changsheng}</span>
             </div>
           </div>
         `;
@@ -3729,23 +3953,47 @@
       gridContainer.innerHTML = gridCells.map(cell => {
         if (cell.type === 'center') {
           const virtualAge = 2026 - b.solar.year + 1;
+          const personName = (document.getElementById('chartPersonNameInput')?.value || '無名氏').trim() || '無名氏';
+          const isYangYear = (b.pillars.year.stemIdx % 2 === 0);
+          const yinYangGender = `${isYangYear ? '陽' : '陰'}${b.gender === 'M' ? '男' : '女'}`;
+          const feiSummary = ['祿', '權', '科', '忌'].map(ht => {
+            const f = selPalace.feixingMap[ht];
+            return f ? `<span class="inline-flex items-center gap-0.5"><strong class="px-1 rounded text-[10px] ${sihuaBadgeColor(ht)}">化${ht}</strong><span>${f.star}→${f.targetRole}(${f.targetBranch})</span></span>` : '';
+          }).join(' ｜ ');
+
           return `
-            <div class="ziwei-center theme-subtle border theme-border rounded-xl p-4 flex flex-col justify-between">
+            <div class="ziwei-center theme-subtle border theme-border rounded-xl p-3.5 sm:p-4 flex flex-col justify-between">
               <div class="space-y-1.5 text-xs">
-                <div class="flex items-center justify-between border-b theme-border pb-2">
-                  <span class="font-bold serif-font text-base">免費紫微斗數命盤</span>
+                <div class="flex items-center justify-between border-b theme-border pb-2 flex-wrap gap-1">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-bold serif-font text-base">萬宗紫微斗數命盤</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded bg-purple-800 text-white font-bold">${mode === 'sanhe' ? '三合派模式' : (mode === 'sihua' ? '四化派模式' : '飛星派模式')}</span>
+                  </div>
                   <span class="px-2 py-0.5 rounded bg-amber-800 text-white font-bold">${z.bureau.name}</span>
                 </div>
-                <div><strong>陽曆生日：</strong>民國 ${b.solar.year - 1911} 年 ${b.solar.month} 月 ${b.solar.day} 日 ${b.hourOpt.value} 時生</div>
-                <div><strong>農曆生日：</strong>民國 ${b.lunar.year - 1911} 年 ${b.lunar.isLeap ? '閏' : ''}${b.lunar.month} 月 ${b.lunar.day} 日 ${BRANCHES[b.hourOpt.branchIdx]} 時生</div>
-                <div><strong>生辰八字：</strong>${b.pillars.year.stem}${b.pillars.year.branch} 年 ${b.pillars.month.stem}${b.pillars.month.branch} 月 ${b.pillars.day.stem}${b.pillars.day.branch} 日 ${b.pillars.hour.stem}${b.pillars.hour.branch} 時</div>
-                <div class="grid grid-cols-2 gap-2 pt-1">
-                  <div class="theme-card p-2 rounded-lg border theme-border"><strong>命宮：</strong>${BRANCHES[z.mingBranchIdx]} ｜ <strong>身宮：</strong>${BRANCHES[z.shenBranchIdx]} ｜ <strong>虛歲：</strong>${virtualAge}</div>
-                  <div class="theme-card p-2 rounded-lg border theme-border"><strong>命主：</strong>${z.mingzhu} ｜ <strong>身主：</strong>${z.shenzhu} ｜ <strong>子年斗君：</strong>${z.doujun}</div>
+                <div class="flex flex-wrap justify-between gap-1">
+                  <span><strong>命主：</strong>${personName}（${yinYangGender}・虛歲 ${virtualAge} 歲）</span>
+                  <span><strong>來源：</strong><a href="https://wzziweiwan.com/" target="_blank" rel="noopener noreferrer" class="underline text-amber-800 dark:text-amber-300 font-semibold">萬宗紫微 (wzziweiwan.com)</a></span>
+                </div>
+                <div><strong>公曆：</strong>西元 ${b.solar.year} 年（民國 ${b.solar.year - 1911} 年）${b.solar.month} 月 ${b.solar.day} 日 ${b.hourOpt.value} 時生</div>
+                <div><strong>農曆：</strong>${b.lunar.year} 年 ${b.lunar.isLeap ? '閏' : ''}${b.lunar.month} 月 ${b.lunar.day} 日 ${BRANCHES[b.hourOpt.branchIdx]} 時生</div>
+                <div><strong>四柱：</strong>${b.pillars.year.stem}${b.pillars.year.branch} 年 ${b.pillars.month.stem}${b.pillars.month.branch} 月 ${b.pillars.day.stem}${b.pillars.day.branch} 日 ${b.pillars.hour.stem}${b.pillars.hour.branch} 時</div>
+                <div class="grid grid-cols-2 gap-1.5 pt-0.5">
+                  <div class="theme-card p-1.5 rounded-lg border theme-border"><strong>命宮：</strong>${BRANCHES[z.mingBranchIdx]} ｜ <strong>身宮：</strong>${BRANCHES[z.shenBranchIdx]}</div>
+                  <div class="theme-card p-1.5 rounded-lg border theme-border"><strong>命主：</strong>${z.mingzhu} ｜ <strong>身主：</strong>${z.shenzhu} ｜ <strong>斗君：</strong>${z.doujun}</div>
+                </div>
+                <div class="theme-card p-2 rounded-lg border theme-border space-y-1">
+                  <div class="font-bold text-[11px] text-stone-700 dark:text-stone-200">✨ 生年四化（${b.pillars.year.stem}干）：
+                    ${z.natalSihuaSummary.map(item => `<span class="mr-1.5"><span class="px-1 rounded text-[10px] ${sihuaBadgeColor(item.type)}">${item.type}</span> ${item.star}(${item.palaceRole})</span>`).join('')}
+                  </div>
+                  <div class="font-bold text-[11px] text-purple-900 dark:text-purple-300 border-t theme-border pt-1">
+                    🚀 點選宮位【${selPalace.roleName}・${selPalace.stem}${selPalace.branch}】宮干四化：${feiSummary}
+                  </div>
                 </div>
               </div>
-              <div class="text-[11px] theme-muted border-t theme-border pt-2">
-                💡 點擊任一宮位，下方即會顯示該宮位的「三方四正」與星曜賦性解析。
+              <div class="text-[11px] theme-muted border-t theme-border pt-1.5 flex items-center justify-between flex-wrap gap-1">
+                <span>💡 點擊任一宮位可切換「本宮／對宮／三合宮」與宮干飛星軌跡</span>
+                <a href="https://wzziweiwan.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">萬宗紫微官網 ↗</a>
               </div>
             </div>
           `;
@@ -3763,42 +4011,75 @@
         });
       });
 
-      const selIdx = state.selectedZiweiBranchIdx ?? z.mingBranchIdx;
-      const selP = z.palaces[selIdx];
-      const oppP = z.palaces[(selIdx + 6) % 12];
-      const tri1P = z.palaces[(selIdx + 4) % 12];
-      const tri2P = z.palaces[(selIdx + 8) % 12];
+      const oppP = z.palaces[oppIdx];
+      const tri1P = z.palaces[tri1Idx];
+      const tri2P = z.palaces[tri2Idx];
 
-      const activeMajorStars = selP.majorStars.length ? selP.majorStars : oppP.majorStars;
+      const activeMajorStars = selPalace.majorStars.length ? selPalace.majorStars : oppP.majorStars;
       const starNotes = activeMajorStars.map(s => `
         <div class="text-xs">
           <span class="font-bold text-red-700 dark:text-red-400">【${s.name} (${s.brightness})】</span>：${STAR_DESCRIPTIONS[s.name] || ''}
         </div>
       `).join('');
 
+      const feixingDetailHtml = ['祿', '權', '科', '忌'].map(ht => {
+        const f = selPalace.feixingMap[ht];
+        if (!f) return '';
+        const meaningMap = {
+          '祿': '主緣起、財祿、順遂、情緣與增益之處',
+          '權': '主掌權、積極開創、執著表現與競爭力所在',
+          '科': '主貴人、名聲、科甲文采與平順化解之處',
+          '忌': '主掛念、耗費心力、執著所在或需特別留心之課題'
+        };
+        return `
+          <div class="theme-card p-2 rounded-lg border theme-border text-xs flex flex-wrap items-center justify-between gap-1">
+            <div>
+              <span class="px-1.5 py-0.5 rounded text-[11px] font-bold ${sihuaBadgeColor(ht)}">${selPalace.stem}干化${ht}</span>
+              <strong class="ml-1">${f.star}</strong> 飛入 <strong class="text-amber-800 dark:text-amber-300">【${f.targetRole}】（${f.targetBranch}宮）</strong>
+              ${f.isSelf ? '<span class="ml-1 px-1.5 py-0.2 rounded bg-rose-100 text-rose-800 font-bold text-[10px]">本宮自化</span>' : ''}
+              ${f.isOpposite ? '<span class="ml-1 px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-800 font-bold text-[10px]">飛入對宮</span>' : ''}
+            </div>
+            <span class="theme-muted text-[11px]">${meaningMap[ht]}</span>
+          </div>
+        `;
+      }).join('');
+
       document.getElementById('ziweiPalaceDetailBox').innerHTML = `
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 border-b theme-border pb-2">
           <h4 class="font-bold serif-font text-sm">
-            📍 目前檢視：【本${selP.roleName}】（${selP.stem}${selP.branch}宮 ${selP.isShen ? '・身宮所在' : ''}）— 三方四正星曜會照
+            📖 萬宗紫微【命書解讀・三方四正與宮干飛化】— 目前點選：【本${selPalace.roleName}】（${selPalace.stem}${selPalace.branch}宮 ${selPalace.isShen ? '・身宮所在' : ''}）
           </h4>
-          <span class="text-xs theme-muted">大限歲數：${selP.daxian}歲 ｜ 博士十二神：${selP.boshi} ｜ 長生十二神：${selP.changsheng}</span>
+          <span class="text-xs theme-muted">大限：${selPalace.daxian}歲 ｜ 博士：${selPalace.boshi} ｜ 歲前：${selPalace.suiqian} ｜ 將前：${selPalace.jiangqian} ｜ 長生：${selPalace.changsheng}</span>
         </div>
+
+        <!-- 三方四正會照 -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs mb-3">
           <div class="theme-card p-2.5 rounded-lg border theme-border">
-            <span class="theme-muted">對宮（${oppP.roleName}・${oppP.branch}）：</span>
+            <span class="theme-muted">對宮（${oppP.roleName}・${oppP.stem}${oppP.branch}）：</span>
             <span class="font-bold">${oppP.majorStars.map(s => `${s.name}(${s.brightness})`).join('、') || '無主星'}</span>
           </div>
           <div class="theme-card p-2.5 rounded-lg border theme-border">
-            <span class="theme-muted">三合宮（${tri1P.roleName}・${tri1P.branch}）：</span>
+            <span class="theme-muted">三合宮（${tri1P.roleName}・${tri1P.stem}${tri1P.branch}）：</span>
             <span class="font-bold">${tri1P.majorStars.map(s => `${s.name}(${s.brightness})`).join('、') || '無主星'}</span>
           </div>
           <div class="theme-card p-2.5 rounded-lg border theme-border">
-            <span class="theme-muted">三合宮（${tri2P.roleName}・${tri2P.branch}）：</span>
+            <span class="theme-muted">三合宮（${tri2P.roleName}・${tri2P.stem}${tri2P.branch}）：</span>
             <span class="font-bold">${tri2P.majorStars.map(s => `${s.name}(${s.brightness})`).join('、') || '無主星'}</span>
           </div>
         </div>
+
+        <!-- 宮干飛星四化軌跡 -->
+        <div class="mb-3 space-y-1.5">
+          <div class="text-xs font-bold text-purple-900 dark:text-purple-300">🚀 【本${selPalace.roleName}（${selPalace.stem}干）】四化飛星落宮解析：</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            ${feixingDetailHtml}
+          </div>
+        </div>
+
+        <!-- 主星賦性解讀 -->
         <div class="space-y-1.5 border-t theme-border pt-2.5">
-          ${selP.majorStars.length === 0 ? '<div class="text-xs text-amber-800 dark:text-amber-300 font-medium">※ 本宮無正曜，依傳統斗數規則借對宮星曜參看：</div>' : ''}
+          <div class="text-xs font-bold">🌟 星曜賦性解讀：</div>
+          ${selPalace.majorStars.length === 0 ? '<div class="text-xs text-amber-800 dark:text-amber-300 font-medium">※ 本宮無正曜，依斗數規則借對宮（' + oppP.roleName + '）星曜參看：</div>' : ''}
           ${starNotes}
         </div>
       `;
@@ -4078,8 +4359,13 @@
 
     const compassState = {
       angle: 270,
-      doorRef: '270', // '270' (left), '180' (bottom), '0' (top), '90' (right), 'direct'
-      legendMode: 'dynamic',
+      doorRef: '270',          // 'custom' | '270' | '180' | '0' | '90'
+      doorScreenDeg: 270,      // Direction from house center (cx, cy) to door on screen (0=Top, 90=Right, 180=Bottom, 270=Left)
+      doorPointOffset: { dx: -215, dy: 0 },
+      canvasMode: 'door',      // 'door' | 'pan'
+      showDoorMarker: true,
+      showCardinalLabels: true,
+      legendMode: 'dynamic24', // 'dynamic24' | 'dynamic8' | 'fixed'
       fpScale: 1.0,
       fpOffsetX: 0,
       fpOffsetY: 0,
@@ -4125,7 +4411,6 @@
 
       // Internal partition walls
       ctx.lineWidth = 4;
-      // Top-left rooms
       ctx.beginPath();
       ctx.moveTo(35, 105); ctx.lineTo(285, 105);
       ctx.moveTo(285, 35); ctx.lineTo(285, 175);
@@ -4133,14 +4418,13 @@
       ctx.moveTo(240, 195); ctx.lineTo(240, 325);
       ctx.moveTo(95, 325); ctx.lineTo(240, 325);
       ctx.moveTo(95, 300); ctx.lineTo(95, 465);
-      // Right-side rooms & bathroom
       ctx.moveTo(285, 240); ctx.lineTo(485, 240);
       ctx.moveTo(285, 240); ctx.lineTo(285, 300);
       ctx.moveTo(285, 300); ctx.lineTo(485, 300);
       ctx.moveTo(410, 110); ctx.lineTo(410, 240);
       ctx.stroke();
 
-      // Door arcs (thin grey-brown architectural door swings)
+      // Door arcs
       ctx.strokeStyle = '#777777';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -4159,9 +4443,24 @@
       return c;
     }
 
+    // 8 main directions (every 45°)
     function screenAngleTo8DirName(scrDeg) {
       const norm = ((scrDeg % 360) + 360) % 360;
       const dirs = ['北', '東北', '東', '東南', '南', '西南', '西', '西北'];
+      const idx = Math.round(norm / 45) % 8;
+      return dirs[idx];
+    }
+
+    // 24 fine directions (every 15° matching the 24 Mountains)
+    function screenAngleTo24DirName(scrDeg) {
+      const norm = ((scrDeg % 360) + 360) % 360;
+      const idx = Math.round(norm / 15) % 24;
+      return MOUNTAINS_24[idx].fixedDir;
+    }
+
+    function screenAngleToPosLabel(scrDeg) {
+      const norm = ((scrDeg % 360) + 360) % 360;
+      const dirs = ['圖面上方', '圖面右上', '圖面右方', '圖面右下', '圖面下方', '圖面左下', '圖面左方', '圖面左上'];
       const idx = Math.round(norm / 45) % 8;
       return dirs[idx];
     }
@@ -4174,10 +4473,9 @@
 
     function computeCompassRotationDeg() {
       const a = Number(compassState.angle) || 0;
-      if (compassState.doorRef === 'direct') {
-        return ((a % 360) + 360) % 360;
-      }
-      const refDeg = Number(compassState.doorRef); // e.g. 270 for Left
+      const refDeg = compassState.doorRef === 'custom'
+        ? Number(compassState.doorScreenDeg)
+        : Number(compassState.doorRef);
       // Rotate compass so that degree `a` on the compass lands at `refDeg` on screen
       return ((refDeg - a) % 360 + 360) % 360;
     }
@@ -4192,18 +4490,75 @@
       const lookupOne = (mName) => {
         const m = MOUNTAINS_24.find(x => x.name === mName);
         const scrDeg = (m.deg + rotationDeg + 360) % 360;
-        const dynDir = screenAngleTo8DirName(scrDeg);
         if (compassState.legendMode === 'fixed') {
           return `${mName}：${m.fixedDir}`;
-        } else if (compassState.legendMode === 'both') {
-          return `${mName}：${m.fixedDir} (圖面${dynDir})`;
+        } else if (compassState.legendMode === 'dynamic8') {
+          return `${mName}：${screenAngleTo8DirName(scrDeg)}`;
         }
-        return `${mName}：${dynDir}`;
+        // Default 'dynamic24': updates every 15° (and at 0°/45°/90°... shows 北、東北、東、東南、南、西南、西、西北)
+        return `${mName}：${screenAngleTo24DirName(scrDeg)}`;
       };
       return keyNames.map(pair => ({
         leftText: lookupOne(pair.left),
         rightText: lookupOne(pair.right)
       }));
+    }
+
+    function drawOuterCardinalLabels(ctx, W, H, cx, cy, rOuter) {
+      if (!compassState.showCardinalLabels) return;
+      ctx.save();
+      const pad = rOuter + 44;
+      ctx.font = 'bold 26px "標楷體", "DFKai-SB", "Kaiti TC", "Noto Serif TC", serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // 北 (Top, 0°) & 南 (Bottom, 180°) in classic red
+      ctx.fillStyle = '#c8372d';
+      ctx.fillText('北', cx, Math.max(22, cy - pad));
+      ctx.fillText('南', cx, Math.min(H - 22, cy + pad));
+
+      // 西 (Left, 270°) & 東 (Right, 90°) in classic indigo
+      ctx.fillStyle = '#4656b0';
+      ctx.fillText('西', Math.max(22, cx - pad), cy);
+      ctx.fillText('東', Math.min(W - 22, cx + pad), cy);
+      ctx.restore();
+    }
+
+    function drawDoorMarkerPoint(ctx, cx, cy) {
+      if (!compassState.showDoorMarker) return;
+      const doorX = cx + compassState.doorPointOffset.dx;
+      const doorY = cy + compassState.doorPointOffset.dy;
+      const dx = doorX - cx;
+      const dy = doorY - cy;
+      if (Math.hypot(dx, dy) < 12) return;
+
+      ctx.save();
+      // Subtle thin dotted line from center to door point
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(doorX, doorY);
+      ctx.strokeStyle = 'rgba(180, 83, 9, 0.45)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Small neat door marker circle
+      ctx.beginPath();
+      ctx.arc(doorX, doorY, 7, 0, Math.PI * 2);
+      ctx.fillStyle = '#d97706';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+
+      // Compact text label "大門"
+      ctx.font = 'bold 13px "Noto Sans TC", sans-serif';
+      ctx.fillStyle = '#9a3412';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('🚪大門', doorX, doorY - 10);
+      ctx.restore();
     }
 
     function drawCompassOverlayOnContext(ctx, cx, cy, radius, rotationDeg, opacity) {
@@ -4268,8 +4623,6 @@
         const boundaryDeg = m.deg + 7.5;
         const bRad = ((boundaryDeg - 90) * Math.PI) / 180;
 
-        // Divider line in the mountain band (and faint radial line to center for non-dashed boundaries)
-        const isRedDashedBoundary = ((i % 3) === 0); // 7.5°? Wait: red dashed are at 22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5 -> i = 1, 4, 7, 10, 13, 16, 19, 22
         ctx.beginPath();
         ctx.moveTo(Math.cos(bRad) * rInnerRing, Math.sin(bRad) * rInnerRing);
         ctx.lineTo(Math.cos(bRad) * rTickBase, Math.sin(bRad) * rTickBase);
@@ -4277,7 +4630,7 @@
         ctx.lineWidth = 0.9;
         ctx.stroke();
 
-        // Draw 24-Mountain character
+        // Draw 24-Mountain character (1:1 faithful to image_57b08e.jpg)
         ctx.save();
         ctx.rotate((m.deg * Math.PI) / 180);
         ctx.fillStyle = m.isRed ? '#c8372d' : '#4656b0';
@@ -4296,7 +4649,7 @@
       ctx.lineWidth = 1.2;
       ctx.stroke();
 
-      // Faint 15° radial lines for 癸/丁 (15°/195°) like in image_57b08e.jpg
+      // Faint 15° radial lines for 癸/丁 (15°/195°)
       [15, -15].forEach(d => {
         const rad = ((d - 90) * Math.PI) / 180;
         ctx.beginPath();
@@ -4351,7 +4704,7 @@
       const srcImg = compassState.uploadedImg || compassState.sampleCanvas;
       const imgW = srcImg.width || 520;
       const imgH = srcImg.height || 500;
-      const baseFit = Math.min((W * 0.64) / imgW, (H * 0.64) / imgH);
+      const baseFit = Math.min((W * 0.60) / imgW, (H * 0.60) / imgH);
       const drawW = imgW * baseFit * compassState.fpScale;
       const drawH = imgH * baseFit * compassState.fpScale;
 
@@ -4365,19 +4718,24 @@
       );
       ctx.restore();
 
-      // 2. Compute rotation & Draw Upper Layer: 24-Mountain Compass
+      // 2. Compute rotation & Draw Upper Layer: Clean 24-Mountain Compass
       const rotationDeg = computeCompassRotationDeg();
-      const radius = (W * 0.41) * compassState.cpScale;
+      const radius = (W * 0.385) * compassState.cpScale;
       drawCompassOverlayOnContext(ctx, cx, cy, radius, rotationDeg, compassState.cpOpacity);
 
-      // 3. Update Status Summary & Bottom 8-Direction Legend
+      // 3. Draw Clean 東西南北 Cardinal Labels at the 4 sides & subtle Door Point Marker
+      drawOuterCardinalLabels(ctx, W, H, cx, cy, radius);
+      drawDoorMarkerPoint(ctx, cx, cy);
+
+      // 4. Update Status Summary & Bottom 8-Direction Legend
       const facingM = getMountainMountainByDeg(compassState.angle);
       const sittingDeg = (Number(compassState.angle) + 180) % 360;
       const sittingM = getMountainMountainByDeg(sittingDeg);
 
       const summaryEl = document.getElementById('compassStatusSummary');
       if (summaryEl) {
-        summaryEl.innerHTML = `目前輸入大門角度：<span class="text-amber-800">${compassState.angle}°（向首：${facingM.name}山・${facingM.trigram}宮${facingM.fixedDir} ／ 坐山：${sittingM.name}山・${sittingM.trigram}宮${sittingM.fixedDir}）</span>`;
+        const doorPosName = screenAngleToPosLabel(compassState.doorScreenDeg);
+        summaryEl.innerHTML = `向首：${facingM.name}山 (${facingM.trigram}宮・${facingM.fixedDir}) ／ 坐山：${sittingM.name}山 (${sittingM.trigram}宮・${sittingM.fixedDir}) ｜ 大門位置：${doorPosName}`;
       }
 
       const legendRows = get8KeyMountainsLegend(rotationDeg);
@@ -4407,9 +4765,9 @@
       ctx.fillStyle = '#6e1409';
       ctx.font = 'bold 34px "標楷體", "DFKai-SB", "Kaiti TC", "Noto Serif TC", serif';
       legendRows.forEach((r, idx) => {
-        const y = 875 + idx * 48;
+        const y = 885 + idx * 48;
         ctx.fillText(r.leftText, 110, y);
-        ctx.fillText(r.rightText, 520, y);
+        ctx.fillText(r.rightText, 490, y);
       });
 
       const url = out.toDataURL('image/png');
@@ -4422,7 +4780,7 @@
       showToast('⬇️ 已下載「房屋平面圖＋二十四山疊合圖 (PNG)」！');
     }
 
-    function applyTheme(themeName) {
+        function applyTheme(themeName) {
       state.theme = themeName;
       document.body.classList.remove('theme-paper', 'theme-light', 'theme-dark');
       if (themeName === 'light') document.body.classList.add('theme-light');
@@ -4499,10 +4857,10 @@
       const hostUrl = (document.getElementById('embedHostUrlInput').value || 'https://scottie1016.github.io/bazi-app/').trim();
 
       const embedUrl = `${hostUrl}?embed=1&tab=${tab}&theme=${theme}`;
-      const code = `<!-- 免費八字・紫微・姓名命盤嵌入模組（無廣告版｜來源出處：https://myfate.herokuapp.com/） -->
+      const code = `<!-- 免費八字・萬宗紫微・姓名命盤嵌入模組（無廣告版｜來源出處：https://myfate.herokuapp.com/ & https://wzziweiwan.com/） -->
 <div style="width:100%; max-width:1024px; margin:0 auto;">
-  <iframe src="${embedUrl}" width="100%" height="${height}" style="border:1px solid #e7e0d3; border-radius:16px; overflow:hidden;" loading="lazy" title="免費八字紫微姓名命盤工具"></iframe>
-  <p style="font-size:12px; color:#78716c; text-align:right; margin-top:4px;">命理架構與參考出處：<a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer">免費八字命盤 (myfate.herokuapp.com)</a></p>
+  <iframe src="${embedUrl}" width="100%" height="${height}" style="border:1px solid #e7e0d3; border-radius:16px; overflow:hidden;" loading="lazy" title="免費八字萬宗紫微姓名命盤工具"></iframe>
+  <p style="font-size:12px; color:#78716c; text-align:right; margin-top:4px;">命理架構與參考出處：<a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer">免費八字命盤 (myfate.herokuapp.com)</a> ｜ <a href="https://wzziweiwan.com/" target="_blank" rel="noopener noreferrer">萬宗紫微 (wzziweiwan.com)</a></p>
 </div>`;
       document.getElementById('embedCodeTextarea').value = code;
     }
@@ -4709,7 +5067,7 @@
 ・日柱：${p.day.stem}${p.day.branch}（日主${p.day.stem}${p.day.stemWx}，納音${p.day.nayin}）
 ・時柱：${p.hour.stem}${p.hour.branch}（${p.hour.tenGod}，納音${p.hour.nayin}）
 ・命局參考：${b.patternName}，${b.strengthLabel}，參考喜用神為【${b.xiYong.join('、')}】。
-（排盤工具來源：免費八字命盤 https://myfate.herokuapp.com/ 無廣告嵌入版）
+（排盤工具來源：免費八字命盤 https://myfate.herokuapp.com/ ＆ 萬宗紫微 https://wzziweiwan.com/ 無廣告嵌入版）
 
 請結合我的八字結構與大運流年，以繁體中文為我客觀全方位解析：
 1. 性格特質與天賦優勢
@@ -4717,6 +5075,15 @@
 3. 財運走勢與理財建議
 4. 感情婚姻與人際關係建議`;
         copyTextToClipboard(promptText, '🤖 已複製 AI 深度解盤提示詞！可直接貼給 AI 對話框進行深度推算。');
+      });
+
+      document.querySelectorAll('.zw-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.ziweiChartMode = btn.getAttribute('data-zwmode') || 'sanhe';
+          renderZiweiView();
+          const modeLabel = state.ziweiChartMode === 'sanhe' ? '三合盤' : (state.ziweiChartMode === 'sihua' ? '四化盤 (含自化)' : '飛星盤 (宮干飛化)');
+          showToast(`✨ 已切換為萬宗紫微「${modeLabel}」模式！`);
+        });
       });
 
       const gridBtn = document.getElementById('ziweiViewGridBtn');
@@ -4757,6 +5124,21 @@
 
 
       // 24-Mountain Compass Overlay Events
+      const setDoorByScreenDeg = (scrDeg, customPointOffset = null) => {
+        const norm = ((scrDeg % 360) + 360) % 360;
+        compassState.doorScreenDeg = norm;
+        if (customPointOffset) {
+          compassState.doorPointOffset = customPointOffset;
+        } else {
+          const rad = ((norm - 90) * Math.PI) / 180;
+          const dist = 215;
+          compassState.doorPointOffset = {
+            dx: Math.round(Math.cos(rad) * dist),
+            dy: Math.round(Math.sin(rad) * dist)
+          };
+        }
+      };
+
       const fileInp = document.getElementById('floorPlanFileInput');
       if (fileInp) {
         fileInp.addEventListener('change', (e) => {
@@ -4774,7 +5156,7 @@
               document.getElementById('fpOffsetXVal').textContent = '0px';
               document.getElementById('fpOffsetYVal').textContent = '0px';
               renderCompassView();
-              showToast('✅ 已載入您上傳的房屋平面圖並完成二十四山疊合！');
+              showToast('✅ 已載入平面圖！可直接於圖上點選大門位置並拖拉角度。');
             };
             img.src = ev.target.result;
           };
@@ -4802,7 +5184,11 @@
       const doorRefSel = document.getElementById('compassDoorRefSelect');
       if (doorRefSel) {
         doorRefSel.addEventListener('change', (e) => {
-          compassState.doorRef = e.target.value;
+          const val = e.target.value;
+          compassState.doorRef = val;
+          if (['0', '90', '180', '270'].includes(val)) {
+            setDoorByScreenDeg(Number(val), null);
+          }
           renderCompassView();
         });
       }
@@ -4814,6 +5200,48 @@
           renderCompassView();
         });
       }
+
+      const showDoorCheck = document.getElementById('showDoorMarkerCheck');
+      if (showDoorCheck) {
+        showDoorCheck.addEventListener('change', (e) => {
+          compassState.showDoorMarker = e.target.checked;
+          renderCompassView();
+        });
+      }
+
+      const showCardinalCheck = document.getElementById('showCardinalLabelsCheck');
+      if (showCardinalCheck) {
+        showCardinalCheck.addEventListener('change', (e) => {
+          compassState.showCardinalLabels = e.target.checked;
+          renderCompassView();
+        });
+      }
+
+      const modeDoorBtn = document.getElementById('canvasModeDoorBtn');
+      const modePanBtn = document.getElementById('canvasModePanBtn');
+      const compCanvas = document.getElementById('compassCompositeCanvas');
+
+      const updateCanvasInteractionMode = (mode) => {
+        compassState.canvasMode = mode;
+        if (mode === 'door') {
+          modeDoorBtn.className = 'px-2.5 py-1 rounded-md font-bold bg-amber-800 text-white transition';
+          modePanBtn.className = 'px-2.5 py-1 rounded-md font-bold text-stone-600 hover:bg-stone-100 transition';
+          if (compCanvas) {
+            compCanvas.classList.remove('cursor-move');
+            compCanvas.classList.add('cursor-crosshair');
+          }
+        } else {
+          modePanBtn.className = 'px-2.5 py-1 rounded-md font-bold bg-amber-800 text-white transition';
+          modeDoorBtn.className = 'px-2.5 py-1 rounded-md font-bold text-stone-600 hover:bg-stone-100 transition';
+          if (compCanvas) {
+            compCanvas.classList.remove('cursor-crosshair');
+            compCanvas.classList.add('cursor-move');
+          }
+        }
+      };
+
+      if (modeDoorBtn) modeDoorBtn.addEventListener('click', () => updateCanvasInteractionMode('door'));
+      if (modePanBtn) modePanBtn.addEventListener('click', () => updateCanvasInteractionMode('pan'));
 
       const bindRange = (sliderId, labelId, stateKey, isPct, unit) => {
         const s = document.getElementById(sliderId);
@@ -4838,6 +5266,7 @@
           compassState.uploadedImg = null;
           compassState.angle = 270;
           compassState.doorRef = '270';
+          setDoorByScreenDeg(270, null);
           compassState.fpScale = 1.0;
           compassState.fpOffsetX = 0;
           compassState.fpOffsetY = 0;
@@ -4862,23 +5291,58 @@
         dlPngBtn.addEventListener('click', exportCompositeCompassPng);
       }
 
-      // Drag floor plan directly on canvas
-      const compCanvas = document.getElementById('compassCompositeCanvas');
       if (compCanvas) {
+        const applyDoorPickAtClientXY = (clientX, clientY, showNotification = false) => {
+          const rect = compCanvas.getBoundingClientRect();
+          const scaleX = compCanvas.width / rect.width;
+          const scaleY = compCanvas.height / rect.height;
+          const x = (clientX - rect.left) * scaleX;
+          const y = (clientY - rect.top) * scaleY;
+          const cx = compCanvas.width / 2;
+          const cy = compCanvas.height / 2;
+          const dx = x - cx;
+          const dy = y - cy;
+          if (Math.hypot(dx, dy) < 12) return;
+
+          const scrDeg = ((Math.atan2(dy, dx) * 180) / Math.PI + 90 + 360) % 360;
+          const roundedScrDeg = Math.round(scrDeg * 10) / 10;
+          compassState.doorRef = 'custom';
+          setDoorByScreenDeg(roundedScrDeg, { dx: Math.round(dx), dy: Math.round(dy) });
+
+          const customOpt = document.getElementById('compassDoorCustomOpt');
+          const posName = screenAngleToPosLabel(roundedScrDeg);
+          if (customOpt) {
+            customOpt.textContent = `🎯 依圖面點選之大門位置 (${posName} ${Math.round(roundedScrDeg)}°)`;
+          }
+          if (doorRefSel) doorRefSel.value = 'custom';
+          renderCompassView();
+          if (showNotification) {
+            showToast(`🚪 已標記大門於「${posName}」，羅盤與下方方位已自動更新！`);
+          }
+        };
+
         const startDrag = (clientX, clientY) => {
           compassState.isDragging = true;
-          compassState.dragStartX = clientX - compassState.fpOffsetX;
-          compassState.dragStartY = clientY - compassState.fpOffsetY;
+          if (compassState.canvasMode === 'door') {
+            applyDoorPickAtClientXY(clientX, clientY, true);
+          } else {
+            compassState.dragStartX = clientX - compassState.fpOffsetX;
+            compassState.dragStartY = clientY - compassState.fpOffsetY;
+          }
         };
         const moveDrag = (clientX, clientY) => {
           if (!compassState.isDragging) return;
-          compassState.fpOffsetX = Math.max(-200, Math.min(200, Math.round(clientX - compassState.dragStartX)));
-          compassState.fpOffsetY = Math.max(-200, Math.min(200, Math.round(clientY - compassState.dragStartY)));
-          document.getElementById('fpOffsetXSlider').value = compassState.fpOffsetX;
-          document.getElementById('fpOffsetYSlider').value = compassState.fpOffsetY;
-          document.getElementById('fpOffsetXVal').textContent = `${compassState.fpOffsetX}px`;
-          document.getElementById('fpOffsetYVal').textContent = `${compassState.fpOffsetY}px`;
-          renderCompassView();
+          if (compassState.canvasMode === 'door') {
+            applyDoorPickAtClientXY(clientX, clientY, false);
+          } else {
+            compassState.fpOffsetX = Math.max(-200, Math.min(200, Math.round(clientX - compassState.dragStartX)));
+            compassState.fpOffsetY = Math.max(-200, Math.min(200, Math.round(clientY - compassState.dragStartY)));
+            document.getElementById('fpOffsetXSlider').value = compassState.fpOffsetX;
+            document.getElementById('fpOffsetYSlider').value = compassState.fpOffsetY;
+            document.getElementById('fpOffsetXVal').textContent = `${compassState.fpOffsetX}px`;
+            document.getElementById('fpOffsetYVal').textContent = `${compassState.fpOffsetY}px`;
+            renderCompassView();
+          }
         };
         const endDrag = () => { compassState.isDragging = false; };
         compCanvas.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
@@ -4893,7 +5357,7 @@
         compCanvas.addEventListener('touchend', endDrag);
       }
 
-      document.getElementById('clearNameBtn').addEventListener('click', () => {
+            document.getElementById('clearNameBtn').addEventListener('click', () => {
         document.getElementById('surnameInput').value = '';
         document.getElementById('givenNameInput').value = '';
         state.customStrokes = {};
