@@ -1,13 +1,13 @@
-# 免費八字・紫微・姓名命盤分析（無廣告純淨嵌入版）
+# 八字・紫微・姓名命盤分析（純淨嵌入版）
 
-本專案為無廣告、100% 純前端獨立運作之命理排盤工具，可直接透過 GitHub Pages 線上使用或透過 `<iframe>` 嵌入個人網站與部落格。
+本專案為、100% 純前端獨立運作之命理排盤工具，可直接透過 GitHub Pages 線上使用或透過 `<iframe>` 嵌入個人網站與部落格。
 
 ## 📌 來源出處與致敬聲明
 
-* **原始網站與架構出處**：[免費八字命盤 (https://myfate.herokuapp.com/)](https://myfate.herokuapp.com/)
-  * [免費八字命盤](https://myfate.herokuapp.com/)
-  * [免費紫微命盤](https://myfate.herokuapp.com/ziwei)
-  * [免費姓名吉凶分析](https://myfate.herokuapp.com/person)
+* **原始網站與架構出處**：[八字命盤 (https://myfate.herokuapp.com/)](https://myfate.herokuapp.com/)
+  * [八字命盤](https://myfate.herokuapp.com/)
+  * [紫微命盤](https://myfate.herokuapp.com/ziwei)
+  * [姓名吉凶分析](https://myfate.herokuapp.com/person)
 * **原作者團隊**：科技命理網 (心靈) ／ 凱心健康團隊 (身體)（聯絡信箱：`pyfate@gmail.com`）
 * **命理學理與參考文獻**：
   * 八字神煞：黃恆堉老師《大師教你論八字》
