@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">八字・紫微・姓名・風水命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v4.3</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v4.4</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：八字/姓名改編自
@@ -293,7 +293,7 @@
       </div>
 
       <div class="text-xs theme-muted flex items-center gap-2 flex-wrap">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v4.3</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v4.4</span>
         <span>來源對照：</span>
         <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">八字</a>
         <span>·</span>
@@ -308,7 +308,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-2 border-b theme-border">
         <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-base font-bold serif-font">請輸入生辰年月日時</h2>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v4.3</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v4.4</span>
           <span class="text-xs theme-muted">（八字與紫微命盤自動同步生辰資料）</span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -629,7 +629,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base sm:text-lg font-bold serif-font">原站經典命盤呈現（1:1 還原 myfate.herokuapp.com 格式）</h3>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold">經典直書表格</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v4.3</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v4.4</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <div class="inline-flex items-center gap-1.5 text-xs">
@@ -1133,7 +1133,7 @@
         <span id="footerExtraCredits" class="hidden sm:inline">（參考：黃恆堉、李鐵筆、陳德生、黃冠寰/江幸芬、林相如、勸學齋主等著作｜原作者聯絡：pyfate@gmail.com）</span>
       </div>
       <div class="flex items-center gap-3">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v4.3</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v4.4</span>
         <button type="button" id="footerEmbedBtn" class="underline hover:text-amber-700 font-medium">取得網站嵌入代碼</button>
       </div>
     </div>
@@ -1598,109 +1598,8 @@
       const mBIdx = pillars.month.branchIdx;
       const dS = pillars.day.stem;
       const dB = pillars.day.branch;
-      const dBIdx = pillars.day.branchIdx;
       const yearKW = getKongWangPair(pillars.year.stemIdx, pillars.year.branchIdx);
       const dayKW = getKongWangPair(pillars.day.stemIdx, pillars.day.branchIdx);
-
-      // Exact reference maps for verified charts on myfate.herokuapp.com
-      const key4 = `${pillars.year.stem}${pillars.year.branch}_${pillars.month.stem}${pillars.month.branch}_${pillars.day.stem}${pillars.day.branch}_${pillars.hour.stem}${pillars.hour.branch}_${gender}`;
-      const exactShenshaCharts = {
-        '丁卯_丁未_丁亥_庚子_M': {
-          year:  ['截空', '將星'],
-          month: ['羊刃', '紅豔', '五鬼', '血刃', '華蓋', '空亡'],
-          day:   ['天乙貴人', '白虎', '日貴', '空亡'],
-          hour:  ['桃花', '紅鸞', '福德', '桃花']
-        },
-        '丁卯_丁未_丁亥_庚子_F': {
-          year:  ['截空', '將星'],
-          month: ['羊刃', '紅豔', '五鬼', '血刃', '華蓋', '空亡'],
-          day:   ['天乙貴人', '白虎', '日貴', '空亡'],
-          hour:  ['桃花', '紅鸞', '福德', '桃花']
-        },
-        '壬寅_庚戌_辛丑_丙申_M': {
-          year:  ['天乙貴人', '劫煞', '孤辰'],
-          month: ['羊刃', '紅豔', '白虎', '寡宿', '魁罡'],
-          day:   ['紅鸞', '天德合', '月德合'],
-          hour:  ['歲破', '血刃', '大耗', '亡神', '天德貴人', '月德貴人']
-        },
-        '壬寅_庚戌_辛丑_丙申_F': {
-          year:  ['天乙貴人', '劫煞', '孤辰'],
-          month: ['羊刃', '紅豔', '白虎', '寡宿', '魁罡'],
-          day:   ['紅鸞', '天德合', '月德合'],
-          hour:  ['歲破', '血刃', '大耗', '亡神', '天德貴人', '月德貴人']
-        },
-        '乙卯_丙戌_乙未_丙子_M': {
-          year:  ['血刃', '將星', '祿神'],
-          month: ['飛刃', '流霞', '墓庫', '月德貴人', '天德貴人', '龍德'],
-          day:   ['血刃', '五鬼', '截空'],
-          hour:  ['紅鸞', '桃花', '天乙貴人', '天德貴人', '桃花', '福德', '空亡', '月德貴人']
-        },
-        '乙卯_丙戌_乙未_丙子_F': {
-          year:  ['血刃', '將星', '祿神'],
-          month: ['飛刃', '流霞', '墓庫', '月德貴人', '天德貴人', '龍德'],
-          day:   ['血刃', '五鬼', '截空'],
-          hour:  ['紅鸞', '桃花', '天乙貴人', '天德貴人', '桃花', '福德', '空亡', '月德貴人']
-        },
-        '丙寅_丙申_乙未_辛巳_F': {
-          year:  ['亡神', '月破'],
-          month: ['天乙貴人', '紅豔', '歲破', '血刃', '大耗', '劫煞', '孤辰', '鐵掃星'],
-          day:   ['截空', '天喜', '元辰'],
-          hour:  ['金輿', '沐浴', '勾絞', '驛馬', '空亡']
-        },
-        '丙寅_丙申_乙未_辛巳_M': {
-          year:  ['亡神', '月破'],
-          month: ['天乙貴人', '紅豔', '歲破', '血刃', '大耗', '劫煞', '孤辰'],
-          day:   ['截空', '天喜'],
-          hour:  ['金輿', '沐浴', '勾絞', '驛馬', '空亡']
-        },
-        '丙辰_丁酉_癸酉_辛酉_F': {
-          year:  [],
-          month: ['桃花', '元辰', '將星', '伏吟'],
-          day:   ['桃花', '元辰'],
-          hour:  ['桃花', '元辰', '將星', '伏吟']
-        },
-        '己卯_辛未_壬申_己酉_F': {
-          year:  ['天德合', '截空', '天乙貴人', '月德合'],
-          month: ['寡宿', '血刃', '五鬼'],
-          day:   ['空亡', '劫煞', '學士'],
-          hour:  ['大耗', '歲破', '沐浴', '天德合', '桃花', '災煞', '空亡', '血刃', '月德合']
-        },
-        '己卯_辛未_壬申_己酉_M': {
-          year:  ['天德合', '截空', '天乙貴人', '月德合'],
-          month: ['寡宿', '血刃', '五鬼'],
-          day:   ['空亡', '劫煞', '學士'],
-          hour:  ['大耗', '歲破', '沐浴', '天德合', '桃花', '災煞', '空亡', '血刃', '月德合']
-        }
-      };
-      if (exactShenshaCharts[key4]) {
-        const perPillar = {
-          year:  [...exactShenshaCharts[key4].year],
-          month: [...exactShenshaCharts[key4].month],
-          day:   [...exactShenshaCharts[key4].day],
-          hour:  [...exactShenshaCharts[key4].hour]
-        };
-        const exactOrderMap = {
-          '丁卯_丁未_丁亥_庚子_M': ['血刃', '羊刃', '五鬼', '白虎', '紅鸞', '福德', '截空', '紅豔', '將星', '華蓋', '空亡', '天乙貴人', '桃花', '日貴'],
-          '丁卯_丁未_丁亥_庚子_F': ['血刃', '羊刃', '五鬼', '白虎', '紅鸞', '福德', '截空', '紅豔', '將星', '華蓋', '空亡', '天乙貴人', '桃花', '日貴'],
-          '壬寅_庚戌_辛丑_丙申_M': ['天德合', '孤辰', '天德貴人', '魁罡', '寡宿', '亡神', '大耗', '白虎', '紅鸞', '羊刃', '天乙貴人', '劫煞', '紅豔', '月德合', '歲破', '血刃', '月德貴人'],
-          '壬寅_庚戌_辛丑_丙申_F': ['天德合', '孤辰', '天德貴人', '魁罡', '寡宿', '亡神', '大耗', '白虎', '紅鸞', '羊刃', '天乙貴人', '劫煞', '紅豔', '月德合', '歲破', '血刃', '月德貴人'],
-          '乙卯_丙戌_乙未_丙子_M': ['祿神', '紅鸞', '截空', '血刃', '流霞', '月德貴人', '空亡', '五鬼', '飛刃', '天德貴人', '福德', '桃花', '龍德', '天乙貴人', '墓庫', '將星'],
-          '乙卯_丙戌_乙未_丙子_F': ['祿神', '紅鸞', '截空', '血刃', '流霞', '月德貴人', '空亡', '五鬼', '飛刃', '天德貴人', '福德', '桃花', '龍德', '天乙貴人', '墓庫', '將星'],
-          '丙寅_丙申_乙未_辛巳_M': ['金輿', '截空', '血刃', '月破', '空亡', '勾絞', '紅豔', '沐浴', '天乙貴人', '孤辰', '亡神', '劫煞', '驛馬', '歲破', '大耗', '天喜'],
-          '丙寅_丙申_乙未_辛巳_F': ['金輿', '截空', '血刃', '月破', '空亡', '勾絞', '紅豔', '沐浴', '天乙貴人', '孤辰', '亡神', '劫煞', '驛馬', '歲破', '大耗', '天喜', '鐵掃星', '元辰'],
-          '丙辰_丁酉_癸酉_辛酉_F': ['桃花', '伏吟', '將星', '元辰'],
-          '己卯_辛未_壬申_己酉_F': ['災煞', '截空', '血刃', '寡宿', '空亡', '天德合', '五鬼', '沐浴', '學士', '歲破', '劫煞', '桃花', '月德合', '天乙貴人', '大耗'],
-          '己卯_辛未_壬申_己酉_M': ['災煞', '截空', '血刃', '寡宿', '空亡', '天德合', '五鬼', '沐浴', '學士', '歲破', '劫煞', '桃花', '月德合', '天乙貴人', '大耗']
-        };
-        if (exactOrderMap[key4]) {
-          return { perPillar, uniqueNames: [...exactOrderMap[key4]] };
-        }
-        const uniqueNames = [];
-        ['hour', 'day', 'month', 'year'].forEach(k => {
-          perPillar[k].forEach(nm => { if (!uniqueNames.includes(nm)) uniqueNames.push(nm); });
-        });
-        return { perPillar, uniqueNames };
-      }
 
       const tianyiMap = {
         '甲': ['丑', '未'], '戊': ['丑', '未'], '庚': ['丑', '未'],
@@ -1711,7 +1610,7 @@
       };
       const luMap = { '甲':'寅','乙':'卯','丙':'巳','戊':'巳','丁':'午','己':'午','庚':'申','辛':'酉','壬':'亥','癸':'子' };
       const jinyuMap = { '甲':'辰','乙':'巳','丙':'未','戊':'未','丁':'申','己':'申','庚':'戌','辛':'亥','壬':'丑','癸':'寅' };
-      const hongyanMap = { '甲':'午','乙':'申','丙':'寅','丁':'未','戊':'辰','己':'辰','庚':'戌','辛':'酉','壬':'子','癸':'申' };
+      const hongyanMap = { '甲':'午','乙':'申','丙':'寅','丁':'未','戊':'辰','己':'辰','庚':'戌','辛':'戌','壬':'子','癸':'申' };
       const yangrenMap = { '甲':'卯','乙':'辰','丙':'午','戊':'午','丁':'未','己':'未','庚':'酉','辛':'戌','壬':'子','癸':'丑' };
       const feirenMap = { '甲':'酉','乙':'戌','丙':'子','戊':'子','丁':'丑','己':'丑','庚':'卯','辛':'辰','壬':'午','癸':'未' };
       const liuxiaMap = { '甲':'酉','乙':'戌','丙':'未','丁':'申','戊':'巳','己':'午','庚':'辰','辛':'卯','壬':'亥','癸':'寅' };
@@ -1726,7 +1625,8 @@
       const tiandeHeMap = { '寅':'壬','卯':'巳','辰':'丁','巳':'丙','午':'寅','未':'己','申':'戊','酉':'亥','戌':'辛','亥':'庚','子':'申','丑':'乙' };
       const yuedeMap = { '寅':'丙','午':'丙','戌':'丙','申':'壬','子':'壬','辰':'壬','亥':'甲','卯':'甲','未':'甲','巳':'庚','酉':'庚','丑':'庚' };
       const yuedeHeMap = { '寅':'辛','午':'辛','戌':'辛','申':'丁','子':'丁','辰':'丁','亥':'己','卯':'己','未':'己','巳':'乙','酉':'乙','丑':'乙' };
-      const xuerenMap = { '寅':'丑','卯':'未','辰':'寅','巳':'申','午':'卯','未':'酉','申':'辰','酉':'戌','戌':'卯','亥':'巳','子':'午','丑':'亥' };
+      const xuerenMonthMap = { '寅':'丑','卯':'未','辰':'寅','巳':'申','午':'卯','未':'酉','申':'辰','酉':'戌','戌':'卯','亥':'巳','子':'午','丑':'亥' };
+      const xuerenYearMap  = { '寅':'申','卯':'未','辰':'寅','巳':'申','午':'卯','未':'酉','申':'辰','酉':'戌','戌':'卯','亥':'巳','子':'午','丑':'亥' };
       const xueshiMap = { '甲':'亥','乙':'午','丙':'寅','戊':'寅','丁':'酉','己':'酉','庚':'巳','辛':'子','壬':'申','癸':'卯' };
 
       function triLookup(b) {
@@ -1738,22 +1638,24 @@
       const triY = triLookup(yB);
       const triD = triLookup(dB);
       const hongluanB = BRANCHES[(3 - yBIdx + 12) % 12];
-      const tianxiB = BRANCHES[(9 - yBIdx + 12) % 12];
-      const wuguiB = BRANCHES[(yBIdx + 4) % 12];
-      const longdeB = BRANCHES[(yBIdx + 7) % 12];
-      const fudeB = BRANCHES[(yBIdx + 9) % 12];
+      const tianxiB   = BRANCHES[(9 - yBIdx + 12) % 12];
+      const goujiaoB  = BRANCHES[(yBIdx + 3) % 12];
+      const wuguiB    = BRANCHES[(yBIdx + 4) % 12];
+      const longdeB   = BRANCHES[(yBIdx + 7) % 12];
+      const baihuB    = BRANCHES[(yBIdx + 8) % 12];
+      const fudeB     = BRANCHES[(yBIdx + 9) % 12];
 
       // 元辰 (大耗): 陽男陰女沖前一位 (yBIdx + 7), 陰男陽女沖後一位 (yBIdx + 5)
       const isYangYear = (ySIdx % 2 === 0);
       const isForward = (gender === 'M' && isYangYear) || (gender === 'F' && !isYangYear);
       const yuanchenB = BRANCHES[(yBIdx + (isForward ? 7 : 5)) % 12];
 
-      // 孤辰、寡宿 (by Year Branch season)
-      let guchenB = '巳', guasuB = '丑';
-      if (['寅','卯','辰'].includes(yB)) { guchenB = '巳'; guasuB = '丑'; }
-      else if (['巳','午','未'].includes(yB)) { guchenB = '申'; guasuB = '辰'; }
-      else if (['申','酉','戌'].includes(yB)) { guchenB = '亥'; guasuB = '未'; }
-      else { guchenB = '寅'; guasuB = '戌'; }
+      // 孤辰、寡宿 (by Day Branch season, matching myfate.herokuapp.com)
+      let guchenD = '巳', guasuD = '丑';
+      if (['寅','卯','辰'].includes(dB)) { guchenD = '巳'; guasuD = '丑'; }
+      else if (['巳','午','未'].includes(dB)) { guchenD = '申'; guasuD = '辰'; }
+      else if (['申','酉','戌'].includes(dB)) { guchenD = '亥'; guasuD = '未'; }
+      else { guchenD = '寅'; guasuD = '戌'; }
 
       // 鐵掃星 (by Year Branch triad + Gender, checked on Month Branch)
       let tiesaoMonthB = '';
@@ -1784,38 +1686,36 @@
         if (b === xueshiMap[dS]) addSS('學士');
         if (p.changsheng === '沐浴') addSS('沐浴');
         if (p.changsheng === '墓') addSS('墓庫');
-        if (k === 'day' && ['丁酉', '丁亥', '癸巳', '癸卯'].includes( s + b )) addSS('日貴');
+        if (k === 'day' && ['丁酉', '丁亥', '癸巳', '癸卯'].includes(s + b)) addSS('日貴');
+        if (k !== 'year' && ['壬辰', '庚戌', '庚辰', '戊戌'].includes(s + b)) addSS('魁罡');
 
         // Month-branch based
         if (s === tiandeMap[mB] || b === tiandeMap[mB]) addSS('天德貴人');
         if (s === tiandeHeMap[mB] || b === tiandeHeMap[mB]) addSS('天德合');
         if (s === yuedeMap[mB] || b === yuedeMap[mB]) addSS('月德貴人');
         if (s === yuedeHeMap[mB]) addSS('月德合');
-        if (b === xuerenMap[mB] || b === xuerenMap[yB]) addSS('血刃');
+        if (b === xuerenMonthMap[mB] || (k !== 'year' && b === xuerenYearMap[yB])) addSS('血刃');
         if (k !== 'month' && p.branchIdx === (mBIdx + 6) % 12) addSS('月破');
 
-        // Year-branch based (self-excluded on 'year' pillar!)
+        // Year-branch based (self-excluded on 'year' pillar)
         if (k !== 'year') {
           if (b === triY.taohua) addSS('桃花');
           if (b === triY.jiang) addSS('將星');
-          if (b === triY.yima) addSS('驛馬');
-          if (b === triY.huagai) addSS('華蓋');
           if (b === triY.jiesha) addSS('劫煞');
           if (b === triY.zaisha) addSS('災煞');
-          if (b === triY.wangshen) addSS('亡神');
           if (b === yuanchenB) addSS('元辰');
-          if (p.branchIdx === (yBIdx + 6) % 12) { addSS('大耗'); addSS('歲破'); }
-          if (b === guchenB) addSS('孤辰');
-          if (b === guasuB) addSS('寡宿');
+          if (p.branchIdx === (yBIdx + 6) % 12) { addSS('歲破'); addSS('大耗'); }
           if (b === hongluanB) addSS('紅鸞');
           if (b === tianxiB) addSS('天喜');
+          if (b === goujiaoB) addSS('勾絞');
           if (b === wuguiB) addSS('五鬼');
           if (b === longdeB) addSS('龍德');
+          if (b === baihuB) addSS('白虎');
           if (b === fudeB) addSS('福德');
           if (k === 'month' && b === tiesaoMonthB) addSS('鐵掃星');
         }
 
-        // Day-branch based (self-excluded on 'day' pillar!)
+        // Day-branch based (self-excluded on 'day' pillar)
         if (k !== 'day') {
           if (b === triD.taohua) list.push('桃花');
           if (b === triD.jiang) addSS('將星');
@@ -1824,6 +1724,8 @@
           if (b === triD.jiesha) addSS('劫煞');
           if (b === triD.zaisha) addSS('災煞');
           if (b === triD.wangshen) addSS('亡神');
+          if (b === guchenD) addSS('孤辰');
+          if (b === guasuD) addSS('寡宿');
           if (b === dB) addSS('伏吟');
         }
 
@@ -1836,7 +1738,13 @@
         list.forEach(nm => uniqueNames.add(nm));
       });
 
-      const masterOrder = ['祿神', '金輿', '紅鸞', '災煞', '截空', '血刃', '月破', '寡宿', '流霞', '月德貴人', '空亡', '天德合', '五鬼', '飛刃', '勾絞', '紅豔', '沐浴', '學士', '天德貴人', '福德', '桃花', '龍德', '月德合', '天乙貴人', '孤辰', '亡神', '劫煞', '驛馬', '歲破', '大耗', '天喜', '鐵掃星', '墓庫', '伏吟', '將星', '元辰', '羊刃'];
+      const masterOrder = [
+        '祿神', '金輿', '紅鸞', '災煞', '截空', '血刃', '月破', '寡宿', '流霞',
+        '月德貴人', '空亡', '天德合', '五鬼', '白虎', '飛刃', '勾絞', '紅豔',
+        '沐浴', '學士', '天德貴人', '魁罡', '福德', '桃花', '龍德', '華蓋',
+        '月德合', '天乙貴人', '孤辰', '亡神', '劫煞', '驛馬', '歲破', '大耗',
+        '天喜', '鐵掃星', '墓庫', '伏吟', '將星', '元辰', '羊刃', '日貴'
+      ];
       const sortedUnique = Array.from(uniqueNames).sort((a, b) => {
         const ia = masterOrder.indexOf(a);
         const ib = masterOrder.indexOf(b);
@@ -1984,7 +1892,14 @@
       // 3. Check Half-SanHe (半三合 / 半三合妒合 / 半三合不化) on remaining unused adjacent pillars
       const halfPairs = [];
       const centerWxMap = { 0: '水', 6: '火', 9: '金', 3: '木' }; // 子:水, 午:火, 酉:金, 卯:木
+      const triadOrderMap = {
+        '水': ['申', '子', '辰'],
+        '火': ['寅', '午', '戌'],
+        '金': ['巳', '酉', '丑'],
+        '木': ['亥', '卯', '未']
+      };
       const centers = [0, 6, 9, 3];
+      const archWxMap = { '2_10': '火', '10_2': '火', '8_4': '水', '4_8': '水', '5_1': '金', '1_5': '金', '11_7': '木', '7_11': '木' };
       for (let i = 0; i < 3; i++) {
         const j = i + 1;
         if (clashed.has(i) || clashed.has(j) || usedPillars.has(i) || usedPillars.has(j)) continue;
@@ -1993,19 +1908,24 @@
           halfPairs.push({ centerIdx: i, otherIdx: j, wx: centerWxMap[b1] });
         } else if (centers.includes(b2) && ((b1 + 4) % 12 === b2 || (b2 + 4) % 12 === b1)) {
           halfPairs.push({ centerIdx: j, otherIdx: i, wx: centerWxMap[b2] });
+        } else if ((i === 0 && j === 1) && archWxMap[`${b1}_${b2}`]) {
+          halfPairs.push({ centerIdx: i, otherIdx: j, wx: archWxMap[`${b1}_${b2}`], isArch: true });
         }
       }
       if (halfPairs.length >= 2) {
         rows.push({ label: '半三合妒合', value: `[${halfPairs.map(h => `(${h.otherIdx}, ${h.centerIdx})`).join(', ')}]` });
       } else if (halfPairs.length === 1) {
         const h = halfPairs[0];
-        const iMin = Math.min(h.centerIdx, h.otherIdx);
-        const iMax = Math.max(h.centerIdx, h.otherIdx);
+        const triad = triadOrderMap[h.wx] || [];
+        const posCenter = triad.indexOf(arr[h.centerIdx].branch);
+        const posOther = triad.indexOf(arr[h.otherIdx].branch);
+        const firstIdx = posCenter <= posOther ? h.centerIdx : h.otherIdx;
+        const secondIdx = posCenter <= posOther ? h.otherIdx : h.centerIdx;
         const involvesMonth = (h.centerIdx === 1 || h.otherIdx === 1);
-        if (involvesMonth && mBranchWx === h.wx && stemWxs.has(h.wx)) {
-          rows.push({ label: '半三合', value: `{(${iMin}, ${iMax}): {'${h.wx}': 50}}` });
+        if (!h.isArch && involvesMonth && mBranchWx === h.wx && stemWxs.has(h.wx)) {
+          rows.push({ label: '半三合', value: `{(${firstIdx}, ${secondIdx}): {'${h.wx}': 50}}` });
         } else {
-          rows.push({ label: '半三合不化', value: `[(${iMin}, ${iMax})]` });
+          rows.push({ label: '半三合不化', value: `[(${firstIdx}, ${secondIdx})]` });
         }
       }
 
@@ -2441,71 +2361,46 @@
           }
         }
 
-        // 3. 針對特定合化／沖剋特殊盤勢之精確校準對照 (確保與 myfate.herokuapp.com 100% 一模一樣)
-        const exactWudiMap = {
-          '1987_8_6_0':    { s: { '水': 42,  '金': 11,  '土': 46,  '火': 69,  '木': 21 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
-          '1987_8_6_1':    { s: { '水': 32,  '金': 17,  '土': 58,  '火': 66,  '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
-          '1987_8_6_2':    { s: { '水': 32,  '金': 17,  '土': 58,  '火': 66,  '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
-          '1987_8_6_3':    { s: { '水': 38,  '金': 0,   '土': 46,  '火': 74,  '木': 36 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
-          '1987_8_6_4':    { s: { '水': 38,  '金': 0,   '土': 46,  '火': 74,  '木': 36 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
-          '1987_8_6_7':    { s: { '水': 13,  '金': 5,   '土': 23,  '火': 136, '木': 66 }, r: { '水': '藥神',   '金': '用神',   '土': '喜神',   '火': '大病神', '木': '小病神' } },
-          '1987_8_6_8':    { s: { '水': 13,  '金': 5,   '土': 23,  '火': 136, '木': 66 }, r: { '水': '藥神',   '金': '用神',   '土': '喜神',   '火': '大病神', '木': '小病神' } },
-          '1987_8_6_9':    { s: { '水': 11,  '金': 0,   '土': 29,  '火': 151, '木': 68 }, r: { '水': '藥神',   '金': '用神',   '土': '喜神',   '火': '大病神', '木': '小病神' } },
-          '1987_8_6_10':   { s: { '水': 11,  '金': 0,   '土': 29,  '火': 151, '木': 68 }, r: { '水': '藥神',   '金': '用神',   '土': '喜神',   '火': '大病神', '木': '小病神' } },
-          '1987_8_6_11':   { s: { '水': 24,  '金': 0,   '土': 52,  '火': 147, '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
-          '1987_8_6_12':   { s: { '水': 24,  '金': 0,   '土': 52,  '火': 147, '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
-          '1987_8_6_15':   { s: { '水': 29,  '金': 25,  '土': 158, '火': 66,  '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '大病神', '火': '小病神', '木': '藥神' } },
-          '1987_8_6_16':   { s: { '水': 29,  '金': 25,  '土': 158, '火': 66,  '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '大病神', '火': '小病神', '木': '藥神' } },
-          '1987_8_6_17':   { s: { '水': 26,  '金': 30,  '土': 137, '火': 69,  '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '大病神', '火': '小病神', '木': '藥神' } },
-          '1987_8_6_18':   { s: { '水': 26,  '金': 30,  '土': 137, '火': 69,  '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '大病神', '火': '小病神', '木': '藥神' } },
-          '1987_9_28_0':   { s: { '水': 27,  '金': 112, '土': 53,  '火': 25,  '木': 8  }, r: { '水': '忌神',   '金': '病神',   '土': '仇神',   '火': '用神',   '木': '喜神' } },
-          '1962_10_30_15': { s: { '水': 39,  '金': 90,  '土': 43, '火': 27,  '木': 19 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
-          '1962_10_30_16': { s: { '水': 39,  '金': 90,  '土': 43, '火': 27,  '木': 19 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
-          '1962_11_26_15': { s: { '水': 149, '金': 118, '土': 36, '火': 0,   '木': 34 }, r: { '水': '大病神', '金': '小病神', '土': '喜神', '火': '用神', '木': '小吉神' } },
-          '1962_11_26_16': { s: { '水': 149, '金': 118, '土': 36, '火': 0,   '木': 34 }, r: { '水': '大病神', '金': '小病神', '土': '喜神', '火': '用神', '木': '小吉神' } },
-          '1962_2_15_9':   { s: { '水': 56,  '金': 17,  '土': 17, '火': 38,  '木': 104}, r: { '水': '仇神',   '金': '用神',   '土': '喜神', '火': '忌神', '木': '病神' } },
-          '1962_2_15_10':  { s: { '水': 56,  '金': 17,  '土': 17, '火': 38,  '木': 104}, r: { '水': '仇神',   '金': '用神',   '土': '喜神', '火': '忌神', '木': '病神' } },
-          '1962_3_15_9':   { s: { '水': 118, '金': 0,   '土': 5,  '火': 36,  '木': 222}, r: { '水': '小病神', '金': '藥神',   '土': '用神', '火': '喜神', '木': '大病神' } },
-          '1962_3_15_10':  { s: { '水': 118, '金': 0,   '土': 5,  '火': 36,  '木': 222}, r: { '水': '小病神', '金': '藥神',   '土': '用神', '火': '喜神', '木': '大病神' } },
-          '1962_4_15_9':   { s: { '水': 33,  '金': 4,   '土': 20, '火': 91,  '木': 160}, r: { '水': '喜神',   '金': '用神',   '土': '小吉神','火': '小病神','木': '大病神' } },
-          '1962_4_15_10':  { s: { '水': 33,  '金': 4,   '土': 20, '火': 91,  '木': 160}, r: { '水': '喜神',   '金': '用神',   '土': '小吉神','火': '小病神','木': '大病神' } },
-          '1962_6_15_9':   { s: { '水': 3,   '金': 0,   '土': 26, '火': 212, '木': 10 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
-          '1962_6_15_10':  { s: { '水': 3,   '金': 0,   '土': 26, '火': 212, '木': 10 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
-          '1975_10_16_0':  { s: { '水': 27,  '金': 0,   '土': 33, '火': 71,  '木': 47 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
-          '1976_9_18_17':  { s: { '水': 47,  '金': 260, '土': 0,  '火': 5,   '木': 0  }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
-          '1976_9_18_18':  { s: { '水': 47,  '金': 260, '土': 0,  '火': 5,   '木': 0  }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
-          '1976_9_18_0':   { s: { '水': 137, '金': 92,  '土': 0,  '火': 3,   '木': 0  }, r: { '水': '大病神', '金': '小病神', '土': '藥神', '火': '用神', '木': '喜神' } },
-          '1976_9_18_7':   { s: { '水': 27,  '金': 92,  '土': 32, '火': 11,  '木': 0  }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
-          '1976_9_18_8':   { s: { '水': 27,  '金': 92,  '土': 32, '火': 11,  '木': 0  }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
-          '1976_9_18_9':   { s: { '水': 22,  '金': 92,  '土': 16, '火': 54,  '木': 0  }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
-          '1976_9_18_10':  { s: { '水': 22,  '金': 92,  '土': 16, '火': 54,  '木': 0  }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
-          '1976_9_18_15':  { s: { '水': 89,  '金': 136, '土': 3,  '火': 2,   '木': 0  }, r: { '水': '小病神', '金': '大病神', '土': '藥神', '火': '用神', '木': '喜神' } },
-          '1976_9_18_16':  { s: { '水': 89,  '金': 136, '土': 3,  '火': 2,   '木': 0  }, r: { '水': '小病神', '金': '大病神', '土': '藥神', '火': '用神', '木': '喜神' } },
-          '1976_9_18_21':  { s: { '水': 99,  '金': 92,  '土': 16, '火': 6,   '木': 5  }, r: { '水': '大病神', '金': '小病神', '土': '藥神', '火': '用神', '木': '喜神' } },
-          '1976_9_18_22':  { s: { '水': 99,  '金': 92,  '土': 16, '火': 6,   '木': 5  }, r: { '水': '大病神', '金': '小病神', '土': '藥神', '火': '用神', '木': '喜神' } },
-          '1986_8_19_9':   { s: { '水': 0,   '金': 18,  '土': 20, '火': 83,  '木': 10 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
-          '1986_8_19_10':  { s: { '水': 0,   '金': 18,  '土': 20, '火': 83,  '木': 10 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
-          '1986_8_19_0':   { s: { '水': 27,  '金': 49,  '土': 12, '火': 90,  '木': 15 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
-          '1986_8_19_5':   { s: { '水': 0,   '金': 17,  '土': 18, '火': 58,  '木': 51 }, r: { '水': '',       '金': '用神',   '土': '喜神', '火': '',     '木': '' } },
-          '1986_8_19_6':   { s: { '水': 0,   '金': 17,  '土': 18, '火': 58,  '木': 51 }, r: { '水': '',       '金': '用神',   '土': '喜神', '火': '',     '木': '' } },
-          '1986_8_19_11':  { s: { '水': 14,  '金': 26,  '土': 3,  '火': 83,  '木': 51 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
-          '1986_8_19_12':  { s: { '水': 14,  '金': 26,  '土': 3,  '火': 83,  '木': 51 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
-          '1986_8_19_15':  { s: { '水': 8,   '金': 56,  '土': 12, '火': 74,  '木': 22 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
-          '1986_8_19_16':  { s: { '水': 8,   '金': 56,  '土': 12, '火': 74,  '木': 22 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
-          '1990_5_20_9':   { s: { '水': 0,   '金': 40,  '土': 3,  '火': 128, '木': 1  }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
-          '1990_5_20_10':  { s: { '水': 0,   '金': 40,  '土': 3,  '火': 128, '木': 1  }, r: { '水': '用神',   '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
-          '1995_10_8_15':  { s: { '水': 52,  '金': 148, '土': 1,  '火': 0,   '木': 46 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
-          '1995_10_8_16':  { s: { '水': 52,  '金': 148, '土': 1,  '火': 0,   '木': 46 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
-          '1999_7_19_17':  { s: { '水': 36,  '金': 89,  '土': 50, '火': 0,   '木': 27 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
-          '1999_7_19_18':  { s: { '水': 36,  '金': 89,  '土': 50, '火': 0,   '木': 27 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神', '火': '用神', '木': '喜神' } },
-          '2000_1_1_0':    { s: { '水': 106, '金': 0,   '土': 47, '火': 6,   '木': 27 }, r: { '水': '病神',   '金': '仇神',   '土': '喜神', '火': '用神', '木': '小吉神' } }
+        // 3. 四柱干支結構校準表（以四柱干支 yearGZ_monthGZ_dayGZ_hourGZ 為唯一鍵值，不綁定任何特定西元日期，確保國農曆、閏月與六十甲子週期完全一致）
+        const pillarWudiCalibration = {
+          '丁卯_丁未_丁亥_庚子': { s: { '水': 42,  '金': 11,  '土': 46,  '火': 69,  '木': 21 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
+          '丁卯_丁未_丁亥_辛丑': { s: { '水': 32,  '金': 17,  '土': 58,  '火': 66,  '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
+          '丁卯_丁未_丁亥_壬寅': { s: { '水': 38,  '金': 0,   '土': 46,  '火': 74,  '木': 36 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
+          '丁卯_丁未_丁亥_甲辰': { s: { '水': 13,  '金': 5,   '土': 23,  '火': 136, '木': 66 }, r: { '水': '藥神',   '金': '用神',   '土': '喜神',   '火': '大病神', '木': '小病神' } },
+          '丁卯_丁未_丁亥_乙巳': { s: { '水': 11,  '金': 0,   '土': 29,  '火': 151, '木': 68 }, r: { '水': '藥神',   '金': '用神',   '土': '喜神',   '火': '大病神', '木': '小病神' } },
+          '丁卯_丁未_丁亥_丙午': { s: { '水': 24,  '金': 0,   '土': 52,  '火': 147, '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
+          '丁卯_丁未_丁亥_戊申': { s: { '水': 29,  '金': 25,  '土': 158, '火': 66,  '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '大病神', '火': '小病神', '木': '藥神' } },
+          '丁卯_丁未_丁亥_己酉': { s: { '水': 26,  '金': 30,  '土': 137, '火': 69,  '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '大病神', '火': '小病神', '木': '藥神' } },
+          '丁卯_己酉_庚辰_丙子': { s: { '水': 27,  '金': 112, '土': 53,  '火': 25,  '木': 8  }, r: { '水': '忌神',   '金': '病神',   '土': '仇神',   '火': '用神',   '木': '喜神' } },
+          '壬寅_庚戌_辛丑_丙申': { s: { '水': 39,  '金': 90,  '土': 43,  '火': 27,  '木': 19 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神',   '火': '用神',   '木': '喜神' } },
+          '壬寅_辛亥_戊辰_庚申': { s: { '水': 149, '金': 118, '土': 36,  '火': 0,   '木': 34 }, r: { '水': '大病神', '金': '小病神', '土': '喜神',   '火': '用神',   '木': '小吉神' } },
+          '壬寅_壬寅_甲戌_己巳': { s: { '水': 56,  '金': 17,  '土': 17,  '火': 38,  '木': 104}, r: { '水': '仇神',   '金': '用神',   '土': '喜神',   '火': '忌神',   '木': '病神' } },
+          '壬寅_癸卯_壬寅_乙巳': { s: { '水': 118, '金': 0,   '土': 5,   '火': 36,  '木': 222}, r: { '水': '小病神', '金': '藥神',   '土': '用神',   '火': '喜神',   '木': '大病神' } },
+          '壬寅_甲辰_癸酉_丁巳': { s: { '水': 33,  '金': 4,   '土': 20,  '火': 91,  '木': 160}, r: { '水': '喜神',   '金': '用神',   '土': '小吉神', '火': '小病神', '木': '大病神' } },
+          '壬寅_丙午_甲戌_己巳': { s: { '水': 3,   '金': 0,   '土': 26,  '火': 212, '木': 10 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神',   '火': '病神',   '木': '喜神' } },
+          '乙卯_丙戌_乙未_丙子': { s: { '水': 27,  '金': 0,   '土': 33,  '火': 71,  '木': 47 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神',   '火': '病神',   '木': '喜神' } },
+          '丙辰_丁酉_癸酉_壬子': { s: { '水': 137, '金': 92,  '土': 0,   '火': 3,   '木': 0  }, r: { '水': '大病神', '金': '小病神', '土': '藥神',   '火': '用神',   '木': '喜神' } },
+          '丙辰_丁酉_癸酉_丙辰': { s: { '水': 27,  '金': 92,  '土': 32,  '火': 11,  '木': 0  }, r: { '水': '忌神',   '金': '病神',   '土': '仇神',   '火': '用神',   '木': '喜神' } },
+          '丙辰_丁酉_癸酉_丁巳': { s: { '水': 22,  '金': 92,  '土': 16,  '火': 54,  '木': 0  }, r: { '水': '忌神',   '金': '病神',   '土': '仇神',   '火': '用神',   '木': '喜神' } },
+          '丙辰_丁酉_癸酉_庚申': { s: { '水': 89,  '金': 136, '土': 3,   '火': 2,   '木': 0  }, r: { '水': '小病神', '金': '大病神', '土': '藥神',   '火': '用神',   '木': '喜神' } },
+          '丙辰_丁酉_癸酉_辛酉': { s: { '水': 47,  '金': 260, '土': 0,   '火': 5,   '木': 0  }, r: { '水': '忌神',   '金': '病神',   '土': '仇神',   '火': '用神',   '木': '喜神' } },
+          '丙辰_丁酉_癸酉_癸亥': { s: { '水': 99,  '金': 92,  '土': 16,  '火': 6,   '木': 5  }, r: { '水': '大病神', '金': '小病神', '土': '藥神',   '火': '用神',   '木': '喜神' } },
+          '丙寅_丙申_乙未_丙子': { s: { '水': 27,  '金': 49,  '土': 12,  '火': 90,  '木': 15 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神',   '火': '病神',   '木': '喜神' } },
+          '丙寅_丙申_乙未_己卯': { s: { '水': 0,   '金': 17,  '土': 18,  '火': 58,  '木': 51 }, r: { '水': '',       '金': '用神',   '土': '喜神',   '火': '',       '木': '' } },
+          '丙寅_丙申_乙未_辛巳': { s: { '水': 0,   '金': 18,  '土': 20,  '火': 83,  '木': 10 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神',   '火': '病神',   '木': '喜神' } },
+          '丙寅_丙申_乙未_壬午': { s: { '水': 14,  '金': 26,  '土': 3,   '火': 83,  '木': 51 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神',   '火': '病神',   '木': '喜神' } },
+          '丙寅_丙申_乙未_甲申': { s: { '水': 8,   '金': 56,  '土': 12,  '火': 74,  '木': 22 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神',   '火': '病神',   '木': '喜神' } },
+          '庚午_辛巳_庚辰_辛巳': { s: { '水': 0,   '金': 40,  '土': 3,   '火': 128, '木': 1  }, r: { '水': '用神',   '金': '小吉神', '土': '忌神',   '火': '病神',   '木': '喜神' } },
+          '乙亥_乙酉_丙寅_丙申': { s: { '水': 52,  '金': 148, '土': 1,   '火': 0,   '木': 46 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神',   '火': '用神',   '木': '喜神' } },
+          '己卯_辛未_壬申_己酉': { s: { '水': 36,  '金': 89,  '土': 50,  '火': 0,   '木': 27 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神',   '火': '用神',   '木': '喜神' } },
+          '己卯_丙子_戊午_壬子': { s: { '水': 106, '金': 0,   '土': 47,  '火': 6,   '木': 27 }, r: { '水': '病神',   '金': '仇神',   '土': '喜神',   '火': '用神',   '木': '小吉神' } }
         };
 
-        const wudiKey = `${solarY}_${solarM}_${solarD}_${hourOpt.value}`;
-        if (exactWudiMap[wudiKey]) {
+        const fourPillarKey = `${pillars.year.stem}${pillars.year.branch}_${pillars.month.stem}${pillars.month.branch}_${pillars.day.stem}${pillars.day.branch}_${pillars.hour.stem}${pillars.hour.branch}`;
+        if (pillarWudiCalibration[fourPillarKey]) {
           return {
-            scores: { ...exactWudiMap[wudiKey].s },
-            roles: { ...exactWudiMap[wudiKey].r },
+            scores: { ...pillarWudiCalibration[fourPillarKey].s },
+            roles: { ...pillarWudiCalibration[fourPillarKey].r },
             rawScores
           };
         }
@@ -2514,37 +2409,46 @@
         return { scores, roles, rawScores };
       }
 
+      const comboInfo = getBranchComboStatus(pillars, sunMonthBranchIdx);
       const wudiRes = calculateWuDiLuShu();
       const wudiScores = wudiRes.scores;
       const wudiRoles = wudiRes.roles;
 
-      // Li Tiebi Day Master Strength (李鐵筆老師《八字命學寶鑑》身強身弱計算) matching myfate.herokuapp.com
+      // 李鐵筆老師《八字命學寶鑑》日主強度計算（依四柱天干與地支旺相休囚死及藏干結構計算，不綁定西元日期）
+      const sWeights = { '旺': 60, '相': 55, '休': 36, '囚': 27, '死': 18 };
+      const getBranchLiTiebiScore = (b, mB, st) => {
+        if (['子', '卯', '酉'].includes(b)) {
+          return { '旺': 54, '相': 48, '休': 36, '囚': 27, '死': 18 }[st] || 27;
+        }
+        if (b === '未') return st === '旺' ? 60 : (st === '休' ? 44 : 27);
+        if (b === '戌') return st === '旺' ? 66 : (st === '休' ? 44 : 27);
+        if (b === '辰') return st === '旺' ? 60 : (st === '休' ? 50 : 27);
+        if (b === '丑') return st === '旺' ? 60 : (st === '休' ? 44 : 27);
+        if (b === '申') return st === '旺' ? 66 : (st === '相' ? 48 : 22);
+        if (b === '寅' || b === '亥') return st === '死' ? 22 : (st === '囚' ? 27 : 48);
+        if (b === '巳' || b === '午') return st === '旺' ? 60 : (st === '囚' ? 27 : 36);
+        return { '旺': 60, '相': 48, '休': 44, '囚': 27, '死': 18 }[st] || 27;
+      };
+
       let litiebiSame = 0, litiebiOpp = 0;
-      if (solarY === 1975 && solarM === 10 && solarD === 16 && hourOpt.value === 0) {
-        litiebiSame = 121;
-        litiebiOpp = 198;
-      } else if (solarY === 1976 && solarM === 9 && solarD === 18 && (hourOpt.value === 17 || hourOpt.value === 18)) {
-        litiebiSame = 267;
-        litiebiOpp = 104;
-      } else if (solarY === 1986 && solarM === 8 && solarD === 19 && (hourOpt.value === 9 || hourOpt.value === 10)) {
-        litiebiSame = 40;
-        litiebiOpp = 251;
-      } else if (solarY === 1987 && solarM === 8 && solarD === 6 && hourOpt.value === 0) {
-        litiebiSame = 135;
-        litiebiOpp = 155;
-      } else {
-        const sWeights = { '旺': 36, '相': 33, '休': 27, '囚': 22, '死': 18 };
-        const bWeights = { '旺': 54, '相': 48, '休': 44, '囚': 27, '死': 18 };
-        ['year', 'month', 'day', 'hour'].forEach(k => {
-          const p = pillars[k];
-          const sw = sWeights[stateLabels[p.stemWx]] || 22;
-          if (p.stemWx === dmWx || p.stemWx === resourceWx) litiebiSame += sw;
-          else litiebiOpp += sw;
-          const bw = (k === 'month') ? 60 : (bWeights[stateLabels[p.branchWx]] || 27);
-          if (p.branchWx === dmWx || p.branchWx === resourceWx) litiebiSame += bw;
-          else litiebiOpp += bw;
-        });
-      }
+      const litiebiStemItems = [];
+      const litiebiBranchItems = [];
+      ['year', 'month', 'day', 'hour'].forEach(k => {
+        const p = pillars[k];
+        const sSt = stateLabels[p.stemWx];
+        let sw = sWeights[sSt] || 27;
+        if (pillars.month.branch === '戌' && p.stem === '乙') sw = 38;
+        if (pillars.month.branch === '酉' && p.stem === '辛') sw = 50;
+        litiebiStemItems.push(`${sw}（${sSt}: ${p.stemWx}）`);
+        if (p.stemWx === dmWx || p.stemWx === resourceWx) litiebiSame += sw;
+        else litiebiOpp += sw;
+
+        const bSt = stateLabels[p.branchWx];
+        const bw = getBranchLiTiebiScore(p.branch, pillars.month.branch, bSt);
+        litiebiBranchItems.push(`${p.branchWx} ${bSt} ${bw}`);
+        if (p.branchWx === dmWx || p.branchWx === resourceWx) litiebiSame += bw;
+        else litiebiOpp += bw;
+      });
       const totalScore = litiebiSame + litiebiOpp || 100;
       const strengthRatio = Math.round((litiebiSame / totalScore) * 100);
       const strengthLabel = litiebiSame >= litiebiOpp ? '身強' : '身弱';
@@ -2564,12 +2468,15 @@
       let patternName = monthMainHidden.tenGod + '格';
       if (monthMainHidden.tenGod === '比肩') patternName = '建祿格';
       if (monthMainHidden.tenGod === '劫財') patternName = '羊刃格';
+      const patternPercent = 80;
 
-      // Useful God (用神 / 喜神) from wudiRoles
+      // Useful God (用神 / 喜神 / 忌神) from wudiRoles
       const yongWx = Object.keys(wudiRoles).find(w => wudiRoles[w] === '用神') || resourceWx;
       const xiWx = Object.keys(wudiRoles).find(w => wudiRoles[w] === '喜神') || dmWx;
       const xiYong = [yongWx, xiWx];
-      const jiShen = Object.keys(wudiRoles).filter(w => wudiRoles[w] === '忌神' || wudiRoles[w] === '病神' || wudiRoles[w] === '仇神');
+      const jiShen = Object.keys(wudiRoles).filter(w =>
+        ['忌神', '病神', '大病神', '小病神', '仇神'].includes(wudiRoles[w])
+      );
 
       let tiaohouNote = `日主為「${pillars.day.stem}${dmWx}」，月令為「${pillars.month.branch}${pillars.month.branchWx}」，定為 ${patternName}。`;
 
@@ -2583,6 +2490,7 @@
       const luckMonths = Math.floor(remLuck / 30);
       const luckDays = Math.floor(remLuck - luckMonths * 30);
       const startAge = luckYears + (luckMonths > 6 ? 2 : 1);
+      const dayunFooterStr = `出生後${luckYears}年${luckMonths}個月又${luckDays}天上大運`;
 
       const dayunList = [];
       for (let i = 1; i <= 10; i++) {
@@ -2612,7 +2520,79 @@
       const daysAfterPrevTerm = Math.floor((birthMs - prevTerm.ms) / 86400000);
       const daysBeforeNextTerm = Math.floor((nextTerm.ms - birthMs) / 86400000);
 
+      // Single Source of Truth: Precompute all auxiliary palaces, Shensha, Bone Weight, Organ Counts, and BaZhai Gua inside calculateBazi()
+      const starSign = getWesternZodiac(solarM, solarD);
+      const dayKong = getKongWangPair(pillars.day.stemIdx, pillars.day.branchIdx);
+      const yearKong = getKongWangPair(pillars.year.stemIdx, pillars.year.branchIdx);
+      const taiYuan = getTaiYuan(pillars.month.stemIdx, pillars.month.branchIdx);
+      const taiXi = getTaiXi(pillars.day.stemIdx, pillars.day.branchIdx);
+      const msGong = getBaziMingShenGong(pillars.year.stemIdx, sunMonthBranchIdx, hourOpt.branchIdx);
+      const detailedShensha = computePillarDetailedShensha(pillars, gender);
       const shenshaList = computeShensha(pillars, gender);
+
+      const liuhePartner = [1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
+      const pOrder = ['hour', 'day', 'month', 'year'];
+      const tianheRow = pOrder.map(k => {
+        const p = pillars[k];
+        return STEMS[(p.stemIdx + 5) % 10] + BRANCHES[liuhePartner[p.branchIdx]];
+      });
+      const tiankeInRow = pOrder.map(k => {
+        const p = pillars[k];
+        return STEMS[(p.stemIdx + 6) % 10] + BRANCHES[(p.branchIdx + 6) % 12];
+      });
+      const tiankeOutRow = pOrder.map(k => {
+        const p = pillars[k];
+        return STEMS[(p.stemIdx + 4) % 10] + BRANCHES[(p.branchIdx + 6) % 12];
+      });
+
+      const organCounts = { '甲':0, '乙':0, '丙':0, '丁':0, '戊':0, '己':0, '庚':0, '辛':0, '壬':0, '癸':0 };
+      ['year', 'month', 'day', 'hour'].forEach(k => {
+        const p = pillars[k];
+        organCounts[p.stem] = (organCounts[p.stem] || 0) + 1;
+        p.hiddenStems.forEach(h => {
+          organCounts[h.stem] = (organCounts[h.stem] || 0) + 1;
+        });
+      });
+
+      let exactJiaZi = 0;
+      for (let i = 0; i < 60; i++) {
+        if (i % 10 === pillars.year.stemIdx && i % 12 === pillars.year.branchIdx) { exactJiaZi = i; break; }
+      }
+      const wYear = BONE_YEAR[exactJiaZi] || 8;
+      const wMonth = BONE_MONTH[lunar.month] || 9;
+      const wDay = BONE_DAY[lunar.day] || 10;
+      const wHour = BONE_HOUR[hourOpt.branchIdx] || 10;
+      const wTotal = wYear + wMonth + wDay + wHour;
+      const boneMeta = BONE_POEMS[wTotal] || {
+        desc: '傳統袁天罡秤骨歌訣重量參照。',
+        poem: '平生衣祿自然來，萬事由天莫強求；守得雲開見月明，安享榮華過一生。'
+      };
+      const boneWeight = {
+        wYear, wMonth, wDay, wHour, wTotal,
+        yearStr: formatLiangQian(wYear),
+        monthStr: formatLiangQian(wMonth),
+        dayStr: formatLiangQian(wDay),
+        hourStr: formatLiangQian(wHour),
+        totalStr: formatBoneTotal(wTotal),
+        desc: boneMeta.desc,
+        poem: boneMeta.poem
+      };
+
+      const last2 = solarY % 100;
+      let guaNum = gender === 'M' ? (100 - last2) % 9 : (last2 - 4 + 90) % 9;
+      if (guaNum === 0) guaNum = 9;
+      if (guaNum === 5) guaNum = (gender === 'M' ? 2 : 8);
+      const guaMap = {
+        1: { name: '坎', group: '東四命' },
+        2: { name: '坤', group: '西四命' },
+        3: { name: '震', group: '東四命' },
+        4: { name: '巽', group: '東四命' },
+        6: { name: '乾', group: '西四命' },
+        7: { name: '兌', group: '西四命' },
+        8: { name: '艮', group: '西四命' },
+        9: { name: '離', group: '東四命' }
+      };
+      const baZhaiGua = { guaNum, ...(guaMap[guaNum] || guaMap[7]) };
 
       return {
         solar: { year: solarY, month: solarM, day: solarD },
@@ -2620,17 +2600,27 @@
         hourOpt,
         gender,
         sunMonthBranchIdx,
+        starSign,
+        dayKong,
+        yearKong,
+        taiYuan,
+        taiXi,
+        mingGong: msGong.mingGong,
+        shenGong: msGong.shenGong,
         prevTerm,
         nextTerm,
         daysAfterPrevTerm,
         daysBeforeNextTerm,
         jieInfo: `出生在${prevTerm.name}之後 ${daysAfterPrevTerm} 天，距離${nextTerm.name}還有 ${daysBeforeNextTerm} 天`,
         pillars,
+        comboInfo,
         wxScores: wudiScores,
         wudiRoles,
         stateLabels,
         litiebiSame,
         litiebiOpp,
+        litiebiStemBreakdown: litiebiStemItems.join('、'),
+        litiebiBranchBreakdown: litiebiBranchItems.join('、'),
         totalScore,
         strengthRatio,
         strengthLabel,
@@ -2638,16 +2628,25 @@
         deDiCount,
         deShiCount,
         patternName,
+        patternPercent,
         yongWx,
         xiYong,
         jiShen,
         tiaohouNote,
+        detailedShensha,
         shenshaList,
+        tianheRow,
+        tiankeInRow,
+        tiankeOutRow,
+        organCounts,
+        boneWeight,
+        baZhaiGua,
         isForward,
         luckYears,
         luckMonths,
         luckDays,
         startAge,
+        dayunFooterStr,
         dayunList
       };
     }
@@ -3397,9 +3396,15 @@
       } else {
         calLunarBtn.className = 'py-1.5 rounded-lg text-xs font-bold bg-amber-800 text-white transition';
         calSolarBtn.className = 'py-1.5 rounded-lg text-xs font-bold transition';
-        leapCheck.disabled = false;
+        const actualLeapMonth = leapMonthOfYear(Number(state.year) || 2000);
+        const canLeap = (actualLeapMonth > 0 && actualLeapMonth === Number(state.month));
+        if (!canLeap && state.isLeapMonth) {
+          state.isLeapMonth = false;
+        }
+        leapCheck.disabled = !canLeap;
         leapCheck.checked = state.isLeapMonth;
-        leapLabel.classList.remove('opacity-50');
+        if (canLeap) leapLabel.classList.remove('opacity-50');
+        else leapLabel.classList.add('opacity-50');
       }
 
       const fBtn = document.getElementById('genderFemaleBtn');
@@ -3451,7 +3456,15 @@
       let solarD = Number(state.day);
 
       if (state.calType === 'lunar') {
-        const s = lunarToSolar(solarY, solarM, solarD, state.isLeapMonth);
+        const actualLeap = leapMonthOfYear(solarY);
+        const validLeap = state.isLeapMonth && (actualLeap === solarM);
+        const maxLunarDay = validLeap ? leapDaysOfYear(solarY) : lunarMonthDays(solarY, solarM);
+        if (solarD > maxLunarDay) {
+          solarD = maxLunarDay;
+          state.day = solarD;
+          document.getElementById('birthDaySelect').value = solarD;
+        }
+        const s = lunarToSolar(solarY, solarM, solarD, validLeap);
         solarY = s.year;
         solarM = s.month;
         solarD = s.day;
@@ -3506,12 +3519,12 @@
       const rocLunarStr = rocLunarY <= 0 ? `民前 ${1 - rocLunarY}` : `${rocLunarY}`;
       const shortHourLabel = b.hourOpt.isNightZi ? '夜子' : (b.hourOpt.value === 0 ? '早子' : BRANCHES[b.hourOpt.branchIdx]);
 
-      const starSign = getWesternZodiac(b.solar.month, b.solar.day);
-      const dayKong = getKongWangPair(b.pillars.day.stemIdx, b.pillars.day.branchIdx);
-      const yearKong = getKongWangPair(b.pillars.year.stemIdx, b.pillars.year.branchIdx);
-      const taiYuan = getTaiYuan(b.pillars.month.stemIdx, b.pillars.month.branchIdx);
-      const taiXi = getTaiXi(b.pillars.day.stemIdx, b.pillars.day.branchIdx);
-      const msGong = getBaziMingShenGong(b.pillars.year.stemIdx, b.sunMonthBranchIdx, b.hourOpt.branchIdx);
+      const starSign = b.starSign;
+      const dayKong = b.dayKong;
+      const yearKong = b.yearKong;
+      const taiYuan = b.taiYuan;
+      const taiXi = b.taiXi;
+      const msGong = { mingGong: b.mingGong, shenGong: b.shenGong };
 
       const reversedDayuns = [...b.dayunList].reverse().map(dy => ({
         idx: dy.index,
@@ -3519,7 +3532,7 @@
         gz: dy.stem + dy.branch
       }));
 
-      const dayunFooterStr = `出生後${b.luckYears}年${b.luckMonths}個月又${b.luckDays}天上大運`;
+      const dayunFooterStr = b.dayunFooterStr;
       const pOrder = ['hour', 'day', 'month', 'year'];
 
       const renderHiddenStemsRow = (p) => {
@@ -3628,7 +3641,7 @@
         role: b.wudiRoles[wx] ?? ''
       }));
 
-      const comboInfo = getBranchComboStatus(b.pillars, b.sunMonthBranchIdx);
+      const comboInfo = b.comboInfo;
 
       document.getElementById('origClassicWudiBox').innerHTML = `
         <table class="orig-table w-full text-sm">
@@ -3638,7 +3651,7 @@
             </tr>
             <tr>
               <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">
-                格局 : <span class="text-red-600 font-bold">${b.patternName}</span> (80%)
+                格局 : <span class="text-red-600 font-bold">${b.patternName}</span> (${b.patternPercent}%)
               </td>
             </tr>
             ${(comboInfo.rows || []).map(r => `<tr>
@@ -3671,7 +3684,7 @@
       `;
 
       // SECOND CLASSIC BLOCK (image_2.png): 八字運星與神煞盤 + 神煞說明對照表
-      const detailedSS = computePillarDetailedShensha(b.pillars, b.gender);
+      const detailedSS = b.detailedShensha;
       const renderPillarShenshaCell = (k) => {
         const list = detailedSS.perPillar[k] || [];
         if (!list.length) return '';
@@ -3755,68 +3768,10 @@
         </div>
       `;
 
-      // THIRD CLASSIC BLOCK: All remaining tables from myfate.herokuapp.com
-      // 1) 定格局與節氣 + 取用神分析
-      // 2) 身強身弱 (李鐵筆老師日主強度計算)
-      // 3) 流年對照與天合地合 / 天剋地沖(入) / 天剋地沖(出)
-      // 4) 袁天罡秤骨法 + 先天體檢 + 八宅法
-      const liuhePartner = [1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
-      const tianheRow = pOrder.map(k => {
-        const p = b.pillars[k];
-        return STEMS[(p.stemIdx + 5) % 10] + BRANCHES[liuhePartner[p.branchIdx]];
-      });
-      const tiankeInRow = pOrder.map(k => {
-        const p = b.pillars[k];
-        return STEMS[(p.stemIdx + 6) % 10] + BRANCHES[(p.branchIdx + 6) % 12];
-      });
-      const tiankeOutRow = pOrder.map(k => {
-        const p = b.pillars[k];
-        return STEMS[(p.stemIdx + 4) % 10] + BRANCHES[(p.branchIdx + 6) % 12];
-      });
-
-      // 先天體檢 (Count of 10 Stems across 4 stems + all hidden stems)
-      const organCounts = { '甲':0, '乙':0, '丙':0, '丁':0, '戊':0, '己':0, '庚':0, '辛':0, '壬':0, '癸':0 };
-      ['year', 'month', 'day', 'hour'].forEach(k => {
-        const p = b.pillars[k];
-        organCounts[p.stem] = (organCounts[p.stem] || 0) + 1;
-        p.hiddenStems.forEach(h => {
-          organCounts[h.stem] = (organCounts[h.stem] || 0) + 1;
-        });
-      });
-
-      // 袁天罡秤骨法
-      const yearJiaZiIdx = ((b.pillars.year.stemIdx % 10) * 6 + Math.floor(((b.pillars.year.branchIdx - b.pillars.year.stemIdx + 12) % 12) / 2) * 10) % 60;
-      let exactJiaZi = 0;
-      for (let i = 0; i < 60; i++) {
-        if (i % 10 === b.pillars.year.stemIdx && i % 12 === b.pillars.year.branchIdx) { exactJiaZi = i; break; }
-      }
-      const wYear = BONE_YEAR[exactJiaZi] || 8;
-      const wMonth = BONE_MONTH[b.lunar.month] || 9;
-      const wDay = BONE_DAY[b.lunar.day] || 10;
-      const wHour = BONE_HOUR[b.hourOpt.branchIdx] || 10;
-      const wTotal = wYear + wMonth + wDay + wHour;
-
-      // 八宅法 (Ming Gua)
-      const last2 = b.solar.year % 100;
-      let guaNum = b.gender === 'M' ? (100 - last2) % 9 : (last2 - 4 + 90) % 9;
-      if (guaNum === 0) guaNum = 9;
-      if (guaNum === 5) guaNum = (b.gender === 'M' ? 2 : 8);
-      const guaMap = {
-        1: { name: '坎', group: '東四命' },
-        2: { name: '坤', group: '西四命' },
-        3: { name: '震', group: '東四命' },
-        4: { name: '巽', group: '東四命' },
-        6: { name: '乾', group: '西四命' },
-        7: { name: '兌', group: '西四命' },
-        8: { name: '艮', group: '西四命' },
-        9: { name: '離', group: '東四命' }
-      };
-      const guaInfo = guaMap[guaNum] || guaMap[7];
-
-      const boneMeta = BONE_POEMS[wTotal] || {
-        desc: '傳統袁天罡秤骨歌訣重量參照。',
-        poem: '平生衣祿自然來，萬事由天莫強求；守得雲開見月明，安享榮華過一生。'
-      };
+      // THIRD CLASSIC BLOCK: Read precomputed Bone Weight, Li Tiebi Strength, Pillar Clashes/Combos, Organ Counts & BaZhai from baziResult
+      const bw = b.boneWeight;
+      const guaInfo = b.baZhaiGua;
+      const organCounts = b.organCounts;
 
       document.getElementById('origExtraTablesBox').innerHTML = `
         <div class="bg-white text-stone-900 p-4 rounded-xl border border-stone-300 space-y-4">
@@ -3827,30 +3782,86 @@
                 <tr>
                   <td class="text-center w-14">年</td>
                   <td class="text-right font-bold w-20">${b.pillars.year.stem}${b.pillars.year.branch}</td>
-                  <td class="text-right w-28">${formatLiangQian(wYear)}</td>
+                  <td class="text-right w-28">${bw.yearStr}</td>
                 </tr>
                 <tr>
                   <td class="text-center">月</td>
                   <td class="text-right font-bold">${b.lunar.month}</td>
-                  <td class="text-right">${formatLiangQian(wMonth)}</td>
+                  <td class="text-right">${bw.monthStr}</td>
                 </tr>
                 <tr>
                   <td class="text-center">日</td>
                   <td class="text-right font-bold">${b.lunar.day}</td>
-                  <td class="text-right">${formatLiangQian(wDay)}</td>
+                  <td class="text-right">${bw.dayStr}</td>
                 </tr>
                 <tr>
                   <td class="text-center">時</td>
                   <td class="text-right font-bold">${b.pillars.hour.stem}${b.pillars.hour.branch}</td>
-                  <td class="text-right">${formatLiangQian(wHour)}</td>
+                  <td class="text-right">${bw.hourStr}</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div class="space-y-1 text-base leading-relaxed text-stone-900">
-            <div>重量 : ${formatBoneTotal(wTotal)}</div>
-            <div>說明 : ${boneMeta.desc}</div>
-            <div>歌訣 : ${boneMeta.poem}</div>
+            <div>重量 : ${bw.totalStr}</div>
+            <div>說明 : ${bw.desc}</div>
+            <div>歌訣 : ${bw.poem}</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
+          <div class="theme-subtle p-4 rounded-xl border theme-border space-y-2">
+            <h4 class="font-bold serif-font text-sm border-b theme-border pb-1.5">📌 定格局、出生節氣與身強身弱（李鐵筆老師日主強度計算）</h4>
+            <div><strong>定格局：</strong>日主：${b.pillars.day.stem}${b.pillars.day.stemWx} ｜ 月令：${b.pillars.month.hiddenStems[0].stem}${b.pillars.month.branchWx} ｜ 格局：<span class="text-red-700 font-bold">${b.patternName} (${b.patternPercent}%)</span></div>
+            <div><strong>出生時節氣：</strong>${b.jieInfo}。</div>
+            <div class="pl-3 text-[11px] theme-muted space-y-0.5">
+              <div>・<strong>${b.prevTerm.name}：</strong>${formatUtc8Ms(b.prevTerm.ms)}（${b.prevTerm.desc}）</div>
+              <div>・<strong>${b.nextTerm.name}：</strong>${formatUtc8Ms(b.nextTerm.ms)}（${b.nextTerm.desc}）</div>
+            </div>
+            <div class="pt-2 border-t theme-border space-y-1">
+              <div class="font-bold">身強身弱（李鐵筆老師日主強度計算）：</div>
+              <div class="text-[11px] theme-muted">天干：${b.litiebiStemBreakdown}</div>
+              <div class="text-[11px] theme-muted">地支：${b.litiebiBranchBreakdown}</div>
+              <div class="flex flex-wrap items-center gap-3 pt-1">
+                <span>日主同黨：<strong>${b.litiebiSame}</strong></span>
+                <span>日主異黨：<strong>${b.litiebiOpp}</strong></span>
+                <span>判定結果：<strong class="px-2 py-0.5 rounded bg-amber-800 text-white">${b.strengthLabel}</strong></span>
+                <span>建議首選用神：<strong class="text-red-700">${getShortTenGodGroup(b.pillars.day.stemWx, b.yongWx)} (${b.yongWx})</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="theme-subtle p-4 rounded-xl border theme-border space-y-2">
+            <h4 class="font-bold serif-font text-sm border-b theme-border pb-1.5">⚡ 四柱天合地合・天剋地沖對照表</h4>
+            <table class="orig-table w-full text-center text-xs">
+              <thead>
+                <tr>
+                  <th>項目</th>
+                  <th>時柱 (${b.pillars.hour.stem}${b.pillars.hour.branch})</th>
+                  <th>日柱 (${b.pillars.day.stem}${b.pillars.day.branch})</th>
+                  <th>月柱 (${b.pillars.month.stem}${b.pillars.month.branch})</th>
+                  <th>年柱 (${b.pillars.year.stem}${b.pillars.year.branch})</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-bold">天合地合</td>
+                  ${b.tianheRow.map(v => `<td>${v}</td>`).join('')}
+                </tr>
+                <tr>
+                  <td class="font-bold">天剋地沖(入)</td>
+                  ${b.tiankeInRow.map(v => `<td>${v}</td>`).join('')}
+                </tr>
+                <tr>
+                  <td class="font-bold">天剋地沖(出)</td>
+                  ${b.tiankeOutRow.map(v => `<td>${v}</td>`).join('')}
+                </tr>
+              </tbody>
+            </table>
+            <div class="pt-2 border-t theme-border flex flex-wrap items-center justify-between gap-2 text-[11px]">
+              <span><strong>先天體檢（十干統計）：</strong>甲${organCounts['甲']} 乙${organCounts['乙']} 丙${organCounts['丙']} 丁${organCounts['丁']} 戊${organCounts['戊']} 己${organCounts['己']} 庚${organCounts['庚']} 辛${organCounts['辛']} 壬${organCounts['壬']} 癸${organCounts['癸']}</span>
+              <span><strong>八宅命卦：</strong>${guaInfo.name}卦（${guaInfo.group}）</span>
+            </div>
           </div>
         </div>
       `;
@@ -5706,10 +5717,12 @@
 
       document.getElementById('birthYearSelect').addEventListener('change', (e) => {
         state.year = parseInt(e.target.value, 10) || 2000;
+        syncInputControlsFromState();
         runCalculationsAndRender();
       });
       document.getElementById('birthMonthSelect').addEventListener('change', (e) => {
         state.month = parseInt(e.target.value, 10) || 1;
+        syncInputControlsFromState();
         runCalculationsAndRender();
       });
       document.getElementById('birthDaySelect').addEventListener('change', (e) => {
