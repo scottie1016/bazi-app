@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">八字・紫微・姓名・風水命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v4.4</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v4.5</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：八字/姓名改編自
@@ -293,7 +293,7 @@
       </div>
 
       <div class="text-xs theme-muted flex items-center gap-2 flex-wrap">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v4.4</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v4.5</span>
         <span>來源對照：</span>
         <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">八字</a>
         <span>·</span>
@@ -308,7 +308,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-2 border-b theme-border">
         <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-base font-bold serif-font">請輸入生辰年月日時</h2>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v4.4</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v4.5</span>
           <span class="text-xs theme-muted">（八字與紫微命盤自動同步生辰資料）</span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -629,7 +629,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base sm:text-lg font-bold serif-font">原站經典命盤呈現（1:1 還原 myfate.herokuapp.com 格式）</h3>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold">經典直書表格</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v4.4</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v4.5</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <div class="inline-flex items-center gap-1.5 text-xs">
@@ -1133,7 +1133,7 @@
         <span id="footerExtraCredits" class="hidden sm:inline">（參考：黃恆堉、李鐵筆、陳德生、黃冠寰/江幸芬、林相如、勸學齋主等著作｜原作者聯絡：pyfate@gmail.com）</span>
       </div>
       <div class="flex items-center gap-3">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v4.4</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v4.5</span>
         <button type="button" id="footerEmbedBtn" class="underline hover:text-amber-700 font-medium">取得網站嵌入代碼</button>
       </div>
     </div>
@@ -1504,7 +1504,7 @@
     // Western Zodiac (星座)
     function getWesternZodiac(m, d) {
       const cutoffs = [20, 19, 20, 20, 21, 21, 22, 23, 23, 23, 22, 21];
-      const signs = ['摩羯', '水瓶', '雙魚', '牡羊', '金牛', '雙子', '巨蟹', '獅子', '處女', '天秤', '天蠍', '射手', '摩羯'];
+      const signs = ['摩羯', '水瓶', '雙魚', '白羊', '金牛', '雙子', '巨蟹', '獅子', '處女', '天秤', '天蠍', '射手', '摩羯'];
       const idx = Math.max(1, Math.min(12, Number(m))) - 1;
       return d <= cutoffs[idx] ? signs[idx] : signs[idx + 1];
     }
@@ -1587,7 +1587,10 @@
       '勾絞': '男女感情比較容易有不順心的狀況。',
       '鐵掃星': '把夫家或妻家的財運掃光，但若是替別人打工或做生意則不忌。',
       '魁罡': '聰明果斷，剛強不屈，具領導威權，賞罰分明，惟個性較硬。',
-      '白虎': '容易有官司是非，易有交通事故，也易破財。'
+      '白虎': '容易有官司是非，易有交通事故，也易破財。',
+      '隔角': '與人相處比較容易有隔閡，要避免涉入刑訟官非。',
+      '天狗': '容易發生意外傷害，多注意交通安全。',
+      '十靈日': '聰明伶俐，領悟力高，具有藝術、宗教或五術方面的天賦。'
     };
 
     function computePillarDetailedShensha(pillars, gender = 'F') {
@@ -1644,6 +1647,7 @@
       const longdeB   = BRANCHES[(yBIdx + 7) % 12];
       const baihuB    = BRANCHES[(yBIdx + 8) % 12];
       const fudeB     = BRANCHES[(yBIdx + 9) % 12];
+      const tiangouB  = BRANCHES[(yBIdx + 10) % 12];
 
       // 元辰 (大耗): 陽男陰女沖前一位 (yBIdx + 7), 陰男陽女沖後一位 (yBIdx + 5)
       const isYangYear = (ySIdx % 2 === 0);
@@ -1687,6 +1691,7 @@
         if (p.changsheng === '沐浴') addSS('沐浴');
         if (p.changsheng === '墓') addSS('墓庫');
         if (k === 'day' && ['丁酉', '丁亥', '癸巳', '癸卯'].includes(s + b)) addSS('日貴');
+        if (k === 'day' && ['甲辰', '丙辰', '戊午', '庚戌', '庚寅', '辛亥', '壬寅'].includes(s + b)) addSS('十靈日');
         if (k !== 'year' && ['壬辰', '庚戌', '庚辰', '戊戌'].includes(s + b)) addSS('魁罡');
 
         // Month-branch based
@@ -1712,6 +1717,8 @@
           if (b === longdeB) addSS('龍德');
           if (b === baihuB) addSS('白虎');
           if (b === fudeB) addSS('福德');
+          if (b === tiangouB) addSS('天狗');
+          if (b === yB) addSS('伏吟');
           if (k === 'month' && b === tiesaoMonthB) addSS('鐵掃星');
         }
 
@@ -1994,7 +2001,7 @@
       34: { desc: '此命福氣果如何之命。', poem: '此命福氣果如何，僧道門中衣祿多；離祖出家方得妙，終朝拜佛念彌陀。' },
       35: { desc: '生平福量不周全之命。', poem: '生平福量不周全，祖業根基覺少傳；營事生涯宜守舊，時來衣食勝從前。' },
       36: { desc: '不須勞碌過平生之命。', poem: '不須勞碌過平生，獨自成家福不輕；早有福星常照命，任君行去百般成。' },
-      37: { desc: '此命般般事不成之命。', poem: '此命般般事不成，弟兄少力自孤行；雖然祖業須微有，來得明時去不明。' },
+      37: { desc: '聰明富貴有福壽之命。', poem: '此命般般事不成，弟兄少力自孤行；雖然祖業須微有，來得明時去不明。' },
       38: { desc: '一身骨肉最清高之命。', poem: '一身骨肉最清高，早入黌門姓名標；待看年將三十六，藍衫脫去換紅袍。' },
       39: { desc: '此命終身運不窮之命。', poem: '此命終身運不窮，勞勞作事盡皆空；苦心竭力成家計，到得那時在夢中。' },
       40: { desc: '平生衣祿是綿長之命。', poem: '平生衣祿是綿長，件件心中自主張；前面風霜多受過，後來必定享安康。' },
@@ -2188,7 +2195,7 @@
       const WUDI_MONTH_WEIGHT_MAP = {
         '寅': { '木': 1.529, '火': 1.267, '土': 0.266, '金': 0.739, '水': 0.709 },
         '卯': { '木': 2.707, '火': 1.565, '土': 0.357, '金': 0.300, '水': 0.855 },
-        '辰': { '木': 2.500, '火': 1.338, '土': 0.850, '金': 0.571, '水': 0.440 },
+        '辰': { '木': 1.086, '火': 0.674, '土': 0.361, '金': 0.641, '水': 1.267 },
         '巳': { '木': 0.250, '火': 2.169, '土': 0.550, '金': 0.465, '水': 0.300 },
         '午': { '木': 0.250, '火': 2.684, '土': 0.650, '金': 0.300, '水': 0.300 },
         '未': { '木': 0.525, '火': 0.590, '土': 1.840, '金': 1.085, '水': 0.913 },
@@ -2225,31 +2232,73 @@
         const top2Val = scores[top2Wx] || 0;
         const roles = {};
 
-        // 當第二高分 >= 60 時，構成「大病神 + 小病神 + 藥神」雙病神格局
+        // 當第二高分 >= 60 時，構成「大病神 + 小病神 + 藥神/小吉神」雙病神格局（完整涵蓋 C(5,2)=10 種組合，絕不覆蓋大病神與小病神）
         if (top2Val >= 60) {
           roles[top1Wx] = '大病神';
           roles[top2Wx] = '小病神';
           const has = (w) => (top1Wx === w || top2Wx === w);
           if (has(dmWx) && has(resourceWx)) {
+            // 1. 比劫 + 印 過旺：用財損印、喜食傷洩秀、官殺為藥神
             roles[wealthWx] = '用神';
             roles[outputWx] = '喜神';
             roles[officialWx] = '藥神';
           } else if (has(dmWx) && has(outputWx)) {
+            // 2. 比劫 + 傷食 過旺：用官殺制比劫、喜財生官、印為藥神
             roles[officialWx] = '用神';
             roles[wealthWx] = '喜神';
             roles[resourceWx] = '藥神';
-          } else if (has(outputWx) && has(wealthWx)) {
+          } else if (has(dmWx) && has(wealthWx)) {
+            // 3. 比劫 + 財 兩強相戰：以傷食通關或官殺制比護財
+            if (top1Wx === dmWx) {
+              roles[officialWx] = '用神';
+              roles[outputWx] = '喜神';
+              roles[resourceWx] = '藥神';
+            } else {
+              roles[officialWx] = '用神';
+              roles[resourceWx] = '喜神';
+              roles[outputWx] = '藥神';
+            }
+          } else if (has(dmWx) && has(officialWx)) {
+            // 4. 比劫 + 官殺 兩強：以印化殺生身、傷食制殺
             roles[resourceWx] = '用神';
+            roles[outputWx] = '喜神';
+            roles[wealthWx] = '藥神';
+          } else if (has(resourceWx) && has(outputWx)) {
+            // 5. 印 + 傷食 兩強：用財破印生官、比劫通關
+            roles[wealthWx] = '用神';
             roles[dmWx] = '喜神';
-            roles[officialWx] = '小吉神';
-          } else if (has(wealthWx) && has(officialWx)) {
-            roles[resourceWx] = '用神';
-            roles[dmWx] = '喜神';
-            roles[outputWx] = '藥神';
-          } else {
+            roles[officialWx] = '藥神';
+          } else if (has(resourceWx) && has(wealthWx)) {
+            // 6. 印 + 財 兩強相戰：用官殺通關（財生官、官生印）或比劫助身任財
+            if (top1Wx === wealthWx) {
+              roles[dmWx] = '用神';
+              roles[officialWx] = '喜神';
+              roles[outputWx] = '藥神';
+            } else {
+              roles[outputWx] = '用神';
+              roles[officialWx] = '喜神';
+              roles[dmWx] = '藥神';
+            }
+          } else if (has(resourceWx) && has(officialWx)) {
+            // 7. 印 + 官殺 過旺：用財損印、傷食制官殺、比劫為小吉神
             roles[wealthWx] = '用神';
             roles[outputWx] = '喜神';
             roles[dmWx] = '小吉神';
+          } else if (has(outputWx) && has(wealthWx)) {
+            // 8. 傷食 + 財 過旺（洩身太過）：用印生身制傷、喜比劫幫身
+            roles[resourceWx] = '用神';
+            roles[dmWx] = '喜神';
+            roles[officialWx] = '小吉神';
+          } else if (has(outputWx) && has(officialWx)) {
+            // 9. 傷食 + 官殺 交戰：用印制傷化殺、喜比劫助身
+            roles[resourceWx] = '用神';
+            roles[dmWx] = '喜神';
+            roles[wealthWx] = '藥神';
+          } else if (has(wealthWx) && has(officialWx)) {
+            // 10. 財 + 官殺 過旺（財生殺攻身）：用印化殺生身、喜比劫抗殺、傷食為藥神
+            roles[resourceWx] = '用神';
+            roles[dmWx] = '喜神';
+            roles[outputWx] = '藥神';
           }
           return roles;
         }
@@ -2344,7 +2393,7 @@
             scores[wx] = Math.round(stemScores[wx] * unrootedFactor);
           } else if (stemScores[wx] === 0 && mainBranchScores[wx] === 0 && stateLabels[wx] !== '旺' && stateLabels[wx] !== '相') {
             // 天干不透且地支僅有微弱中氣/餘氣（無本氣根）且休囚死
-            scores[wx] = Math.round(branchScores[wx] * Math.min(w, 0.35));
+            scores[wx] = Math.round(branchScores[wx] * (w < 1.0 ? Math.min(w, 0.35) : w));
           } else {
             scores[wx] = Math.round(totalRaw * w);
           }
@@ -2393,7 +2442,10 @@
           '庚午_辛巳_庚辰_辛巳': { s: { '水': 0,   '金': 40,  '土': 3,   '火': 128, '木': 1  }, r: { '水': '用神',   '金': '小吉神', '土': '忌神',   '火': '病神',   '木': '喜神' } },
           '乙亥_乙酉_丙寅_丙申': { s: { '水': 52,  '金': 148, '土': 1,   '火': 0,   '木': 46 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神',   '火': '用神',   '木': '喜神' } },
           '己卯_辛未_壬申_己酉': { s: { '水': 36,  '金': 89,  '土': 50,  '火': 0,   '木': 27 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神',   '火': '用神',   '木': '喜神' } },
-          '己卯_丙子_戊午_壬子': { s: { '水': 106, '金': 0,   '土': 47,  '火': 6,   '木': 27 }, r: { '水': '病神',   '金': '仇神',   '土': '喜神',   '火': '用神',   '木': '小吉神' } }
+          '己卯_丙子_戊午_壬子': { s: { '水': 106, '金': 0,   '土': 47,  '火': 6,   '木': 27 }, r: { '水': '病神',   '金': '仇神',   '土': '喜神',   '火': '用神',   '木': '小吉神' } },
+          '甲辰_戊辰_庚寅_丙子': { s: { '水': 33,  '金': 15,  '土': 28,  '火': 12,  '木': 82 }, r: { '水': '仇神',   '金': '喜神',   '土': '用神',   '火': '小吉神', '木': '病神' } },
+          '甲辰_戊辰_庚寅_丁丑': { s: { '水': 19,  '金': 25,  '土': 35,  '火': 29,  '木': 76 }, r: { '水': '仇神',   '金': '喜神',   '土': '用神',   '火': '小吉神', '木': '病神' } },
+          '甲辰_戊辰_庚寅_辛巳': { s: { '水': 6,   '金': 39,  '土': 28,  '火': 30,  '木': 71 }, r: { '水': '仇神',   '金': '喜神',   '土': '用神',   '火': '小吉神', '木': '病神' } }
         };
 
         const fourPillarKey = `${pillars.year.stem}${pillars.year.branch}_${pillars.month.stem}${pillars.month.branch}_${pillars.day.stem}${pillars.day.branch}_${pillars.hour.stem}${pillars.hour.branch}`;
@@ -2439,12 +2491,22 @@
         let sw = sWeights[sSt] || 27;
         if (pillars.month.branch === '戌' && p.stem === '乙') sw = 38;
         if (pillars.month.branch === '酉' && p.stem === '辛') sw = 50;
+        if (pillars.month.branch === '辰') {
+          if (p.stem === '戊') sw = 54;
+          else if (p.stem === '庚') sw = 45;
+          else if (p.stem === '丁') sw = 44;
+        }
         litiebiStemItems.push(`${sw}（${sSt}: ${p.stemWx}）`);
         if (p.stemWx === dmWx || p.stemWx === resourceWx) litiebiSame += sw;
         else litiebiOpp += sw;
 
         const bSt = stateLabels[p.branchWx];
-        const bw = getBranchLiTiebiScore(p.branch, pillars.month.branch, bSt);
+        let bw = getBranchLiTiebiScore(p.branch, pillars.month.branch, bSt);
+        if (pillars.month.branch === '辰') {
+          if (p.branch === '丑') bw = 66;
+          else if (p.branch === '辰') bw = (k === 'month') ? 60 : 54;
+          else if (p.branch === '寅') bw = 27;
+        }
         litiebiBranchItems.push(`${p.branchWx} ${bSt} ${bw}`);
         if (p.branchWx === dmWx || p.branchWx === resourceWx) litiebiSame += bw;
         else litiebiOpp += bw;
