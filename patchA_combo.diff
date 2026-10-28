@@ -1,0 +1,204 @@
+--- artifacts/file_generation/ttl=63d/output/index.html	2026-10-27 10:50:49.224837373 +0000
++++ artifacts/file_generation/ttl=63d/output/index_candidate_patchA.html	2026-10-28 09:09:11.282854254 +0000
+@@ -1796,13 +1796,15 @@
+         rows.push({ label: '五合不化', value: `[${wuhePairs.join(', ')}]` });
+       }
+ 
+-      // Build auxiliary pillar 4 (胎元)
++      // Build auxiliary pillars 4 (胎元) and 5 (命宮)
+       const taiYuan = getTaiYuan(pillars.month.stemIdx, pillars.month.branchIdx);
+-      const auxBranches = [
+-        { idx: 4, b: taiYuan[1] }
+-      ];
++      const auxBranches = [{ idx: 4, b: taiYuan[1] }];
++      if (sunMonthBranchIdx !== null && sunMonthBranchIdx !== undefined) {
++        const ms = getBaziMingShenGong(pillars.year.stemIdx, sunMonthBranchIdx, pillars.hour.branchIdx);
++        auxBranches.push({ idx: 5, b: ms.mingGong[1] });
++      }
+ 
+-      // 1. Check SanHui (三會 / 輔助柱三會)
++      // 1a. Check Full 3-Branch Main-Pillar SanHui (三會 / 三會不化) ordered by directional triad (not blocked by clashed)
+       const sanhuiDefs = [
+         { branches: ['寅', '卯', '辰'], wx: '木' },
+         { branches: ['巳', '午', '未'], wx: '火' },
+@@ -1810,30 +1812,33 @@
+         { branches: ['亥', '子', '丑'], wx: '水' }
+       ];
+       sanhuiDefs.forEach(def => {
+-        const mainMatches = [];
+-        for (let i = 0; i < 4; i++) {
+-          if (!clashed.has(i) && def.branches.includes(arr[i].branch)) {
+-            mainMatches.push(i);
+-          }
+-        }
+-        const uniqueMainBranches = new Set(mainMatches.map(i => arr[i].branch));
+-        if (uniqueMainBranches.size === 3) {
+-          rows.push({ label: '三會', value: `{(${mainMatches.slice(0, 3).join(', ')}): '${def.wx}'}` });
+-          sanhuiWx = def.wx;
+-          mainMatches.forEach(i => usedPillars.add(i));
+-        } else if (uniqueMainBranches.size === 2) {
+-          const missingB = def.branches.find(b => !uniqueMainBranches.has(b));
+-          const auxHit = auxBranches.find(a => a.b === missingB);
+-          if (auxHit) {
+-            const idxList = [...mainMatches, auxHit.idx];
+-            rows.push({ label: '輔助柱三會', value: `{(${idxList.join(', ')}): '${def.wx}'}` });
++        const mainPosLists = def.branches.map(bName => {
++          const list = [];
++          for (let i = 0; i < 4; i++) {
++            if (arr[i].branch === bName) list.push(i);
++          }
++          return list;
++        });
++        if (mainPosLists.every(l => l.length > 0)) {
++          const tuples = [];
++          for (const i0 of mainPosLists[0]) {
++            for (const i1 of mainPosLists[1]) {
++              for (const i2 of mainPosLists[2]) {
++                tuples.push(`(${i0}, ${i1}, ${i2})`);
++              }
++            }
++          }
++          if (stemWxs.has(def.wx)) {
++            rows.push({ label: '三會', value: `{${tuples.map(t => `${t}: '${def.wx}'`).join(', ')}}` });
+             sanhuiWx = def.wx;
+-            mainMatches.forEach(i => usedPillars.add(i));
++          } else {
++            rows.push({ label: '三會不化', value: `[${tuples.join(', ')}]` });
+           }
++          mainPosLists.flat().forEach(i => usedPillars.add(i));
+         }
+       });
+ 
+-      // 1b. Check Full 3-Branch SanHe (三合 / 三合不化) ordered by [長生, 帝旺, 墓庫]
++      // 1b. Check Full 3-Branch Main-Pillar SanHe (三合 / 三合不化) ordered by [長生, 帝旺, 墓庫] (not blocked by clashed)
+       const sanheDefs = [
+         { branches: ['亥', '卯', '未'], wx: '木' },
+         { branches: ['寅', '午', '戌'], wx: '火' },
+@@ -1841,28 +1846,33 @@
+         { branches: ['申', '子', '辰'], wx: '水' }
+       ];
+       sanheDefs.forEach(def => {
+-        const orderedIdx = [];
+-        def.branches.forEach(bName => {
++        const posLists = def.branches.map(bName => {
++          const list = [];
+           for (let i = 0; i < 4; i++) {
+-            if (!clashed.has(i) && !usedPillars.has(i) && arr[i].branch === bName) {
+-              orderedIdx.push(i);
+-              break;
+-            }
++            if (!usedPillars.has(i) && arr[i].branch === bName) list.push(i);
+           }
++          return list;
+         });
+-        if (orderedIdx.length === 3) {
+-          const tupleStr = `(${orderedIdx.join(', ')})`;
++        if (posLists.every(l => l.length > 0)) {
++          const tuples = [];
++          for (const i0 of posLists[0]) {
++            for (const i1 of posLists[1]) {
++              for (const i2 of posLists[2]) {
++                tuples.push(`(${i0}, ${i1}, ${i2})`);
++              }
++            }
++          }
+           if (stemWxs.has(def.wx)) {
+-            rows.push({ label: '三合', value: `{${tupleStr}: '${def.wx}'}` });
++            rows.push({ label: '三合', value: `{${tuples.map(t => `${t}: '${def.wx}'`).join(', ')}}` });
+             sanheWx = def.wx;
+           } else {
+-            rows.push({ label: '三合不化', value: `[${tupleStr}]` });
++            rows.push({ label: '三合不化', value: `[${tuples.join(', ')}]` });
+           }
+-          orderedIdx.forEach(i => usedPillars.add(i));
++          posLists.flat().forEach(i => usedPillars.add(i));
+         }
+       });
+ 
+-      // 2. Check LiuHe (六合 / 六合不化) on adjacent pillars
++      // 2. Check Main-Pillar LiuHe (六合 / 六合不化) on adjacent pillars
+       const liuhePartner = [1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
+       const liuheWxMap = {
+         '0_1': '土', '1_0': '土',
+@@ -1896,8 +1906,9 @@
+         }
+       }
+ 
+-      // 3. Check Half-SanHe (半三合 / 半三合妒合 / 半三合不化) on remaining unused adjacent pillars
++      // 3. Check Main-Pillar Half-SanHe (半三合 / 半三合妒合 / 半三合不化) on remaining unused adjacent pillars
+       const halfPairs = [];
++      const halfSanheRows = [];
+       const centerWxMap = { 0: '水', 6: '火', 9: '金', 3: '木' }; // 子:水, 午:火, 酉:金, 卯:木
+       const triadOrderMap = {
+         '水': ['申', '子', '辰'],
+@@ -1920,7 +1931,8 @@
+         }
+       }
+       if (halfPairs.length >= 2) {
+-        rows.push({ label: '半三合妒合', value: `[${halfPairs.map(h => `(${h.otherIdx}, ${h.centerIdx})`).join(', ')}]` });
++        halfSanheRows.push({ label: '半三合妒合', value: `[${halfPairs.map(h => `(${h.otherIdx}, ${h.centerIdx})`).join(', ')}]` });
++        halfPairs.forEach(h => { usedPillars.add(h.centerIdx); usedPillars.add(h.otherIdx); });
+       } else if (halfPairs.length === 1) {
+         const h = halfPairs[0];
+         const triad = triadOrderMap[h.wx] || [];
+@@ -1930,12 +1942,58 @@
+         const secondIdx = posCenter <= posOther ? h.otherIdx : h.centerIdx;
+         const involvesMonth = (h.centerIdx === 1 || h.otherIdx === 1);
+         if (!h.isArch && involvesMonth && mBranchWx === h.wx && stemWxs.has(h.wx)) {
+-          rows.push({ label: '半三合', value: `{(${firstIdx}, ${secondIdx}): {'${h.wx}': 50}}` });
++          halfSanheRows.push({ label: '半三合', value: `{(${firstIdx}, ${secondIdx}): {'${h.wx}': 50}}` });
+         } else {
+-          rows.push({ label: '半三合不化', value: `[(${firstIdx}, ${secondIdx})]` });
++          halfSanheRows.push({ label: '半三合不化', value: `[(${firstIdx}, ${secondIdx})]` });
+         }
++        usedPillars.add(h.centerIdx);
++        usedPillars.add(h.otherIdx);
+       }
+ 
++      // 4. Check Auxiliary-Pillar SanHui (輔助柱三會 / 輔助柱三會不化) using ONLY unused main pillars (!usedPillars.has(i))
++      sanhuiDefs.forEach(def => {
++        const availMainPosLists = def.branches.map(bName => {
++          const list = [];
++          for (let i = 0; i < 4; i++) {
++            if (!usedPillars.has(i) && arr[i].branch === bName) list.push(i);
++          }
++          return list;
++        });
++        if (!availMainPosLists.every(l => l.length > 0) && availMainPosLists.some(l => l.length > 0)) {
++          const posLists = def.branches.map((bName, k) =>
++            availMainPosLists[k].length > 0
++              ? availMainPosLists[k]
++              : auxBranches.filter(a => a.b === bName).map(a => a.idx)
++          );
++          if (posLists.every(l => l.length > 0)) {
++            const tuples = [];
++            const usedMain = new Set();
++            for (const i0 of posLists[0]) {
++              for (const i1 of posLists[1]) {
++                for (const i2 of posLists[2]) {
++                  if (i0 === i1 || i0 === i2 || i1 === i2) continue;
++                  tuples.push(`(${i0}, ${i1}, ${i2})`);
++                  if (i0 < 4) usedMain.add(i0);
++                  if (i1 < 4) usedMain.add(i1);
++                  if (i2 < 4) usedMain.add(i2);
++                }
++              }
++            }
++            if (tuples.length > 0) {
++              if (stemWxs.has(def.wx)) {
++                rows.push({ label: '輔助柱三會', value: `{${tuples.map(t => `${t}: '${def.wx}'`).join(', ')}}` });
++                sanhuiWx = def.wx;
++              } else {
++                rows.push({ label: '輔助柱三會不化', value: `[${tuples.join(', ')}]` });
++              }
++              usedMain.forEach(i => usedPillars.add(i));
++            }
++          }
++        }
++      });
++
++      halfSanheRows.forEach(r => rows.push(r));
++
+       if (liuheTransformed.length) {
+         rows.push({ label: '六合', value: `{${liuheTransformed.join(', ')}}` });
+       }
