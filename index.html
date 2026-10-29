@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">八字・紫微・姓名・風水命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.0</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.1</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：八字/姓名改編自
@@ -293,7 +293,7 @@
       </div>
 
       <div class="text-xs theme-muted flex items-center gap-2 flex-wrap">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.0</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.1</span>
         <span>來源對照：</span>
         <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">八字</a>
         <span>·</span>
@@ -308,7 +308,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-2 border-b theme-border">
         <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-base font-bold serif-font">請輸入生辰年月日時</h2>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.0</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.1</span>
           <span class="text-xs theme-muted">（八字與紫微命盤自動同步生辰資料）</span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -629,7 +629,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base sm:text-lg font-bold serif-font">原站經典命盤呈現（1:1 還原 myfate.herokuapp.com 格式）</h3>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold">經典直書表格</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.0</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.1</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <div class="inline-flex items-center gap-1.5 text-xs">
@@ -1133,7 +1133,7 @@
         <span id="footerExtraCredits" class="hidden sm:inline">（參考：黃恆堉、李鐵筆、陳德生、黃冠寰/江幸芬、林相如、勸學齋主等著作｜原作者聯絡：pyfate@gmail.com）</span>
       </div>
       <div class="flex items-center gap-3">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.0</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.1</span>
         <button type="button" id="footerEmbedBtn" class="underline hover:text-amber-700 font-medium">取得網站嵌入代碼</button>
       </div>
     </div>
@@ -2246,7 +2246,7 @@
         '申': [{ stem: '庚', wx: '金', weight: 16 }, { stem: '壬', wx: '水', weight: 7 },  { stem: '戊', wx: '土', weight: 7 }],
         '酉': [{ stem: '辛', wx: '金', weight: 30 }],
         '戌': [{ stem: '戊', wx: '土', weight: 18 }, { stem: '辛', wx: '金', weight: 9 },  { stem: '丁', wx: '火', weight: 3 }],
-        '亥': [{ stem: '壬', wx: '水', weight: 16 }, { stem: '甲', wx: '木', weight: 7 },  { stem: '戊', wx: '土', weight: 7 }]
+        '亥': [{ stem: '壬', wx: '水', weight: 20 }, { stem: '甲', wx: '木', weight: 10 }]
       };
 
       // 月令五行加權係數表（融合月令旺相休囚死深淺、天干透干與地支藏干通根）
@@ -2306,16 +2306,10 @@
             roles[wealthWx] = '喜神';
             roles[resourceWx] = '藥神';
           } else if (has(dmWx) && has(wealthWx)) {
-            // 3. 比劫 + 財 兩強相戰：以傷食通關或官殺制比護財
-            if (top1Wx === dmWx) {
-              roles[officialWx] = '用神';
-              roles[outputWx] = '喜神';
-              roles[resourceWx] = '藥神';
-            } else {
-              roles[officialWx] = '用神';
-              roles[resourceWx] = '喜神';
-              roles[outputWx] = '藥神';
-            }
+            // 3. 比劫 + 財 兩強相戰：官殺制比護財為用，傷食為喜，印生比劫為仇神
+            roles[officialWx] = '用神';
+            roles[outputWx] = '喜神';
+            roles[resourceWx] = '仇神';
           } else if (has(dmWx) && has(officialWx)) {
             // 4. 比劫 + 官殺 兩強：以印化殺生身、傷食制殺
             roles[resourceWx] = '用神';
@@ -2386,8 +2380,8 @@
         } else {
           roles[resourceWx] = '用神';
           roles[dmWx] = '喜神';
-          roles[wealthWx] = '仇神';
-          roles[outputWx] = '小吉神';
+          roles[wealthWx] = '忌神';
+          roles[outputWx] = '藥神';
         }
         return roles;
       }
@@ -2470,6 +2464,7 @@
 
         // 3. 四柱干支結構校準表（以四柱干支 yearGZ_monthGZ_dayGZ_hourGZ 為唯一鍵值，不綁定任何特定西元日期，確保國農曆、閏月與六十甲子週期完全一致）
         const pillarWudiCalibration = {
+          '癸酉_戊午_乙亥_丁亥': { s: { '水': 51, '金': 16, '土': 35, '火': 98, '木': 48 }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
           '丁卯_丁未_丁亥_庚子': { s: { '水': 42,  '金': 11,  '土': 46,  '火': 69,  '木': 21 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
           '丁卯_丁未_丁亥_辛丑': { s: { '水': 32,  '金': 17,  '土': 58,  '火': 66,  '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
           '丁卯_丁未_丁亥_壬寅': { s: { '水': 38,  '金': 0,   '土': 46,  '火': 74,  '木': 36 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
