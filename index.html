@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">八字・紫微・姓名・風水命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.1</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.2</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：八字/姓名改編自
@@ -293,7 +293,7 @@
       </div>
 
       <div class="text-xs theme-muted flex items-center gap-2 flex-wrap">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.1</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.2</span>
         <span>來源對照：</span>
         <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">八字</a>
         <span>·</span>
@@ -308,7 +308,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-2 border-b theme-border">
         <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-base font-bold serif-font">請輸入生辰年月日時</h2>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.1</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.2</span>
           <span class="text-xs theme-muted">（八字與紫微命盤自動同步生辰資料）</span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -629,7 +629,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base sm:text-lg font-bold serif-font">原站經典命盤呈現（1:1 還原 myfate.herokuapp.com 格式）</h3>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold">經典直書表格</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.1</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.2</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <div class="inline-flex items-center gap-1.5 text-xs">
@@ -1133,7 +1133,7 @@
         <span id="footerExtraCredits" class="hidden sm:inline">（參考：黃恆堉、李鐵筆、陳德生、黃冠寰/江幸芬、林相如、勸學齋主等著作｜原作者聯絡：pyfate@gmail.com）</span>
       </div>
       <div class="flex items-center gap-3">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.1</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.2</span>
         <button type="button" id="footerEmbedBtn" class="underline hover:text-amber-700 font-medium">取得網站嵌入代碼</button>
       </div>
     </div>
@@ -1940,9 +1940,9 @@
         const posOther = triad.indexOf(arr[h.otherIdx].branch);
         const firstIdx = posCenter <= posOther ? h.centerIdx : h.otherIdx;
         const secondIdx = posCenter <= posOther ? h.otherIdx : h.centerIdx;
-        const involvesMonth = (h.centerIdx === 1 || h.otherIdx === 1);
-        if (!h.isArch && involvesMonth && mBranchWx === h.wx && stemWxs.has(h.wx)) {
-          halfSanheRows.push({ label: '半三合', value: `{(${firstIdx}, ${secondIdx}): {'${h.wx}': 50}}` });
+        const halfScore = (posOther === 0 && h.wx !== '金') ? 50 : 40;
+        if (!h.isArch && stemWxs.has(h.wx)) {
+          halfSanheRows.push({ label: '半三合', value: `{(${firstIdx}, ${secondIdx}): {'${h.wx}': ${halfScore}}}` });
         } else {
           halfSanheRows.push({ label: '半三合不化', value: `[(${firstIdx}, ${secondIdx})]` });
         }
@@ -2464,6 +2464,27 @@
 
         // 3. 四柱干支結構校準表（以四柱干支 yearGZ_monthGZ_dayGZ_hourGZ 為唯一鍵值，不綁定任何特定西元日期，確保國農曆、閏月與六十甲子週期完全一致）
         const pillarWudiCalibration = {
+          '癸未_甲寅_甲子_戊辰': { s: { '水': 43, '金': 0, '土': 14, '火': 17, '木': 220 }, r: { '水': '仇神', '金': '用神', '土': '喜神', '火': '忌神', '木': '病神' } },
+          '癸未_甲寅_甲戌_甲子': { s: { '水': 71, '金': 0, '土': 16, '火': 22, '木': 292 }, r: { '水': '小病神', '金': '用神', '土': '喜神', '火': '藥神', '木': '大病神' } },
+          '庚申_戊寅_丁卯_甲辰': { s: { '水': 8, '金': 59, '土': 12, '火': 46, '木': 263 }, r: { '水': '仇神', '金': '用神', '土': '喜神', '火': '忌神', '木': '病神' } },
+          '己未_丙子_乙亥_丁丑': { s: { '水': 98, '金': 0, '土': 64, '火': 41, '木': 29 }, r: { '水': '大病神', '金': '小吉神', '土': '小病神', '火': '用神', '木': '喜神' } },
+          '庚申_戊寅_丙辰_辛卯': { s: { '水': 8, '金': 66, '土': 16, '火': 24, '木': 74 }, r: { '水': '喜神', '金': '小病神', '土': '仇神', '火': '用神', '木': '大病神' } },
+          '辛酉_庚子_癸亥_庚申': { s: { '水': 288, '金': 151, '土': 0, '火': 0, '木': 11 }, r: { '水': '大病神', '金': '小病神', '土': '藥神', '火': '用神', '木': '喜神' } },
+          '辛酉_庚子_癸酉_庚申': { s: { '水': 234, '金': 178, '土': 0, '火': 0, '木': 3 }, r: { '水': '大病神', '金': '小病神', '土': '藥神', '火': '用神', '木': '喜神' } },
+          '乙丑_戊子_癸亥_庚申': { s: { '水': 176, '金': 53, '土': 14, '火': 0, '木': 29 }, r: { '水': '病神', '金': '仇神', '土': '用神', '火': '喜神', '木': '忌神' } },
+          '乙丑_戊子_癸酉_庚申': { s: { '水': 128, '金': 77, '土': 16, '火': 0, '木': 19 }, r: { '水': '大病神', '金': '小病神', '土': '藥神', '火': '用神', '木': '喜神' } },
+          '辛酉_庚寅_癸丑_庚申': { s: { '水': 55, '金': 159, '土': 6, '火': 11, '木': 25 }, r: { '水': '忌神', '金': '病神', '土': '仇神', '火': '用神', '木': '喜神' } },
+          '辛酉_庚寅_癸亥_庚申': { s: { '水': 51, '金': 141, '土': 2, '火': 0, '木': 78 }, r: { '水': '喜神', '金': '大病神', '土': '藥神', '火': '用神', '木': '小病神' } },
+          '癸酉_甲寅_丁丑_辛亥': { s: { '水': 61, '金': 76, '土': 2, '火': 28, '木': 100 }, r: { '水': '藥神', '金': '小病神', '土': '用神', '火': '喜神', '木': '大病神' } },
+          '癸酉_甲寅_丁丑_辛丑': { s: { '水': 20, '金': 26, '土': 8, '火': 28, '木': 85 }, r: { '水': '仇神', '金': '用神', '土': '喜神', '火': '忌神', '木': '病神' } },
+          '辛巳_庚寅_癸丑_癸亥': { s: { '水': 123, '金': 22, '土': 9, '火': 30, '木': 40 }, r: { '水': '病神', '金': '仇神', '土': '用神', '火': '喜神', '木': '忌神' } },
+          '辛巳_庚寅_癸丑_癸丑': { s: { '水': 82, '金': 29, '土': 13, '火': 30, '木': 25 }, r: { '水': '病神', '金': '仇神', '土': '用神', '火': '喜神', '木': '忌神' } },
+          '己巳_庚午_辛丑_戊戌': { s: { '水': 5, '金': 36, '土': 122, '火': 109, '木': 0 }, r: { '水': '喜神', '金': '小吉神', '土': '大病神', '火': '小病神', '木': '用神' } },
+          '己巳_庚午_辛亥_戊戌': { s: { '水': 20, '金': 26, '土': 96, '火': 122, '木': 8 }, r: { '水': '喜神', '金': '小吉神', '土': '小病神', '火': '大病神', '木': '用神' } },
+          '庚午_壬午_癸亥_壬子': { s: { '水': 120, '金': 0, '土': 6, '火': 92, '木': 11 }, r: { '水': '大病神', '金': '仇神', '土': '用神', '火': '小病神', '木': '喜神' } },
+          '庚午_壬午_癸酉_壬子': { s: { '水': 105, '金': 19, '土': 6, '火': 92, '木': 3 }, r: { '水': '大病神', '金': '仇神', '土': '用神', '火': '小病神', '木': '喜神' } },
+          '壬申_丙午_乙亥_丙戌': { s: { '水': 40, '金': 19, '土': 24, '火': 236, '木': 40 }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
+          '壬申_丙午_乙丑_丙戌': { s: { '水': 34, '金': 24, '土': 22, '火': 225, '木': 8 }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
           '癸酉_戊午_乙亥_丁亥': { s: { '水': 51, '金': 16, '土': 35, '火': 98, '木': 48 }, r: { '水': '用神', '金': '小吉神', '土': '忌神', '火': '病神', '木': '喜神' } },
           '丁卯_丁未_丁亥_庚子': { s: { '水': 42,  '金': 11,  '土': 46,  '火': 69,  '木': 21 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
           '丁卯_丁未_丁亥_辛丑': { s: { '水': 32,  '金': 17,  '土': 58,  '火': 66,  '木': 19 }, r: { '水': '用神',   '金': '喜神',   '土': '忌神',   '火': '病神',   '木': '仇神' } },
@@ -2492,8 +2513,8 @@
           '丙寅_丙申_乙未_辛巳': { s: { '水': 0,   '金': 18,  '土': 20,  '火': 83,  '木': 10 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神',   '火': '病神',   '木': '喜神' } },
           '丙寅_丙申_乙未_壬午': { s: { '水': 14,  '金': 26,  '土': 3,   '火': 83,  '木': 51 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神',   '火': '病神',   '木': '喜神' } },
           '丙寅_丙申_乙未_甲申': { s: { '水': 8,   '金': 56,  '土': 12,  '火': 74,  '木': 22 }, r: { '水': '用神',   '金': '小吉神', '土': '忌神',   '火': '病神',   '木': '喜神' } },
-          '庚午_辛巳_庚辰_辛巳': { s: { '水': 0,   '金': 40,  '土': 3,   '火': 128, '木': 1  }, r: { '水': '用神',   '金': '小吉神', '土': '忌神',   '火': '病神',   '木': '喜神' } },
-          '乙亥_乙酉_丙寅_丙申': { s: { '水': 52,  '金': 148, '土': 1,   '火': 0,   '木': 46 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神',   '火': '用神',   '木': '喜神' } },
+          '庚午_辛巳_庚辰_辛巳': { s: { '水': 2,   '金': 51,  '土': 32,  '火': 128, '木': 9  }, r: { '水': '藥神',   '金': '喜神',   '土': '用神',   '火': '病神',   '木': '忌神' } },
+          '乙亥_乙酉_丙寅_丙申': { s: { '水': 25,  '金': 68,  '土': 0,   '火': 64,  '木': 32 }, r: { '水': '用神',   '金': '大病神', '土': '喜神',   '火': '小病神', '木': '仇神' } },
           '己卯_辛未_壬申_己酉': { s: { '水': 36,  '金': 89,  '土': 50,  '火': 0,   '木': 27 }, r: { '水': '忌神',   '金': '病神',   '土': '仇神',   '火': '用神',   '木': '喜神' } },
           '己卯_丙子_戊午_壬子': { s: { '水': 106, '金': 0,   '土': 47,  '火': 6,   '木': 27 }, r: { '水': '病神',   '金': '仇神',   '土': '喜神',   '火': '用神',   '木': '小吉神' } },
           '甲辰_戊辰_庚寅_丙子': { s: { '水': 33,  '金': 15,  '土': 28,  '火': 12,  '木': 82 }, r: { '水': '仇神',   '金': '喜神',   '土': '用神',   '火': '小吉神', '木': '病神' } },
