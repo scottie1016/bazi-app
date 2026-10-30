@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">八字・紫微・姓名・風水命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.2</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.3</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：八字/姓名改編自
@@ -293,7 +293,7 @@
       </div>
 
       <div class="text-xs theme-muted flex items-center gap-2 flex-wrap">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.2</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.3</span>
         <span>來源對照：</span>
         <a href="https://myfate.herokuapp.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">八字</a>
         <span>·</span>
@@ -308,7 +308,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-2 border-b theme-border">
         <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-base font-bold serif-font">請輸入生辰年月日時</h2>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.2</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.3</span>
           <span class="text-xs theme-muted">（八字與紫微命盤自動同步生辰資料）</span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -629,7 +629,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base sm:text-lg font-bold serif-font">原站經典命盤呈現（1:1 還原 myfate.herokuapp.com 格式）</h3>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold">經典直書表格</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.2</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.3</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <div class="inline-flex items-center gap-1.5 text-xs">
@@ -1133,7 +1133,7 @@
         <span id="footerExtraCredits" class="hidden sm:inline">（參考：黃恆堉、李鐵筆、陳德生、黃冠寰/江幸芬、林相如、勸學齋主等著作｜原作者聯絡：pyfate@gmail.com）</span>
       </div>
       <div class="flex items-center gap-3">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.2</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.3</span>
         <button type="button" id="footerEmbedBtn" class="underline hover:text-amber-700 font-medium">取得網站嵌入代碼</button>
       </div>
     </div>
@@ -2523,22 +2523,40 @@
         };
 
         const fourPillarKey = `${pillars.year.stem}${pillars.year.branch}_${pillars.month.stem}${pillars.month.branch}_${pillars.day.stem}${pillars.day.branch}_${pillars.hour.stem}${pillars.hour.branch}`;
+        const remoteCache = (typeof window !== "undefined" && window.MYFATE_REMOTE_WUDI_CACHE) ? window.MYFATE_REMOTE_WUDI_CACHE : {};
+        if (remoteCache[fourPillarKey] && remoteCache[fourPillarKey].s && remoteCache[fourPillarKey].r) {
+          return {
+            scores: { ...remoteCache[fourPillarKey].s },
+            roles: { ...remoteCache[fourPillarKey].r },
+            rawScores,
+            fourPillarKey,
+            wudiSyncStatus: "synced_live",
+            remoteData: remoteCache[fourPillarKey]
+          };
+        }
         if (pillarWudiCalibration[fourPillarKey]) {
           return {
             scores: { ...pillarWudiCalibration[fourPillarKey].s },
             roles: { ...pillarWudiCalibration[fourPillarKey].r },
-            rawScores
+            rawScores,
+            fourPillarKey,
+            wudiSyncStatus: "synced_calibrated"
           };
         }
 
         const roles = deriveWuDiRoles(scores);
-        return { scores, roles, rawScores };
+        return { scores, roles, rawScores, fourPillarKey, wudiSyncStatus: "fetching_remote" };
       }
 
       const comboInfo = getBranchComboStatus(pillars, sunMonthBranchIdx);
       const wudiRes = calculateWuDiLuShu();
       const wudiScores = wudiRes.scores;
       const wudiRoles = wudiRes.roles;
+      const fourPillarKey = wudiRes.fourPillarKey;
+      const wudiSyncStatus = wudiRes.wudiSyncStatus || "fetching_remote";
+      if (wudiRes.remoteData && Array.isArray(wudiRes.remoteData.combos)) {
+        comboInfo.rows = wudiRes.remoteData.combos;
+      }
 
       // 李鐵筆老師《八字命學寶鑑》日主強度計算（依四柱天干與地支旺相休囚死及藏干結構計算，不綁定西元日期）
       const sWeights = { '旺': 60, '相': 55, '休': 36, '囚': 27, '死': 18 };
@@ -2604,7 +2622,11 @@
       let patternName = monthMainHidden.tenGod + '格';
       if (monthMainHidden.tenGod === '比肩') patternName = '建祿格';
       if (monthMainHidden.tenGod === '劫財') patternName = '羊刃格';
-      const patternPercent = 80;
+      let patternPercent = 80;
+      if (wudiRes.remoteData && wudiRes.remoteData.patternName) {
+        patternName = wudiRes.remoteData.patternName;
+        patternPercent = wudiRes.remoteData.patternPercent || 80;
+      }
 
       // Useful God (用神 / 喜神 / 忌神) from wudiRoles
       const yongWx = Object.keys(wudiRoles).find(w => wudiRoles[w] === '用神') || resourceWx;
@@ -2749,6 +2771,8 @@
         daysBeforeNextTerm,
         jieInfo: `出生在${prevTerm.name}之後 ${daysAfterPrevTerm} 天，距離${nextTerm.name}還有 ${daysBeforeNextTerm} 天`,
         pillars,
+        fourPillarKey,
+        wudiSyncStatus,
         comboInfo,
         wxScores: wudiScores,
         wudiRoles,
@@ -3572,6 +3596,198 @@
         `目前選擇：${gStr}｜陽曆 ${sy}/${sm}/${sd}（農曆 ${lun.year}/${lun.isLeap ? '閏' : ''}${lun.month}/${lun.day}）${hLbl} — 請點擊右側「立即排盤分析」`;
     }
 
+
+    // ==================== REMOTE MYFATE.HEROKUAPP.COM LIVE FETCHER (方案 A: 跨網域代理即時撈取原站數據) ====================
+    window.MYFATE_REMOTE_WUDI_CACHE = (() => {
+      try {
+        const raw = localStorage.getItem("myfate_wudi_remote_cache_v3");
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    })();
+
+    function saveMyFateRemoteCache() {
+      try {
+        localStorage.setItem("myfate_wudi_remote_cache_v3", JSON.stringify(window.MYFATE_REMOTE_WUDI_CACHE || {}));
+      } catch (e) {}
+    }
+
+    function parseMyFateWudiHtml(htmlText) {
+      if (!htmlText || typeof htmlText !== "string") return null;
+      if (!htmlText.includes("無敵律數") || !htmlText.includes("實律")) return null;
+
+      const tableRegex = /<table\b[^>]*>(?:(?!<table\b)[\s\S])*?無敵律數(?:(?!<table\b)[\s\S])*?實律[\s\S]*?<\/table>/i;
+      const tableMatch = htmlText.match(tableRegex);
+      if (!tableMatch) return null;
+      const tableHtml = tableMatch[0];
+
+      const trMatches = tableHtml.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || [];
+      let patternName = null;
+      let patternPercent = 80;
+      const combos = [];
+      let wxCols = ["水", "金", "土", "火", "木"];
+      const scores = {};
+      const roles = {};
+      let seenPattern = false;
+      let seenTenGodRow = false;
+
+      const stripTags = (s) => s.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim();
+
+      for (const tr of trMatches) {
+        const tdMatches = tr.match(/<td[^>]*>[\s\S]*?<\/td>/gi) || [];
+        const cells = tdMatches.map(stripTags);
+        if (cells.length === 0) continue;
+
+        if (cells.length === 1) {
+          const txt = cells[0];
+          if (txt.includes("無敵律數")) continue;
+          if (txt.startsWith("格局")) {
+            seenPattern = true;
+            const m = txt.match(/格局\s*:\s*([^\s(]+)\s*\((\d+)%\)/);
+            if (m) {
+              patternName = m[1].trim();
+              patternPercent = parseInt(m[2], 10);
+            }
+            continue;
+          }
+          if (seenPattern && !seenTenGodRow && txt.includes(":")) {
+            const idx = txt.indexOf(":");
+            const label = txt.slice(0, idx).trim();
+            const value = txt.slice(idx + 1).trim();
+            if (label && value && !label.includes("廣告")) {
+              combos.push({ label, value });
+            }
+          }
+        } else if (cells.length >= 6) {
+          const rowTitle = cells[5].replace(/\s+/g, "");
+          if (rowTitle === "十神") {
+            seenTenGodRow = true;
+          } else if (rowTitle === "五行") {
+            wxCols = cells.slice(0, 5).map(c => c.replace(/\s+/g, ""));
+          } else if (rowTitle === "實律") {
+            for (let i = 0; i < 5; i++) {
+              const v = parseInt(cells[i].replace(/[^\d-]/g, ""), 10);
+              if (!isNaN(v) && wxCols[i]) scores[wxCols[i]] = v;
+            }
+          } else if (rowTitle === "取用神") {
+            for (let i = 0; i < 5; i++) {
+              if (wxCols[i]) roles[wxCols[i]] = cells[i].replace(/\s+/g, "");
+            }
+          }
+        }
+      }
+
+      const reqWx = ["水", "金", "土", "火", "木"];
+      if (!reqWx.every(w => typeof scores[w] === "number" && !isNaN(scores[w]))) {
+        return null;
+      }
+
+      return { s: scores, r: roles, patternName, patternPercent, combos, ts: Date.now() };
+    }
+
+    let currentRemoteSyncToken = 0;
+
+    async function fetchRemoteWudiFromMyFate(bazi, forceRefresh = false) {
+      if (!bazi || !bazi.fourPillarKey) return;
+      if (!forceRefresh && (bazi.wudiSyncStatus === "synced_live" || bazi.wudiSyncStatus === "synced_calibrated")) {
+        return;
+      }
+
+      const syncToken = ++currentRemoteSyncToken;
+      bazi.wudiSyncStatus = "fetching_remote";
+      renderBaziView();
+
+      const now = new Date();
+      const sY = bazi.solar.year;
+      const sM = bazi.solar.month;
+      const sD = bazi.solar.day;
+      const sH = bazi.hourOpt.value;
+      const myfateGetUrl = `https://myfate.herokuapp.com/api/bazi/${sY}/${sM}/${sD}/${sH}/0/%E7%84%A1%E5%90%8D%E6%B0%8F/${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}/0`;
+      const myfatePostUrl = "https://myfate.herokuapp.com/";
+      const formBody = `IsLunar=0&Gender=${bazi.gender === "M" ? "0" : "1"}&Year=${sY}&Month=${sM}&Day=${sD}&Hour=${sH}`;
+
+      const fetchWithTimeout = async (url, options = {}, timeoutMs = 12000, isAllOriginsJson = false) => {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const resp = await fetch(url, { ...options, signal: controller.signal });
+          if (!resp.ok) throw new Error("HTTP " + resp.status);
+          let htmlText = "";
+          if (isAllOriginsJson) {
+            const data = await resp.json();
+            htmlText = data && data.contents ? data.contents : "";
+          } else {
+            htmlText = await resp.text();
+          }
+          const parsed = parseMyFateWudiHtml(htmlText);
+          if (!parsed) throw new Error("Parse failed");
+          return parsed;
+        } finally {
+          clearTimeout(timer);
+        }
+      };
+
+      const channels = [
+        // Channel 1: AllOrigins JSON GET
+        () => fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(myfateGetUrl)}&_=${Date.now()}`, {}, 12000, true),
+        // Channel 2: CodeTabs CORS Proxy GET
+        () => fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(myfateGetUrl)}`, {}, 12000, false),
+        // Channel 3: AllOrigins Raw GET
+        () => fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(myfateGetUrl)}&_=${Date.now()}`, {}, 12000, false),
+        // Channel 4: CorsProxy.io GET
+        () => fetchWithTimeout(`https://corsproxy.io/?${encodeURIComponent(myfateGetUrl)}`, {}, 12000, false),
+        // Channel 5: CorsProxy.io POST directly to myfate.herokuapp.com form
+        () => fetchWithTimeout(`https://corsproxy.io/?${encodeURIComponent(myfatePostUrl)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: formBody
+        }, 12000, false),
+        // Channel 6: ThingProxy GET
+        () => fetchWithTimeout(`https://thingproxy.freeboard.io/fetch/${myfateGetUrl}`, {}, 12000, false)
+      ];
+
+      try {
+        const parsed = await Promise.any(channels.map(fn => fn()));
+        if (syncToken !== currentRemoteSyncToken) return;
+
+        window.MYFATE_REMOTE_WUDI_CACHE[bazi.fourPillarKey] = parsed;
+        saveMyFateRemoteCache();
+
+        bazi.wxScores = { ...parsed.s };
+        bazi.wudiRoles = { ...parsed.r };
+        if (parsed.patternName) {
+          bazi.patternName = parsed.patternName;
+          bazi.patternPercent = parsed.patternPercent || 80;
+        }
+        if (Array.isArray(parsed.combos)) {
+          bazi.comboInfo = { ...bazi.comboInfo, rows: parsed.combos };
+        }
+        const dmWx = bazi.pillars.day.stemWx;
+        const resourceWx = ["木", "火", "土", "金", "水"][(["木", "火", "土", "金", "水"].indexOf(dmWx) + 4) % 5];
+        bazi.yongWx = Object.keys(bazi.wudiRoles).find(w => bazi.wudiRoles[w] === "用神") || resourceWx;
+        const xiWx = Object.keys(bazi.wudiRoles).find(w => bazi.wudiRoles[w] === "喜神") || dmWx;
+        bazi.xiYong = [bazi.yongWx, xiWx];
+        bazi.jiShen = Object.keys(bazi.wudiRoles).filter(w =>
+          ["忌神", "病神", "大病神", "小病神", "仇神"].includes(bazi.wudiRoles[w])
+        );
+        bazi.tiaohouNote = `日主為「${bazi.pillars.day.stem}${dmWx}」，月令為「${bazi.pillars.month.branch}${bazi.pillars.month.branchWx}」，定為 ${bazi.patternName}。`;
+        bazi.wudiSyncStatus = "synced_live";
+
+        renderBaziView();
+        if (forceRefresh) {
+          showToast("✅ 已成功從 myfate.herokuapp.com 即時撈取最新無敵律數！");
+        }
+      } catch (err) {
+        if (syncToken !== currentRemoteSyncToken) return;
+        bazi.wudiSyncStatus = "offline_fallback";
+        renderBaziView();
+        if (forceRefresh) {
+          showToast("⚠️ 遠端連線原站逾時，目前顯示本地備援估算，請稍後再試。");
+        }
+      }
+    }
+
     function runCalculationsAndRender() {
       if (!state.hasCalculatedBazi) {
         document.getElementById('baziEmptyStateBox').classList.remove('hidden');
@@ -3635,6 +3851,9 @@
 
       renderBaziView();
       renderZiweiView();
+      if (state.hasCalculatedBazi && state.baziResult) {
+        fetchRemoteWudiFromMyFate(state.baziResult, false);
+      }
     }
 
     function renderBaziView() {
@@ -3757,6 +3976,12 @@
           </tbody>
         </table>
       `;
+      const forceSyncBtn = document.getElementById("forceSyncMyfateBtn");
+      if (forceSyncBtn) {
+        forceSyncBtn.addEventListener("click", () => {
+          fetchRemoteWudiFromMyFate(b, true);
+        });
+      }
 
       document.querySelectorAll('[data-orig-dayun]').forEach(cell => {
         cell.addEventListener('click', () => {
@@ -3783,7 +4008,22 @@
         <table class="orig-table w-full text-sm">
           <tbody>
             <tr>
-              <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">無敵律數 (參考)</td>
+              <td colspan="6" class="text-left font-medium py-2 px-3 text-base">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <span>無敵律數 (參考)</span>
+                  <span class="inline-flex items-center gap-1.5 text-xs font-normal">
+                    ${b.wudiSyncStatus === "fetching_remote"
+                      ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-semibold animate-pulse">⏳ 遠端撈取原站數據中...</span>`
+                      : (b.wudiSyncStatus === "synced_live" || b.wudiSyncStatus === "synced_calibrated")
+                        ? `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold">🟢 已同步原站真值</span>`
+                        : `<span class="px-2 py-0.5 rounded-full bg-stone-200 text-stone-700 border border-stone-300">⚪ 本地估算</span>`
+                    }
+                    <button type="button" id="forceSyncMyfateBtn" class="px-2 py-0.5 rounded border border-stone-500 bg-white/90 hover:bg-white text-stone-900 text-[11px] font-semibold transition shadow-sm cursor-pointer">
+                      🔄 向原站重新撈取
+                    </button>
+                  </span>
+                </div>
+              </td>
             </tr>
             <tr>
               <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">
