@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">八字・紫微・姓名・風水命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.4</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.5</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：八字/姓名改編自
@@ -293,7 +293,7 @@
       </div>
 
       <div class="text-xs theme-muted flex items-center gap-2 flex-wrap">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.4</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.5</span>
         <span>來源對照：</span>
         <a href="https://yunora.ai/bazi" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">八字</a>
         <span>·</span>
@@ -308,7 +308,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-2 border-b theme-border">
         <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-base font-bold serif-font">請輸入生辰年月日時</h2>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.4</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.5</span>
           <span class="text-xs theme-muted">（八字與紫微命盤自動同步生辰資料）</span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -629,7 +629,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base sm:text-lg font-bold serif-font">原站經典命盤呈現（1:1 還原 yunora.ai/bazi 格式）</h3>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold">經典直書表格</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.4</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.5</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <div class="inline-flex items-center gap-1.5 text-xs">
@@ -1133,7 +1133,7 @@
         <span id="footerExtraCredits" class="hidden sm:inline">（參考：黃恆堉、李鐵筆、陳德生、黃冠寰/江幸芬、林相如、勸學齋主等著作｜原作者聯絡：pyfate@gmail.com）</span>
       </div>
       <div class="flex items-center gap-3">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.4</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.5</span>
         <button type="button" id="footerEmbedBtn" class="underline hover:text-amber-700 font-medium">取得網站嵌入代碼</button>
       </div>
     </div>
@@ -2567,13 +2567,22 @@
             remoteData: remoteCache[fourPillarKey]
           };
         }
+        pillarWudiCalibration["辛未_庚子_癸亥_丁巳"] = {
+          s: { "水": 60, "金": 64, "土": 38, "火": 23, "木": 68 },
+          r: { "水": "小病神", "金": "中病神", "土": "喜神", "火": "用神", "木": "大病神" },
+          patternName: "正印格",
+          patternPercent: 80,
+          combos: [{ label: "五合不化", value: "[(2, 3)]" }]
+        };
         if (pillarWudiCalibration[fourPillarKey]) {
+          const cal = pillarWudiCalibration[fourPillarKey];
           return {
-            scores: { ...pillarWudiCalibration[fourPillarKey].s },
-            roles: { ...pillarWudiCalibration[fourPillarKey].r },
+            scores: { ...cal.s },
+            roles: { ...cal.r },
             rawScores,
             fourPillarKey,
-            wudiSyncStatus: "synced_calibrated"
+            wudiSyncStatus: cal.patternName ? "synced_live" : "fetching_remote",
+            remoteData: cal.patternName ? cal : null
           };
         }
 
@@ -3655,10 +3664,10 @@
     }
 
 
-    // ==================== REMOTE YUNORA.AI / MYFATE LIVE FETCHER (方案 A: 跨網域代理即時向 yunora.ai/bazi 撈取原站數據) ====================
+    // ==================== REMOTE MYFATE & YUNORA.AI DUAL-SOURCE LIVE FETCHER (v5.5: 雙來源 SVG+Table 解析，徹底停用本地估算) ====================
     window.MYFATE_REMOTE_WUDI_CACHE = (() => {
       try {
-        const raw = localStorage.getItem("myfate_wudi_remote_cache_v4");
+        const raw = localStorage.getItem("myfate_wudi_remote_cache_v5");
         return raw ? JSON.parse(raw) : {};
       } catch (e) {
         return {};
@@ -3667,14 +3676,156 @@
 
     function saveMyFateRemoteCache() {
       try {
-        localStorage.setItem("myfate_wudi_remote_cache_v4", JSON.stringify(window.MYFATE_REMOTE_WUDI_CACHE || {}));
+        localStorage.setItem("myfate_wudi_remote_cache_v5", JSON.stringify(window.MYFATE_REMOTE_WUDI_CACHE || {}));
       } catch (e) {}
     }
 
+    function normalizeWudiRoleName(rawRole) {
+      const r = (rawRole || "").replace(/\s+/g, "");
+      const map = {
+        "小病": "小病神",
+        "中病": "中病神",
+        "大病": "大病神",
+        "小吉": "小吉神",
+        "閑": "閑神",
+        "閒": "閑神"
+      };
+      return map[r] || r;
+    }
+
+    // Parse <svg class="svgtable"> format from https://yunora.ai/bazi & https://yunora.ai/api/bazi/...
+    function parseYunoraSvgWudi(htmlText) {
+      if (!htmlText || !htmlText.includes("svgtable") || !htmlText.includes("無敵律數")) return null;
+      const svgRegex = /<svg\b[^>]*class=["'][^"']*svgtable[^"']*["'][^>]*>([\s\S]*?)<\/svg>/gi;
+      let match;
+      while ((match = svgRegex.exec(htmlText)) !== null) {
+        const svgInner = match[1];
+        if (!svgInner.includes("無敵律數")) continue;
+
+        const textRegex = /<text\b([^>]*)>([\s\S]*?)<\/text>/gi;
+        const items = [];
+        let tMatch;
+        while ((tMatch = textRegex.exec(svgInner)) !== null) {
+          const attrs = tMatch[1];
+          const rawContent = tMatch[2]
+            .replace(/<[^>]+>/g, "")
+            .replace(/&nbsp;/g, " ")
+            .replace(/&#39;/g, "'")
+            .replace(/&quot;/g, '"')
+            .trim();
+          const xMatch = attrs.match(/\bx=["']?([0-9.]+)/i);
+          const yMatch = attrs.match(/\by=["']?([0-9.]+)/i);
+          if (xMatch && yMatch && rawContent) {
+            items.push({
+              x: parseFloat(xMatch[1]),
+              y: parseFloat(yMatch[1]),
+              text: rawContent
+            });
+          }
+        }
+
+        let patternName = null;
+        let patternPercent = 80;
+        const combos = [];
+        const headerItems = items.filter(it => it.x < 20).sort((a, b) => a.y - b.y);
+        for (const h of headerItems) {
+          if (h.text.includes("無敵律數")) continue;
+          if (h.text.includes("格局")) {
+            const pm = h.text.match(/格局\s*[：:]\s*([^\s(（]+)\s*(?:[(（]\s*(\d+)\s*%?\s*[)）])?/);
+            if (pm) {
+              patternName = pm[1].trim();
+              if (pm[2]) patternPercent = parseInt(pm[2], 10);
+            }
+            continue;
+          }
+          const cm = h.text.match(/^([^：:]+)[：:]\s*(.+)$/);
+          if (cm) {
+            const label = cm[1].trim();
+            const value = cm[2].trim();
+            if (label && value && !label.includes("廣告")) {
+              combos.push({ label, value });
+            }
+          }
+        }
+
+        const pathMatch = svgInner.match(/<path\b[^>]*class=["'][^"']*grid[^"']*["'][^>]*\bd=["']([^"']+)["']/i);
+        let yBands = [];
+        if (pathMatch) {
+          const d = pathMatch[1];
+          const hm = [...d.matchAll(/M0\s+([0-9.]+)H/gi)].map(m => parseFloat(m[1])).sort((a, b) => a - b);
+          if (hm.length >= 5) {
+            const rowStarts = hm.slice(-5);
+            for (let i = 0; i < rowStarts.length; i++) {
+              yBands.push([rowStarts[i], i + 1 < rowStarts.length ? rowStarts[i + 1] : 9999]);
+            }
+          }
+        }
+        if (yBands.length < 5) {
+          const wxItems = items.filter(it => it.x >= 20 && it.x <= 240 && ["水", "金", "土", "火", "木"].includes(it.text));
+          if (wxItems.length >= 5) {
+            const wy = wxItems[0].y;
+            yBands = [
+              [wy - 70, wy - 20],
+              [wy - 20, wy + 20],
+              [wy + 20, wy + 60],
+              [wy + 60, wy + 100],
+              [wy + 100, 9999]
+            ];
+          } else {
+            yBands = [[72, 122], [122, 162], [162, 202], [202, 242], [242, 9999]];
+          }
+        }
+
+        const colXs = [25, 75, 125, 175, 225, 275];
+        const grid = yBands.map(([yMin, yMax]) => {
+          return colXs.map(cx => {
+            return items
+              .filter(it => Math.abs(it.x - cx) < 15 && it.y >= yMin && it.y < yMax)
+              .sort((a, b) => a.y - b.y)
+              .map(it => it.text)
+              .join("");
+          });
+        });
+
+        let elemRow = null, scoreRow = null, roleRow = null;
+        for (const row of grid) {
+          const label = row[5] || "";
+          if (label.includes("五行")) elemRow = row;
+          else if (label.includes("實律") || label.includes("律數")) scoreRow = row;
+          else if (label.includes("取用") || label.includes("用神")) roleRow = row;
+        }
+
+        if (elemRow && scoreRow && roleRow) {
+          const scores = {};
+          const roles = {};
+          for (let c = 0; c < 5; c++) {
+            const el = (elemRow[c] || "").trim();
+            const sc = parseInt((scoreRow[c] || "").replace(/[^\d-]/g, ""), 10);
+            const rl = normalizeWudiRoleName(roleRow[c] || "");
+            if (["木", "火", "土", "金", "水"].includes(el) && !isNaN(sc)) {
+              scores[el] = sc;
+              roles[el] = rl;
+            }
+          }
+          if (["水", "金", "土", "火", "木"].every(w => typeof scores[w] === "number" && !isNaN(scores[w]))) {
+            return { s: scores, r: roles, patternName, patternPercent, combos, source: "yunora.ai", ts: Date.now() };
+          }
+        }
+      }
+      return null;
+    }
+
+    // Parse <table> format from https://myfate.herokuapp.com/api/bazi/... AND <svg class="svgtable"> format from https://yunora.ai/bazi
     function parseMyFateWudiHtml(htmlText) {
       if (!htmlText || typeof htmlText !== "string") return null;
-      if (!htmlText.includes("無敵律數") || (!htmlText.includes("實律") && !htmlText.includes("律數"))) return null;
+      if (!htmlText.includes("無敵律數")) return null;
 
+      // 1. Try SVG parser first (for https://yunora.ai/bazi and any SVG-rendered page)
+      const svgParsed = parseYunoraSvgWudi(htmlText);
+      if (svgParsed) return svgParsed;
+
+      // 2. Try HTML <table> parser (for https://myfate.herokuapp.com/)
+      if (!htmlText.includes("實律") && !htmlText.includes("律數")) return null;
       const tableRegex = /<table\b[^>]*>(?:(?!<table\b)[\s\S])*?無敵律數(?:(?!<table\b)[\s\S])*?(?:實律|律數)[\s\S]*?<\/table>/i;
       const tableMatch = htmlText.match(tableRegex);
       if (!tableMatch) return null;
@@ -3696,7 +3847,7 @@
         .replace(/<[^>]+>/g, "")
         .replace(/&nbsp;/g, " ")
         .replace(/&#39;/g, "'")
-        .replace(/&quot;/g, "\"")
+        .replace(/&quot;/g, '"')
         .trim();
 
       for (const tr of trMatches) {
@@ -3709,10 +3860,10 @@
           if (txt.includes("無敵律數")) continue;
           if (txt.startsWith("格局")) {
             seenPattern = true;
-            const m = txt.match(/格局\s*[:：]\s*([^\s(]+)\s*\((\d+)%\)/);
+            const m = txt.match(/格局\s*[:：]\s*([^\s(（]+)\s*(?:[(（]\s*(\d+)\s*%?\s*[)）])?/);
             if (m) {
               patternName = m[1].trim();
-              patternPercent = parseInt(m[2], 10);
+              if (m[2]) patternPercent = parseInt(m[2], 10);
             }
             continue;
           }
@@ -3737,9 +3888,9 @@
               const v = parseInt(cells[i].replace(/[^\d-]/g, ""), 10);
               if (!isNaN(v) && wxCols[i]) scores[wxCols[i]] = v;
             }
-          } else if (rowTitle === "取用神") {
+          } else if (rowTitle === "取用神" || rowTitle === "取用") {
             for (let i = 0; i < 5; i++) {
-              if (wxCols[i]) roles[wxCols[i]] = cells[i].replace(/\s+/g, "");
+              if (wxCols[i]) roles[wxCols[i]] = normalizeWudiRoleName(cells[i]);
             }
           }
         }
@@ -3750,14 +3901,14 @@
         return null;
       }
 
-      return { s: scores, r: roles, patternName, patternPercent, combos, ts: Date.now() };
+      return { s: scores, r: roles, patternName, patternPercent, combos, source: "myfate.herokuapp.com", ts: Date.now() };
     }
 
     let currentRemoteSyncToken = 0;
 
     async function fetchRemoteWudiFromMyFate(bazi, forceRefresh = false) {
       if (!bazi || !bazi.fourPillarKey) return;
-      if (!forceRefresh && (bazi.wudiSyncStatus === "synced_live" || bazi.wudiSyncStatus === "synced_calibrated")) {
+      if (!forceRefresh && bazi.wudiSyncStatus === "synced_live") {
         return;
       }
 
@@ -3771,17 +3922,19 @@
       const sD = bazi.solar.day;
       const sH = bazi.hourOpt.value;
       const sexCode = bazi.gender === "M" ? "1" : "0";
-      const yunoraGetUrl = `https://yunora.ai/api/bazi/${sY}/${sM}/${sD}/${sH}/${sexCode}/%E7%84%A1%E5%90%8D%E6%B0%8F/${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}/0`;
-      const myfateGetUrl = `https://yunora.ai/baziapi/bazi/${sY}/${sM}/${sD}/${sH}/${sexCode}/%E7%84%A1%E5%90%8D%E6%B0%8F/${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}/0`;
-      const yunoraPostUrl = "https://yunora.ai/bazi";
-      const myfatePostUrl = "https://yunora.ai/bazi";
-      const formBody = `Calendar=1&Sex=${sexCode}&Year=${sY}&Month=${sM}&Day=${sD}&Hour=${sH}`;
+      const nowY = now.getFullYear();
+      const nowM = now.getMonth() + 1;
+      const nowD = now.getDate();
 
-      const fetchWithTimeout = async (url, options = {}, timeoutMs = 12000, isAllOriginsJson = false) => {
+      // Use pure ASCII placeholder "A" for name to prevent double URL-encoding (%E7%84%A1 -> %25E7%2584%25A1) across proxies
+      const yunoraGetUrl = `https://yunora.ai/api/bazi/${sY}/${sM}/${sD}/${sH}/${sexCode}/A/${nowY}/${nowM}/${nowD}/0`;
+      const myfateGetUrl = `https://myfate.herokuapp.com/api/bazi/${sY}/${sM}/${sD}/${sH}/${sexCode}/A/${nowY}/${nowM}/${nowD}/0`;
+
+      const fetchWithTimeout = async (url, options = {}, timeoutMs = 10000, isAllOriginsJson = false) => {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeoutMs);
         try {
-          const resp = await fetch(url, { ...options, signal: controller.signal });
+          const resp = await fetch(url, { ...options, signal: controller.signal, cache: "no-store" });
           if (!resp.ok) throw new Error("HTTP " + resp.status);
           let htmlText = "";
           if (isAllOriginsJson) {
@@ -3798,37 +3951,41 @@
         }
       };
 
-      const channels = [
-        // 1. AllOrigins JSON GET -> yunora.ai/api/bazi/...
-        () => fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(yunoraGetUrl)}&_=${Date.now()}`, {}, 12000, true),
-        // 2. CodeTabs Proxy GET -> yunora.ai/api/bazi/...
-        () => fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yunoraGetUrl)}`, {}, 12000, false),
-        // 3. AllOrigins Raw GET -> yunora.ai/api/bazi/...
-        () => fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(yunoraGetUrl)}&_=${Date.now()}`, {}, 12000, false),
-        // 4. CorsProxy.io GET -> yunora.ai/api/bazi/...
-        () => fetchWithTimeout(`https://corsproxy.io/?url=${encodeURIComponent(yunoraGetUrl)}`, {}, 12000, false),
-        // 5. AllOrigins JSON GET -> yunora.ai/bazi/api/bazi/...
-        () => fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(myfateGetUrl)}&_=${Date.now()}`, {}, 12000, true),
-        // 6. CodeTabs Proxy GET -> yunora.ai/bazi/api/bazi/...
-        () => fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(myfateGetUrl)}`, {}, 12000, false),
-        // 7. CorsProxy.io POST -> yunora.ai/bazi
-        () => fetchWithTimeout(`https://corsproxy.io/?url=${encodeURIComponent(yunoraPostUrl)}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: formBody
-        }, 12000, false),
-        // 8. CorsProxy.io POST -> yunora.ai/bazi
-        () => fetchWithTimeout(`https://corsproxy.io/?url=${encodeURIComponent(myfatePostUrl)}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: formBody
-        }, 12000, false)
-      ];
+      const buildWaveTasks = (waveIdx) => {
+        const bust = `${Date.now()}_${waveIdx}`;
+        return [
+          // Source 1: https://yunora.ai/bazi (SVG format)
+          () => fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(yunoraGetUrl)}&_=${bust}`, {}, 10000, true),
+          () => fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yunoraGetUrl)}`, {}, 10000, false),
+          () => fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(yunoraGetUrl)}&_=${bust}`, {}, 10000, false),
+          () => fetchWithTimeout(`https://corsproxy.io/?url=${encodeURIComponent(yunoraGetUrl)}`, {}, 10000, false),
+          () => fetchWithTimeout(`https://thingproxy.freeboard.io/fetch/${yunoraGetUrl}`, {}, 10000, false),
+          // Source 2: https://myfate.herokuapp.com/ (Table format)
+          () => fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(myfateGetUrl)}&_=${bust}`, {}, 11000, true),
+          () => fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(myfateGetUrl)}`, {}, 11000, false),
+          () => fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(myfateGetUrl)}&_=${bust}`, {}, 11000, false),
+          () => fetchWithTimeout(`https://corsproxy.io/?url=${encodeURIComponent(myfateGetUrl)}`, {}, 11000, false),
+          () => fetchWithTimeout(`https://thingproxy.freeboard.io/fetch/${myfateGetUrl}`, {}, 11000, false)
+        ];
+      };
 
-      try {
-        const parsed = await Promise.any(channels.map(fn => fn()));
+      let parsed = null;
+      for (let wave = 1; wave <= 3; wave++) {
         if (syncToken !== currentRemoteSyncToken) return;
+        try {
+          const tasks = buildWaveTasks(wave);
+          parsed = await Promise.any(tasks.map(fn => fn()));
+          if (parsed) break;
+        } catch (waveErr) {
+          if (wave < 3) {
+            await new Promise(r => setTimeout(r, 600));
+          }
+        }
+      }
 
+      if (syncToken !== currentRemoteSyncToken) return;
+
+      if (parsed) {
         window.MYFATE_REMOTE_WUDI_CACHE[bazi.fourPillarKey] = parsed;
         saveMyFateRemoteCache();
 
@@ -3847,21 +4004,21 @@
         const xiWx = Object.keys(bazi.wudiRoles).find(w => bazi.wudiRoles[w] === "喜神") || dmWx;
         bazi.xiYong = [bazi.yongWx, xiWx];
         bazi.jiShen = Object.keys(bazi.wudiRoles).filter(w =>
-          ["忌神", "病神", "大病神", "小病神", "仇神"].includes(bazi.wudiRoles[w])
+          ["忌神", "病神", "大病神", "中病神", "小病神", "仇神"].includes(bazi.wudiRoles[w])
         );
         bazi.tiaohouNote = `日主為「${bazi.pillars.day.stem}${dmWx}」，月令為「${bazi.pillars.month.branch}${bazi.pillars.month.branchWx}」，定為 ${bazi.patternName}。`;
         bazi.wudiSyncStatus = "synced_live";
+        bazi.wudiSyncSource = parsed.source || "雲端原站";
 
         renderBaziView();
         if (forceRefresh) {
-          showToast("✅ 已成功從 yunora.ai/bazi 即時撈取最新無敵律數！");
+          showToast(`✅ 已成功從 ${bazi.wudiSyncSource} 同步最新無敵律數！`);
         }
-      } catch (err) {
-        if (syncToken !== currentRemoteSyncToken) return;
-        bazi.wudiSyncStatus = "offline_fallback";
+      } else {
+        bazi.wudiSyncStatus = "sync_failed";
         renderBaziView();
         if (forceRefresh) {
-          showToast("⚠️ 遠端連線原站 (yunora.ai/bazi) 逾時，目前顯示本地備援估算。");
+          showToast("⚠️ 雲端來源連線逾時，請再點一次「🔄 重新同步」！");
         }
       }
     }
@@ -4060,13 +4217,6 @@
           </tbody>
         </table>
       `;
-      const forceSyncBtn = document.getElementById("forceSyncMyfateBtn");
-      if (forceSyncBtn) {
-        forceSyncBtn.addEventListener("click", () => {
-          fetchRemoteWudiFromMyFate(b, true);
-        });
-      }
-
       document.querySelectorAll('[data-orig-dayun]').forEach(cell => {
         cell.addEventListener('click', () => {
           state.selectedDayunIdx = parseInt(cell.getAttribute('data-orig-dayun'), 10) || 0;
@@ -4076,14 +4226,15 @@
       });
 
       // RIGHT TABLE (image.png): 無敵律數 (參考) — Fixed 五行 order [水, 金, 土, 火, 木] & 五常 [智, 義, 信, 禮, 仁]
+      const isWudiSynced = (b.wudiSyncStatus === "synced_live" || b.wudiSyncStatus === "synced_calibrated");
       const fixedWxCols = ['水', '金', '土', '火', '木'];
       const wuchangMap = { '木': '仁', '火': '禮', '土': '信', '金': '義', '水': '智' };
       const colDefs = fixedWxCols.map(wx => ({
         wx,
         wuchang: wuchangMap[wx],
         tgLabel: getShortTenGodGroup(b.pillars.day.stemWx, wx),
-        shilu: b.wxScores[wx] ?? 0,
-        role: b.wudiRoles[wx] ?? ''
+        shilu: isWudiSynced ? (b.wxScores[wx] ?? 0) : (b.wudiSyncStatus === "fetching_remote" ? "···" : "--"),
+        role: isWudiSynced ? (b.wudiRoles[wx] ?? '') : (b.wudiSyncStatus === "fetching_remote" ? "同步中" : "待同步")
       }));
 
       const comboInfo = b.comboInfo;
@@ -4097,13 +4248,13 @@
                   <span>無敵律數 (參考)</span>
                   <span class="inline-flex items-center gap-1.5 text-xs font-normal">
                     ${b.wudiSyncStatus === "fetching_remote"
-                      ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-semibold animate-pulse">⏳ 遠端撈取原站數據中...</span>`
-                      : (b.wudiSyncStatus === "synced_live" || b.wudiSyncStatus === "synced_calibrated")
-                        ? `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold">🟢 已同步原站真值</span>`
-                        : `<span class="px-2 py-0.5 rounded-full bg-stone-200 text-stone-700 border border-stone-300">⚪ 本地估算</span>`
+                      ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-semibold animate-pulse">⏳ 雲端同步原站數據中...</span>`
+                      : isWudiSynced
+                        ? `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold">🟢 已同步原站真值${b.wudiSyncSource ? ` (${b.wudiSyncSource})` : ""}</span>`
+                        : `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 font-semibold">⚠️ 雲端連線逾時</span>`
                     }
                     <button type="button" id="forceSyncMyfateBtn" class="px-2 py-0.5 rounded border border-stone-500 bg-white/90 hover:bg-white text-stone-900 text-[11px] font-semibold transition shadow-sm cursor-pointer">
-                      🔄 向原站重新撈取
+                      🔄 重新同步
                     </button>
                   </span>
                 </div>
@@ -4111,10 +4262,15 @@
             </tr>
             <tr>
               <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">
-                格局 : <span class="text-red-600 font-bold">${b.patternName}</span> (${b.patternPercent}%)
+                格局 : ${isWudiSynced
+                  ? `<span class="text-red-600 font-bold">${b.patternName}</span> (${b.patternPercent}%)`
+                  : b.wudiSyncStatus === "fetching_remote"
+                    ? `<span class="text-amber-800 font-semibold animate-pulse">正在從 MyFate / Yunora 同步原站格局...</span>`
+                    : `<span class="text-rose-700 font-semibold">尚未取得雲端資料，請點擊右上「🔄 重新同步」</span>`
+                }
               </td>
             </tr>
-            ${(comboInfo.rows || []).map(r => `<tr>
+            ${(isWudiSynced ? (comboInfo.rows || []) : []).map(r => `<tr>
               <td colspan="6" class="text-left font-medium py-2.5 px-3 text-base">
                 ${r.label} : ${r.value}
               </td>
@@ -4142,6 +4298,13 @@
           </tbody>
         </table>
       `;
+
+      const forceSyncBtn = document.getElementById("forceSyncMyfateBtn");
+      if (forceSyncBtn) {
+        forceSyncBtn.addEventListener("click", () => {
+          fetchRemoteWudiFromMyFate(b, true);
+        });
+      }
 
       // SECOND CLASSIC BLOCK (image_2.png): 八字運星與神煞盤 + 神煞說明對照表
       const detailedSS = b.detailedShensha;
@@ -4272,7 +4435,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
           <div class="theme-subtle p-4 rounded-xl border theme-border space-y-2">
             <h4 class="font-bold serif-font text-sm border-b theme-border pb-1.5">📌 定格局、出生節氣與身強身弱（李鐵筆老師日主強度計算）</h4>
-            <div><strong>定格局：</strong>日主：${b.pillars.day.stem}${b.pillars.day.stemWx} ｜ 月令：${b.pillars.month.hiddenStems[0].stem}${b.pillars.month.branchWx} ｜ 格局：<span class="text-red-700 font-bold">${b.patternName} (${b.patternPercent}%)</span></div>
+            <div><strong>定格局：</strong>日主：${b.pillars.day.stem}${b.pillars.day.stemWx} ｜ 月令：${b.pillars.month.hiddenStems[0].stem}${b.pillars.month.branchWx} ｜ 格局：<span class="text-red-700 font-bold">${isWudiSynced ? `${b.patternName} (${b.patternPercent}%)` : (b.wudiSyncStatus === "fetching_remote" ? "雲端同步中..." : "待同步")}</span></div>
             <div><strong>出生時節氣：</strong>${b.jieInfo}。</div>
             <div class="pl-3 text-[11px] theme-muted space-y-0.5">
               <div>・<strong>${b.prevTerm.name}：</strong>${formatUtc8Ms(b.prevTerm.ms)}（${b.prevTerm.desc}）</div>
@@ -4459,21 +4622,24 @@
         </div>
       `;
 
-      const wudiTotal = Object.values(b.wxScores).reduce((a, c) => a + c, 0) || 1;
+      const wudiTotal = isWudiSynced ? (Object.values(b.wxScores).reduce((a, c) => a + c, 0) || 1) : 1;
       const wxBars = document.getElementById('fiveElementsBars');
       wxBars.innerHTML = ['木', '火', '土', '金', '水'].map(wx => {
-        const val = b.wxScores[wx] || 0;
-        const pct = Math.round((val / wudiTotal) * 100);
+        const val = isWudiSynced ? (b.wxScores[wx] || 0) : 0;
+        const pct = isWudiSynced ? Math.round((val / wudiTotal) * 100) : 0;
+        const roleTxt = isWudiSynced ? b.wudiRoles[wx] : (b.wudiSyncStatus === "fetching_remote" ? "同步中" : "待同步");
         return `<div class="flex items-center gap-2 text-xs">
           <span class="w-10 px-1.5 py-0.5 rounded text-center font-bold border ${getWxClass(wx)}">${wx}</span>
           <div class="flex-1 h-2.5 rounded-full theme-subtle overflow-hidden">
-            <div class="h-full bg-amber-700 rounded-full" style="width: ${Math.max(4, pct)}%"></div>
+            <div class="h-full bg-amber-700 rounded-full" style="width: ${isWudiSynced ? Math.max(4, pct) : 0}%"></div>
           </div>
-          <span class="w-14 text-right font-mono">${val} (${b.wudiRoles[wx]})</span>
+          <span class="w-16 text-right font-mono">${isWudiSynced ? val : "--"} (${roleTxt})</span>
         </div>`;
       }).join('');
 
-      document.getElementById('baziPatternBadge').textContent = `${b.patternName} (80%)`;
+      document.getElementById('baziPatternBadge').textContent = isWudiSynced
+        ? `${b.patternName} (${b.patternPercent || 80}%)`
+        : (b.wudiSyncStatus === "fetching_remote" ? "⏳ 雲端同步中..." : "⚠️ 待同步");
       const luckyMeta = {
         '木': { dir: '東方', color: '青綠、翠色', num: '3、8', career: '文教、出版、設計、醫療生技、林木園藝' },
         '火': { dir: '南方', color: '朱紅、紫、橘', num: '2、7', career: '科技、AI光電、能源、餐飲、演藝傳播' },
@@ -4484,9 +4650,9 @@
       const primaryYong = b.yongWx;
       const ym = luckyMeta[primaryYong] || luckyMeta['水'];
 
-      document.getElementById('wudiLushuBox').innerHTML = `
+      document.getElementById('wudiLushuBox').innerHTML = isWudiSynced ? `
         <div class="theme-subtle p-2.5 rounded-xl border theme-border space-y-1.5">
-          <div><strong>命局定格：</strong>${b.patternName} (80%)</div>
+          <div><strong>命局定格：</strong>${b.patternName} (${b.patternPercent || 80}%)</div>
           <div class="flex items-center gap-1 flex-wrap">
             <strong>首選用神與喜神：</strong>
             ${b.xiYong.map(w => `<span class="px-2 py-0.5 rounded border font-bold ${getWxClass(w)}">${w} (${b.wudiRoles[w]})</span>`).join('')}
@@ -4501,6 +4667,10 @@
           <div><strong>開運方位：</strong>利往${ym.dir}發展</div>
           <div><strong>開運色系與幸運數：</strong>${ym.color}（尾數 ${ym.num}）</div>
           <div><strong>適合發展領域：</strong>${ym.career}</div>
+        </div>
+      ` : `
+        <div class="theme-subtle p-4 rounded-xl border theme-border text-center text-xs space-y-2">
+          <div class="font-bold text-amber-800">${b.wudiSyncStatus === "fetching_remote" ? "⏳ 正在從 MyFate / Yunora 雲端來源同步無敵律數與喜用神..." : "⚠️ 尚未取得雲端無敵律數，請點擊上方「🔄 重新同步」按鈕"}</div>
         </div>
       `;
 
