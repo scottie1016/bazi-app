@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">八字・紫微・姓名・風水命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.6</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.7</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：八字/姓名改編自
@@ -293,7 +293,7 @@
       </div>
 
       <div class="text-xs theme-muted flex items-center gap-2 flex-wrap">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.6</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.7</span>
         <span>來源對照：</span>
         <a href="https://yunora.ai/bazi" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">八字</a>
         <span>·</span>
@@ -308,7 +308,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-2 border-b theme-border">
         <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-base font-bold serif-font">請輸入生辰年月日時</h2>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.6</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.7</span>
           <span class="text-xs theme-muted">（八字與紫微命盤自動同步生辰資料）</span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -629,7 +629,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base sm:text-lg font-bold serif-font">原站經典命盤呈現（1:1 還原 yunora.ai/bazi 格式）</h3>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold">經典直書表格</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.6</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.7</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <div class="inline-flex items-center gap-1.5 text-xs">
@@ -974,6 +974,59 @@
           </div>
         </div>
 
+        <!-- ④ 八宅命卦四吉四凶方位設定（自動同步生辰，亦可於此獨立輸入或手動選卦） -->
+        <div class="pt-2.5 border-t theme-border space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="text-xs font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5 flex-wrap">
+              <span>🏠 ④ 八宅命卦疊圖（四吉四凶方位）</span>
+              <span class="text-[11px] font-normal theme-muted">（跨世紀公式：2 月 4 日前歸上一年，2 月 4 日當天及之後歸當年）</span>
+            </div>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-semibold">
+              <input type="checkbox" id="showBaZhaiOverlayCheck" checked class="rounded text-amber-800 focus:ring-amber-600" />
+              <span>在羅盤上疊加八宅吉凶方位</span>
+            </label>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 items-end text-xs">
+            <div class="lg:col-span-2">
+              <label for="compassBaZhaiModeSelect" class="block font-semibold mb-1 theme-muted">命卦來源 / 手動指定</label>
+              <select id="compassBaZhaiModeSelect" class="w-full rounded-xl border theme-border theme-card px-2.5 py-1.5 font-bold focus:outline-none focus:ring-2 focus:ring-amber-600">
+                <option value="birth" selected>📅 依下方生辰計算（自動同步八字排盤）</option>
+                <option value="7">☱ 兌卦（西四命）</option>
+                <option value="6">☰ 乾卦（西四命）</option>
+                <option value="2">☷ 坤卦（西四命）</option>
+                <option value="8">☶ 艮卦（西四命）</option>
+                <option value="1">☵ 坎卦（東四命）</option>
+                <option value="9">☲ 離卦（東四命）</option>
+                <option value="3">☳ 震卦（東四命）</option>
+                <option value="4">☴ 巽卦（東四命）</option>
+                <option value="none">🚫 不顯示八宅命卦</option>
+              </select>
+            </div>
+            <div>
+              <label for="compassBirthYearInput" class="block font-semibold mb-1 theme-muted">陽曆出生年</label>
+              <input type="number" id="compassBirthYearInput" value="2000" min="1900" max="2100" class="w-full rounded-xl border theme-border theme-card px-2.5 py-1.5 font-bold focus:outline-none focus:ring-2 focus:ring-amber-600" />
+            </div>
+            <div>
+              <label for="compassBirthMonthInput" class="block font-semibold mb-1 theme-muted">月</label>
+              <input type="number" id="compassBirthMonthInput" value="1" min="1" max="12" class="w-full rounded-xl border theme-border theme-card px-2.5 py-1.5 font-bold focus:outline-none focus:ring-2 focus:ring-amber-600" />
+            </div>
+            <div>
+              <label for="compassBirthDayInput" class="block font-semibold mb-1 theme-muted">日</label>
+              <input type="number" id="compassBirthDayInput" value="1" min="1" max="31" class="w-full rounded-xl border theme-border theme-card px-2.5 py-1.5 font-bold focus:outline-none focus:ring-2 focus:ring-amber-600" />
+            </div>
+            <div>
+              <label for="compassGenderSelect" class="block font-semibold mb-1 theme-muted">性別</label>
+              <select id="compassGenderSelect" class="w-full rounded-xl border theme-border theme-card px-2.5 py-1.5 font-bold focus:outline-none focus:ring-2 focus:ring-amber-600">
+                <option value="F" selected>女 (坤造)</option>
+                <option value="M">男 (乾造)</option>
+              </select>
+            </div>
+          </div>
+          <div id="compassBaZhaiBadgeBar" class="text-xs px-3 py-1.5 rounded-xl bg-emerald-50/80 border border-emerald-200 text-emerald-950 font-semibold flex flex-wrap items-center justify-between gap-2">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
         <!-- Fine-tuning Sliders for Floor Plan & Compass (0% - 200%, px, 0% - 100%) -->
         <div class="pt-2 border-t theme-border grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
           <div>
@@ -1048,6 +1101,11 @@
 
         <!-- 【向首與坐山資訊（頂部）】 -->
         <div id="compassFourCardinalBox" class="max-w-2xl mx-auto bg-amber-50/60 border border-amber-200/90 rounded-xl p-3.5 text-xs sm:text-sm text-stone-900 space-y-1.5">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- 【八宅法命卦九宮吉凶方位表（上南下北・左東右西）】 -->
+        <div id="compassBaZhaiGridBox" class="max-w-2xl mx-auto bg-amber-50/40 border border-stone-300 rounded-xl p-4 space-y-2.5">
           <!-- Populated by JS -->
         </div>
 
@@ -1133,7 +1191,7 @@
         <span id="footerExtraCredits" class="hidden sm:inline">（參考：黃恆堉、李鐵筆、陳德生、黃冠寰/江幸芬、林相如、勸學齋主等著作｜原作者聯絡：pyfate@gmail.com）</span>
       </div>
       <div class="flex items-center gap-3">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.6</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.7</span>
         <button type="button" id="footerEmbedBtn" class="underline hover:text-amber-700 font-medium">取得網站嵌入代碼</button>
       </div>
     </div>
@@ -2267,6 +2325,79 @@
       return validateWudiPayloadDetailed(payload).valid;
     }
 
+    // ==================== 八宅命卦跨世紀通用引擎（依每年 2 月 4 日切分，完整對齊 1926–2050 傳統表） ====================
+    const BAZHAI_STAR_META = {
+      '生氣': { level: '大吉', isLucky: true,  rank: 1 },
+      '天醫': { level: '中吉', isLucky: true,  rank: 2 },
+      '延年': { level: '次吉', isLucky: true,  rank: 3 },
+      '伏位': { level: '小吉', isLucky: true,  rank: 4 },
+      '禍害': { level: '小凶', isLucky: false, rank: 5 },
+      '六煞': { level: '中凶', isLucky: false, rank: 6 },
+      '五鬼': { level: '次凶', isLucky: false, rank: 7 },
+      '絕命': { level: '大凶', isLucky: false, rank: 8 }
+    };
+
+    const BAZHAI_GUA_MAP = {
+      1: {
+        guaNum: 1, name: '坎', symbol: '☵', group: '東四命',
+        sectors: { '正北': '伏位', '東北': '五鬼', '正東': '天醫', '東南': '生氣', '正南': '延年', '西南': '絕命', '正西': '禍害', '西北': '六煞' }
+      },
+      2: {
+        guaNum: 2, name: '坤', symbol: '☷', group: '西四命',
+        sectors: { '正北': '絕命', '東北': '生氣', '正東': '禍害', '東南': '五鬼', '正南': '六煞', '西南': '伏位', '正西': '天醫', '西北': '延年' }
+      },
+      3: {
+        guaNum: 3, name: '震', symbol: '☳', group: '東四命',
+        sectors: { '正北': '天醫', '東北': '六煞', '正東': '伏位', '東南': '延年', '正南': '生氣', '西南': '禍害', '正西': '絕命', '西北': '五鬼' }
+      },
+      4: {
+        guaNum: 4, name: '巽', symbol: '☴', group: '東四命',
+        sectors: { '正北': '生氣', '東北': '絕命', '正東': '延年', '東南': '伏位', '正南': '天醫', '西南': '五鬼', '正西': '六煞', '西北': '禍害' }
+      },
+      6: {
+        guaNum: 6, name: '乾', symbol: '☰', group: '西四命',
+        sectors: { '正北': '六煞', '東北': '天醫', '正東': '五鬼', '東南': '禍害', '正南': '絕命', '西南': '延年', '正西': '生氣', '西北': '伏位' }
+      },
+      7: {
+        guaNum: 7, name: '兌', symbol: '☱', group: '西四命',
+        sectors: { '正北': '禍害', '東北': '延年', '正東': '絕命', '東南': '六煞', '正南': '五鬼', '西南': '天醫', '正西': '伏位', '西北': '生氣' }
+      },
+      8: {
+        guaNum: 8, name: '艮', symbol: '☶', group: '西四命',
+        sectors: { '正北': '五鬼', '東北': '伏位', '正東': '六煞', '東南': '絕命', '正南': '禍害', '西南': '生氣', '正西': '延年', '西北': '天醫' }
+      },
+      9: {
+        guaNum: 9, name: '離', symbol: '☲', group: '東四命',
+        sectors: { '正北': '延年', '東北': '禍害', '正東': '生氣', '東南': '天醫', '正南': '伏位', '西南': '六煞', '正西': '五鬼', '西北': '絕命' }
+      }
+    };
+
+    function calculateBaZhaiGua(solarY, solarM, solarD, gender) {
+      const y = Number(solarY) || 2000;
+      const m = Number(solarM) || 1;
+      const d = Number(solarD) || 1;
+      // 依老師規則：每年 2 月 4 日之前出生歸上一年，2 月 4 日當天及之後歸當年
+      const isBeforeFeb4 = (m < 2) || (m === 2 && d < 4);
+      const guaYear = isBeforeFeb4 ? (y - 1) : y;
+      // 跨世紀連續九年循環公式（無 2000 年斷層）：
+      // 男命：((2000 - guaYear) % 9 + 9) % 9，0→9，5 寄坤(2)
+      // 女命：((guaYear - 1994) % 9 + 9) % 9，0→9，5 寄艮(8)
+      let guaNum = (gender === 'M')
+        ? (((2000 - guaYear) % 9) + 9) % 9
+        : (((guaYear - 1994) % 9) + 9) % 9;
+      if (guaNum === 0) guaNum = 9;
+      if (guaNum === 5) guaNum = (gender === 'M' ? 2 : 8);
+      const meta = BAZHAI_GUA_MAP[guaNum] || BAZHAI_GUA_MAP[7];
+      return {
+        ...meta,
+        guaYear,
+        isBeforeFeb4,
+        ruleNote: isBeforeFeb4
+          ? `${y}/${m}/${d} 在 2月4日之前，依上一年（${guaYear}年）計算`
+          : `${y}/${m}/${d} 在 2月4日當天或之後，依當年（${guaYear}年）計算`
+      };
+    }
+
     function calculateBazi(solarY, solarM, solarD, hourOptionValue, gender, nightZiKeepDay) {
       const hourOpt = HOUR_OPTIONS[hourOptionValue] || HOUR_OPTIONS[0];
       const lunar = solarToLunar(solarY, solarM, solarD);
@@ -3082,21 +3213,7 @@
         poem: boneMeta.poem
       };
 
-      const last2 = solarY % 100;
-      let guaNum = gender === 'M' ? (100 - last2) % 9 : (last2 - 4 + 90) % 9;
-      if (guaNum === 0) guaNum = 9;
-      if (guaNum === 5) guaNum = (gender === 'M' ? 2 : 8);
-      const guaMap = {
-        1: { name: '坎', group: '東四命' },
-        2: { name: '坤', group: '西四命' },
-        3: { name: '震', group: '東四命' },
-        4: { name: '巽', group: '東四命' },
-        6: { name: '乾', group: '西四命' },
-        7: { name: '兌', group: '西四命' },
-        8: { name: '艮', group: '西四命' },
-        9: { name: '離', group: '東四命' }
-      };
-      const baZhaiGua = { guaNum, ...(guaMap[guaNum] || guaMap[7]) };
+      const baZhaiGua = calculateBaZhaiGua(solarY, solarM, solarD, gender);
 
       return {
         solar: { year: solarY, month: solarM, day: solarD },
@@ -4960,8 +5077,10 @@
         state.selectedZiweiLiunianYear = state.ziweiResult.daxianList[0].startYear;
       }
 
+      syncCompassBaZhaiFromBazi(bazi);
       renderBaziView();
       renderZiweiView();
+      renderCompassView();
       if (state.hasCalculatedBazi && state.baziResult) {
         fetchRemoteWudiFromMyFate(state.baziResult, false);
       }
@@ -5509,7 +5628,7 @@
             </table>
             <div class="pt-2 border-t theme-border flex flex-wrap items-center justify-between gap-2 text-[11px]">
               <span><strong>先天體檢（十干統計）：</strong>甲${organCounts['甲']} 乙${organCounts['乙']} 丙${organCounts['丙']} 丁${organCounts['丁']} 戊${organCounts['戊']} 己${organCounts['己']} 庚${organCounts['庚']} 辛${organCounts['辛']} 壬${organCounts['壬']} 癸${organCounts['癸']}</span>
-              <span><strong>八宅命卦：</strong>${guaInfo.name}卦（${guaInfo.group}）</span>
+              <span><strong>八宅命卦：</strong>${guaInfo.symbol || ''} ${guaInfo.name}卦（${guaInfo.group}・依 ${guaInfo.guaYear} 年次${guaInfo.isBeforeFeb4 ? '，2/4前歸上年' : ''}）</span>
             </div>
           </div>
         </div>
@@ -6593,6 +6712,12 @@
       enablePanDrag: true,
       showDoorMarker: true,
       showCardinalLabels: true,
+      showBaZhaiOverlay: true,
+      baZhaiMode: 'birth',     // 'birth' | '1'|'2'|'3'|'4'|'6'|'7'|'8'|'9' | 'none'
+      baZhaiYear: 2000,
+      baZhaiMonth: 1,
+      baZhaiDay: 1,
+      baZhaiGender: 'F',
       legendMode: 'abs_standard', // 'abs_standard' | 'abs_24'
       fpScale: 1.0,
       fpOffsetX: 0,
@@ -6834,6 +6959,33 @@
       ctx.restore();
     }
 
+    function getActiveCompassBaZhai() {
+      if (compassState.baZhaiMode === 'none') return null;
+      if (compassState.baZhaiMode !== 'birth') {
+        const num = parseInt(compassState.baZhaiMode, 10);
+        const meta = BAZHAI_GUA_MAP[num];
+        if (!meta) return null;
+        return { ...meta, isManual: true, ruleNote: '手動指定命卦' };
+      }
+      return calculateBaZhaiGua(compassState.baZhaiYear, compassState.baZhaiMonth, compassState.baZhaiDay, compassState.baZhaiGender);
+    }
+
+    function syncCompassBaZhaiFromBazi(bazi) {
+      if (!bazi || !bazi.solar) return;
+      compassState.baZhaiYear = bazi.solar.year;
+      compassState.baZhaiMonth = bazi.solar.month;
+      compassState.baZhaiDay = bazi.solar.day;
+      compassState.baZhaiGender = bazi.gender;
+      const yEl = document.getElementById('compassBirthYearInput');
+      const mEl = document.getElementById('compassBirthMonthInput');
+      const dEl = document.getElementById('compassBirthDayInput');
+      const gEl = document.getElementById('compassGenderSelect');
+      if (yEl) yEl.value = bazi.solar.year;
+      if (mEl) mEl.value = bazi.solar.month;
+      if (dEl) dEl.value = bazi.solar.day;
+      if (gEl) gEl.value = bazi.gender;
+    }
+
     function drawCompassOverlayOnContext(ctx, cx, cy, radius, rotationDeg, opacity) {
       if (radius <= 5 || opacity <= 0.01) return;
       ctx.save();
@@ -6931,47 +7083,117 @@
         ctx.restore();
       }
 
-      // 4b. 房屋內部／羅盤內圈的淡藍色方位標籤（跟隨羅盤旋轉至正確區域，且文字保持正向水平不倒置！）
-      if (compassState.showCardinalLabels) {
-        const innerDirs = [
-          { label: '北',   deg: 0,   isMain: true,  isRed: true },
-          { label: '東北', deg: 45,  isMain: false, isRed: false },
-          { label: '東',   deg: 90,  isMain: true,  isRed: false },
-          { label: '東南', deg: 135, isMain: false, isRed: false },
-          { label: '南',   deg: 180, isMain: true,  isRed: true },
-          { label: '西南', deg: 225, isMain: false, isRed: false },
-          { label: '西',   deg: 270, isMain: true,  isRed: false },
-          { label: '西北', deg: 315, isMain: false, isRed: false }
-        ];
-        innerDirs.forEach(d => {
-          const rad = ((d.deg - 90) * Math.PI) / 180;
-          const tx = Math.cos(rad) * rDirMid;
-          const ty = Math.sin(rad) * rDirMid;
+      // 4a. 八宅命卦四吉四凶 8 宮扇區淡色底色（疊加於屋內 8 個 45° 方位，不遮蔽下方平面圖）
+      const activeBaZhai = compassState.showBaZhaiOverlay ? getActiveCompassBaZhai() : null;
+      const baZhaiSectorDirs = [
+        { key: '正北', label: '北',   deg: 0,   isMain: true,  isRed: true },
+        { key: '東北', label: '東北', deg: 45,  isMain: false, isRed: false },
+        { key: '正東', label: '東',   deg: 90,  isMain: true,  isRed: false },
+        { key: '東南', label: '東南', deg: 135, isMain: false, isRed: false },
+        { key: '正南', label: '南',   deg: 180, isMain: true,  isRed: true },
+        { key: '西南', label: '西南', deg: 225, isMain: false, isRed: false },
+        { key: '正西', label: '西',   deg: 270, isMain: true,  isRed: false },
+        { key: '西北', label: '西北', deg: 315, isMain: false, isRed: false }
+      ];
+
+      if (activeBaZhai) {
+        const rSectorOuter = rInnerRing;
+        const rSectorInner = radius * 0.14;
+        baZhaiSectorDirs.forEach(d => {
+          const starName = activeBaZhai.sectors[d.key];
+          const meta = BAZHAI_STAR_META[starName];
+          const startRad = ((d.deg - 22.5 - 90) * Math.PI) / 180;
+          const endRad = ((d.deg + 22.5 - 90) * Math.PI) / 180;
 
           ctx.save();
-          ctx.translate(tx, ty);
-          // 反向旋轉 -rotationDeg 使房屋內部的方位標籤永遠保持正向水平，直觀易讀
-          ctx.rotate((-rotationDeg * Math.PI) / 180);
-
-          const fontSize = d.isMain ? Math.round(radius * 0.062) : Math.round(radius * 0.046);
-          ctx.font = `bold ${fontSize}px "標楷體", "DFKai-SB", "Kaiti TC", "Noto Serif TC", serif`;
-          const tw = ctx.measureText(d.label).width;
-          const pw = tw + (d.isMain ? 12 : 10);
-          const ph = fontSize + 6;
-
-          ctx.fillStyle = d.isRed ? 'rgba(254, 226, 226, 0.90)' : 'rgba(219, 234, 254, 0.90)';
-          ctx.strokeStyle = d.isRed ? 'rgba(220, 38, 38, 0.45)' : 'rgba(59, 130, 246, 0.45)';
-          ctx.lineWidth = 1;
           ctx.beginPath();
-          ctx.roundRect(-pw / 2, -ph / 2, pw, ph, 5);
+          ctx.arc(0, 0, rSectorOuter, startRad, endRad);
+          ctx.arc(0, 0, rSectorInner, endRad, startRad, true);
+          ctx.closePath();
+          ctx.fillStyle = meta && meta.isLucky
+            ? 'rgba(16, 185, 129, 0.13)'
+            : 'rgba(239, 68, 68, 0.11)';
           ctx.fill();
-          ctx.stroke();
-
-          ctx.fillStyle = d.isRed ? '#b91c1c' : (d.isMain ? '#1e40af' : '#3b5998');
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(d.label, 0, 1);
           ctx.restore();
+        });
+      }
+
+      // 4b. 房屋內部／羅盤內圈的方位與八宅吉凶標籤（跟隨羅盤旋轉至正確區域，文字保持正向水平不倒置！）
+      if (compassState.showCardinalLabels || activeBaZhai) {
+        baZhaiSectorDirs.forEach(d => {
+          const rad = ((d.deg - 90) * Math.PI) / 180;
+          if (compassState.showCardinalLabels) {
+            const tx = Math.cos(rad) * rDirMid;
+            const ty = Math.sin(rad) * rDirMid;
+
+            ctx.save();
+            ctx.translate(tx, ty);
+            ctx.rotate((-rotationDeg * Math.PI) / 180);
+
+            const fontSize = d.isMain ? Math.round(radius * 0.060) : Math.round(radius * 0.045);
+            ctx.font = `bold ${fontSize}px "標楷體", "DFKai-SB", "Kaiti TC", "Noto Serif TC", serif`;
+            const tw = ctx.measureText(d.label).width;
+            const pw = tw + (d.isMain ? 12 : 10);
+            const ph = fontSize + 6;
+
+            ctx.fillStyle = d.isRed ? 'rgba(254, 226, 226, 0.90)' : 'rgba(219, 234, 254, 0.90)';
+            ctx.strokeStyle = d.isRed ? 'rgba(220, 38, 38, 0.45)' : 'rgba(59, 130, 246, 0.45)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(-pw / 2, -ph / 2, pw, ph, 5);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = d.isRed ? '#b91c1c' : (d.isMain ? '#1e40af' : '#3b5998');
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(d.label, 0, 1);
+            ctx.restore();
+          }
+
+          if (activeBaZhai) {
+            const starName = activeBaZhai.sectors[d.key];
+            const meta = BAZHAI_STAR_META[starName];
+            const rBzMid = radius * 0.46;
+            const bx = Math.cos(rad) * rBzMid;
+            const by = Math.sin(rad) * rBzMid;
+
+            ctx.save();
+            ctx.translate(bx, by);
+            ctx.rotate((-rotationDeg * Math.PI) / 180);
+
+            const line1 = starName;
+            const line2 = meta ? meta.level : '';
+            const fs1 = Math.max(11, Math.round(radius * 0.052));
+            const fs2 = Math.max(9, Math.round(radius * 0.038));
+            ctx.font = `bold ${fs1}px "Noto Sans TC", sans-serif`;
+            const w1 = ctx.measureText(line1).width;
+            ctx.font = `600 ${fs2}px "Noto Sans TC", sans-serif`;
+            const w2 = ctx.measureText(line2).width;
+            const pw = Math.max(w1, w2) + 12;
+            const ph = fs1 + fs2 + 8;
+
+            ctx.fillStyle = meta && meta.isLucky
+              ? 'rgba(236, 253, 245, 0.92)'
+              : 'rgba(254, 242, 242, 0.92)';
+            ctx.strokeStyle = meta && meta.isLucky
+              ? 'rgba(5, 150, 105, 0.75)'
+              : 'rgba(220, 38, 38, 0.65)';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.roundRect(-pw / 2, -ph / 2, pw, ph, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = meta && meta.isLucky ? '#065f46' : '#991b1b';
+            ctx.font = `bold ${fs1}px "Noto Sans TC", sans-serif`;
+            ctx.fillText(line1, 0, -fs2 * 0.55);
+            ctx.font = `600 ${fs2}px "Noto Sans TC", sans-serif`;
+            ctx.fillText(line2, 0, fs1 * 0.55);
+            ctx.restore();
+          }
         });
       }
 
@@ -7100,6 +7322,89 @@
           <div class="py-0.5">${r.rightText}</div>
         `).join('');
       }
+
+      // 7. Update 八宅命卦狀態列 & 3x3 九宮方位圖（上南下北・左東右西）
+      const activeBz = getActiveCompassBaZhai();
+      const bzBadgeBar = document.getElementById('compassBaZhaiBadgeBar');
+      const bzGridBox = document.getElementById('compassBaZhaiGridBox');
+
+      if (bzBadgeBar) {
+        if (!activeBz) {
+          bzBadgeBar.innerHTML = `<span class="text-stone-600">目前已關閉八宅命卦顯示（可於上方下拉選單重新開啟）。</span>`;
+        } else {
+          const luckyDirs = Object.entries(activeBz.sectors)
+            .filter(([, s]) => BAZHAI_STAR_META[s] && BAZHAI_STAR_META[s].isLucky)
+            .sort((a, b) => BAZHAI_STAR_META[a[1]].rank - BAZHAI_STAR_META[b[1]].rank)
+            .map(([dir, s]) => `${dir}(${s})`)
+            .join('、');
+          const unluckyDirs = Object.entries(activeBz.sectors)
+            .filter(([, s]) => BAZHAI_STAR_META[s] && !BAZHAI_STAR_META[s].isLucky)
+            .sort((a, b) => BAZHAI_STAR_META[b[1]].rank - BAZHAI_STAR_META[a[1]].rank)
+            .map(([dir, s]) => `${dir}(${s})`)
+            .join('、');
+          bzBadgeBar.innerHTML = `
+            <div>
+              <span class="text-sm font-extrabold text-emerald-900">${activeBz.symbol} ${activeBz.name}卦（${activeBz.group}）</span>
+              <span class="ml-1.5 text-[11px] text-emerald-800">${activeBz.ruleNote || ''}</span>
+            </div>
+            <div class="text-[11px] flex flex-wrap gap-x-3 gap-y-0.5">
+              <span class="text-emerald-800">✅ 四吉：${luckyDirs}</span>
+              <span class="text-rose-800">⚠️ 四凶：${unluckyDirs}</span>
+            </div>
+          `;
+        }
+      }
+
+      if (bzGridBox) {
+        if (!activeBz) {
+          bzGridBox.classList.add('hidden');
+        } else {
+          bzGridBox.classList.remove('hidden');
+          // 標準風水九宮方位（上南下北、左東右西），對齊老師圖示格式
+          const gridOrder = ['東南', '正南', '西南', '正東', 'CENTER', '正西', '東北', '正北', '西北'];
+          const cellsHtml = gridOrder.map(cellKey => {
+            if (cellKey === 'CENTER') {
+              return `
+                <div class="bg-amber-100/90 border border-stone-400 p-2.5 flex flex-col items-center justify-center text-center min-h-[82px]">
+                  <div class="text-2xl leading-none font-bold text-stone-900">${activeBz.symbol}</div>
+                  <div class="text-lg font-extrabold serif-font text-stone-900 mt-1">${activeBz.name}</div>
+                  <div class="text-[11px] font-bold text-amber-900">${activeBz.group}</div>
+                </div>
+              `;
+            }
+            const star = activeBz.sectors[cellKey];
+            const meta = BAZHAI_STAR_META[star] || { level: '', isLucky: true };
+            const bgCls = meta.isLucky
+              ? 'bg-emerald-50/90 text-emerald-950'
+              : 'bg-rose-50/85 text-rose-950';
+            const badgeCls = meta.isLucky
+              ? 'text-emerald-700 font-bold'
+              : 'text-rose-700 font-bold';
+            return `
+              <div class="${bgCls} border border-stone-400 p-2.5 flex flex-col items-center justify-center text-center min-h-[82px]">
+                <div class="text-xs font-bold text-stone-700">${cellKey}</div>
+                <div class="text-base font-extrabold serif-font my-0.5">${star}</div>
+                <div class="text-xs ${badgeCls}">${meta.level}</div>
+              </div>
+            `;
+          }).join('');
+
+          bzGridBox.innerHTML = `
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-stone-300 pb-1.5">
+              <div class="text-xs sm:text-sm font-bold text-stone-900">
+                【八宅法 - ${activeBz.group}（${activeBz.symbol} ${activeBz.name}卦）九宮吉凶方位表】
+              </div>
+              <div class="text-[11px] text-stone-600">上南下北・左東右西（與羅盤內圈同步）</div>
+            </div>
+            <div class="grid grid-cols-3 border border-stone-400 rounded-lg overflow-hidden">
+              ${cellsHtml}
+            </div>
+            <div class="text-[11px] text-stone-600">
+              計算依據：${activeBz.ruleNote || '手動指定命卦'}（2 月 4 日前出生歸上一年，2 月 4 日當天及之後歸當年；跨世紀通用公式，1926–2050 全年份校準一致）。
+            </div>
+          `;
+        }
+      }
     }
 
     function exportCompositeCompassPng() {
@@ -7144,9 +7449,19 @@
         ctx.fillText(r.rightText, 445, y);
       });
 
+      const activeBzPng = compassState.showBaZhaiOverlay ? getActiveCompassBaZhai() : null;
+      if (activeBzPng) {
+        const luckyStr = Object.entries(activeBzPng.sectors)
+          .filter(([, s]) => BAZHAI_STAR_META[s] && BAZHAI_STAR_META[s].isLucky)
+          .sort((a, b) => BAZHAI_STAR_META[a[1]].rank - BAZHAI_STAR_META[b[1]].rank)
+          .map(([dir, s]) => `${dir}${s}`).join('、');
+        ctx.fillStyle = '#065f46';
+        ctx.font = 'bold 16px "Noto Sans TC", sans-serif';
+        ctx.fillText(`八宅命卦：${activeBzPng.name}卦（${activeBzPng.group}）｜四吉方：${luckyStr}`, 45, 1108);
+      }
       ctx.fillStyle = '#57534e';
-      ctx.font = '15px "Noto Sans TC", sans-serif';
-      ctx.fillText('備註：以上二十四山對應之地理方位為宇宙磁場之固定常理，不隨房屋大門在圖面上的上下左右位置而改變。', 45, 1125);
+      ctx.font = '14px "Noto Sans TC", sans-serif';
+      ctx.fillText('備註：以上二十四山對應之地理方位為宇宙磁場之固定常理，不隨房屋大門在圖面上的上下左右位置而改變。', 45, 1136);
 
       const url = out.toDataURL('image/png');
       const a = document.createElement('a');
@@ -7631,6 +7946,45 @@
           renderCompassView();
         });
       }
+
+      const showBzOverlayCheck = document.getElementById('showBaZhaiOverlayCheck');
+      if (showBzOverlayCheck) {
+        showBzOverlayCheck.addEventListener('change', (e) => {
+          compassState.showBaZhaiOverlay = e.target.checked;
+          renderCompassView();
+        });
+      }
+
+      const bzModeSel = document.getElementById('compassBaZhaiModeSelect');
+      if (bzModeSel) {
+        bzModeSel.addEventListener('change', (e) => {
+          compassState.baZhaiMode = e.target.value;
+          renderCompassView();
+        });
+      }
+
+      const syncManualCompassBirth = () => {
+        const yVal = parseInt(document.getElementById('compassBirthYearInput')?.value, 10);
+        const mVal = parseInt(document.getElementById('compassBirthMonthInput')?.value, 10);
+        const dVal = parseInt(document.getElementById('compassBirthDayInput')?.value, 10);
+        const gVal = document.getElementById('compassGenderSelect')?.value || 'F';
+        if (Number.isFinite(yVal)) compassState.baZhaiYear = Math.max(1900, Math.min(2100, yVal));
+        if (Number.isFinite(mVal)) compassState.baZhaiMonth = Math.max(1, Math.min(12, mVal));
+        if (Number.isFinite(dVal)) compassState.baZhaiDay = Math.max(1, Math.min(31, dVal));
+        compassState.baZhaiGender = gVal;
+        if (compassState.baZhaiMode !== 'birth') {
+          compassState.baZhaiMode = 'birth';
+          if (bzModeSel) bzModeSel.value = 'birth';
+        }
+        renderCompassView();
+      };
+      ['compassBirthYearInput', 'compassBirthMonthInput', 'compassBirthDayInput', 'compassGenderSelect'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', syncManualCompassBirth);
+          el.addEventListener('change', syncManualCompassBirth);
+        }
+      });
 
       const modeDoorBtn = document.getElementById('canvasModeDoorBtn');
       const modePanBtn = document.getElementById('canvasModePanBtn');
