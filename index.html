@@ -928,7 +928,7 @@
           <div>
             <h3 class="text-base sm:text-lg font-bold serif-font">🧭 房屋平面圖 ×「二十四山」方位與角度雙層疊合工具</h3>
             <p class="text-xs theme-muted mt-0.5">
-              底層幾何固定「0°/360° 正上方、90° 正右方、180° 正下方、270° 正左方」；房屋平面圖固定不旋轉（預設大門在圖面正下方 180°），二十四山羅盤依大門角度動態旋轉對齊。
+              底層幾何固定「0°/360° 正上方、90° 正右方、180° 正下方、270° 正左方」；房屋平面圖固定不旋轉（預設中軸點在圖面正下方 180°），二十四山羅盤依中軸點角度動態旋轉對齊。
             </p>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
@@ -954,13 +954,13 @@
 
           <!-- 2. Door Reference Direction on Floor Plan (下拉選單①) -->
           <div>
-            <label for="compassDoorRefSelect" class="block text-xs font-semibold mb-1 theme-muted">② 下拉選單①：【依圖面點選之大門位置】</label>
+            <label for="compassDoorRefSelect" class="block text-xs font-semibold mb-1 theme-muted">② 下拉選單①：【依圖面點選之中軸點位置】</label>
             <select id="compassDoorRefSelect" class="w-full rounded-xl border theme-border theme-card px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-600">
               <option value="180" selected>⬇️ 圖面下（預設正下方 180° 基準）</option>
               <option value="0">⬆️ 圖面上（正上方 0° 基準）</option>
               <option value="270">⬅️ 圖面左（正左方 270° 基準）</option>
               <option value="90">➡️ 圖面右（正右方 90° 基準）</option>
-              <option value="custom" id="compassDoorCustomOpt">🎯 依圖面點選之大門位置 (圖面下方 180°)</option>
+              <option value="custom" id="compassDoorCustomOpt">🎯 依圖面點選之中軸點位置 (圖面下方 180°)</option>
             </select>
           </div>
 
@@ -1059,7 +1059,7 @@
         <div class="bg-amber-50/70 border border-amber-200/80 rounded-xl p-3 space-y-2">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <label for="compassAngleInput" class="text-xs sm:text-sm font-bold text-stone-800">
-              🎯 輸入角度（從屋宅中心往大門看 0°~360°）：
+              🎯 輸入角度（從屋宅中心往中軸點看 0°~360°）：
             </label>
             <div class="flex items-center gap-2 flex-1 min-w-[240px]">
               <input type="number" id="compassAngleInput" value="267" min="0" max="360" step="0.5" class="w-24 rounded-xl border border-stone-300 bg-white px-3 py-1.5 text-base font-bold text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-600" />
@@ -1072,11 +1072,11 @@
             <div id="compassStatusSummary" class="font-bold text-amber-950 bg-amber-100/80 px-2.5 py-1 rounded-lg border border-amber-300/80"></div>
             <div class="flex flex-wrap items-center gap-3">
               <!-- Keep hidden mode buttons for backward compatibility while providing the 4 checkboxes requested -->
-              <button type="button" id="canvasModeDoorBtn" class="hidden">🚪 點圖設定大門位置</button>
+              <button type="button" id="canvasModeDoorBtn" class="hidden">🎯 點圖設定中軸點位置</button>
               <button type="button" id="canvasModePanBtn" class="hidden">✋ 拖曳移動平面圖</button>
               <label class="inline-flex items-center gap-1 cursor-pointer text-stone-800 font-semibold">
                 <input type="checkbox" id="checkDoorClickMode" checked class="rounded text-amber-800 focus:ring-amber-600" />
-                <span>點圖設定大門位置</span>
+                <span>點圖設定中軸點位置</span>
               </label>
               <label class="inline-flex items-center gap-1 cursor-pointer text-stone-800 font-semibold">
                 <input type="checkbox" id="checkPanDragMode" checked class="rounded text-amber-800 focus:ring-amber-600" />
@@ -1084,7 +1084,7 @@
               </label>
               <label class="inline-flex items-center gap-1 cursor-pointer text-stone-800 font-semibold">
                 <input type="checkbox" id="showDoorMarkerCheck" checked class="rounded text-amber-800 focus:ring-amber-600" />
-                <span>顯示大門點</span>
+                <span>顯示中軸點</span>
               </label>
               <label class="inline-flex items-center gap-1 cursor-pointer text-stone-800 font-semibold">
                 <input type="checkbox" id="showCardinalLabelsCheck" checked class="rounded text-amber-800 focus:ring-amber-600" />
@@ -1118,7 +1118,7 @@
             <!-- Populated by JS -->
           </div>
           <div class="pt-2 border-t border-stone-200/80 text-xs text-stone-600 leading-relaxed">
-            備註：以上二十四山對應之地理方位為宇宙磁場之固定常理，不隨房屋大門在圖面上的上下左右位置而改變。
+            備註：以上二十四山對應之地理方位為宇宙磁場之固定常理，不隨房屋中軸點在圖面上的上下左右位置而改變。
           </div>
         </div>
       </div>
@@ -6818,7 +6818,7 @@
       ctx.fillText('客廳', 310, 385);
       ctx.fillText('主臥', 120, 175);
       ctx.fillStyle = '#9a3412';
-      ctx.fillText('大門入口(下方)', 212, 455);
+      ctx.fillText('中軸點(下方)', 218, 455);
 
       return c;
     }
@@ -6939,7 +6939,7 @@
 
       // Compact text label "🚪大門 (向首)"
       const facingM = getMountainMountainByDeg(compassState.angle);
-      const labelTxt = `🚪大門 (${compassState.angle}°${facingM.name}山·${facingM.fixedDir})`;
+      const labelTxt = `🎯中軸點 (${compassState.angle}°${facingM.name}山·${facingM.fixedDir})`;
       ctx.font = 'bold 13px "Noto Sans TC", sans-serif';
       const tw = ctx.measureText(labelTxt).width;
       const pillW = tw + 14;
@@ -7301,7 +7301,7 @@
 
       const summaryEl = document.getElementById('compassStatusSummary');
       if (summaryEl) {
-        summaryEl.textContent = `【向首：${facingM.name}山（${facingM.trigram}宮·${facingM.fixedDir}） / 坐山：${sittingM.name}山（${sittingM.trigram}宮·${sittingM.fixedDir}） | 大門位置：${doorPosName}】`;
+        summaryEl.textContent = `【向首：${facingM.name}山（${facingM.trigram}宮·${facingM.fixedDir}） / 坐山：${sittingM.name}山（${sittingM.trigram}宮·${sittingM.fixedDir}） | 中軸點位置：${doorPosName}】`;
       }
 
       // 6. Update 【向首與坐山資訊（頂部）】 & 【八卦二十四山與真實地理方位對照（下方列表）】
@@ -7458,7 +7458,7 @@
       }
       ctx.fillStyle = '#57534e';
       ctx.font = '14px "Noto Sans TC", sans-serif';
-      ctx.fillText('備註：以上二十四山對應之地理方位為宇宙磁場之固定常理，不隨房屋大門在圖面上的上下左右位置而改變。', 45, 1136);
+      ctx.fillText('備註：以上二十四山對應之地理方位為宇宙磁場之固定常理，不隨房屋中軸點在圖面上的上下左右位置而改變。', 45, 1136);
 
       const url = out.toDataURL('image/png');
       const a = document.createElement('a');
@@ -7867,7 +7867,7 @@
               document.getElementById('fpOffsetXVal').textContent = '0px';
               document.getElementById('fpOffsetYVal').textContent = '0px';
               renderCompassView();
-              showToast('✅ 已載入平面圖（預設大門在圖面正下方 180°）！可直接輸入角度或點選大門位置。');
+              showToast('✅ 已載入平面圖（預設中軸點在圖面正下方 180°）！可直接輸入角度或點選中軸點位置。');
             };
             img.src = ev.target.result;
           };
@@ -8043,7 +8043,7 @@
           document.getElementById('cpOpacitySlider').value = 95;
           document.getElementById('cpOpacityVal').textContent = '95%';
           renderCompassView();
-          showToast('🏡 已重設為 267°（大門在圖面正下方 180°）標準範例圖！');
+          showToast('🏡 已重設為 267°（中軸點在圖面正下方 180°）標準範例圖！');
         });
       }
 
@@ -8073,12 +8073,12 @@
           const customOpt = document.getElementById('compassDoorCustomOpt');
           const posName = screenAngleToPosLabel(roundedScrDeg);
           if (customOpt) {
-            customOpt.textContent = `🎯 依圖面點選之大門位置 (${posName} ${Math.round(roundedScrDeg)}°)`;
+            customOpt.textContent = `🎯 依圖面點選之中軸點位置 (${posName} ${Math.round(roundedScrDeg)}°)`;
           }
           if (doorRefSel) doorRefSel.value = 'custom';
           renderCompassView();
           if (showNotification) {
-            showToast(`🚪 已標記大門於「${posName}」，羅盤與下方方位已同步對齊更新！`);
+            showToast(`🎯 已標記中軸點於「${posName}」，羅盤與下方方位已同步對齊更新！`);
           }
         };
 
