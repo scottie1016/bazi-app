@@ -211,7 +211,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">八字・紫微・姓名・風水命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.7</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.8</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：八字/姓名改編自
@@ -293,7 +293,7 @@
       </div>
 
       <div class="text-xs theme-muted flex items-center gap-2 flex-wrap">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.7</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.8</span>
         <span>來源對照：</span>
         <a href="https://yunora.ai/bazi" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">八字</a>
         <span>·</span>
@@ -308,7 +308,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-2 border-b theme-border">
         <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-base font-bold serif-font">請輸入生辰年月日時</h2>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.7</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.8</span>
           <span class="text-xs theme-muted">（八字與紫微命盤自動同步生辰資料）</span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -629,7 +629,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base sm:text-lg font-bold serif-font">原站經典命盤呈現（1:1 還原 yunora.ai/bazi 格式）</h3>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold">經典直書表格</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.7</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.8</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <div class="inline-flex items-center gap-1.5 text-xs">
@@ -1191,7 +1191,7 @@
         <span id="footerExtraCredits" class="hidden sm:inline">（參考：黃恆堉、李鐵筆、陳德生、黃冠寰/江幸芬、林相如、勸學齋主等著作｜原作者聯絡：pyfate@gmail.com）</span>
       </div>
       <div class="flex items-center gap-3">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.7</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.8</span>
         <button type="button" id="footerEmbedBtn" class="underline hover:text-amber-700 font-medium">取得網站嵌入代碼</button>
       </div>
     </div>
@@ -1410,6 +1410,11 @@
       }
       const d = offset + 1;
       return { year: y, month: m, day: d, isLeap };
+    }
+
+    function getCurrentLunarYear() {
+      const now = new Date();
+      return solarToLunar(now.getFullYear(), now.getMonth() + 1, now.getDate()).year;
     }
 
     function lunarToSolar(ly, lm, ld, isLeap) {
@@ -3625,7 +3630,7 @@
       for (let i = 0; i < 9; i++) {
         const pIdx = isForward ? (mingBranchIdx + i) % 12 : (mingBranchIdx - i + 12) % 12;
         const startAge = bureau.num + i * 10;
-        const startYear = baziData.solar.year + startAge - 1;
+        const startYear = baziData.lunar.year + startAge - 1;
         daxianList.push({
           idx: i,
           branchIdx: pIdx,
@@ -5064,7 +5069,7 @@
         state.selectedZiweiBranchIdx = state.ziweiResult.mingBranchIdx;
       }
       // Auto-select the DaXian covering 2026 (or first DaXian if born after 2026)
-      const curY = 2026;
+      const curY = getCurrentLunarYear();
       const dxMatch = state.ziweiResult.daxianList.find(d => curY >= d.startYear && curY <= d.endYear);
       if (dxMatch) {
         state.selectedZiweiDaxianIdx = dxMatch.idx;
@@ -5911,7 +5916,8 @@
       const lyBranchIdx = lyYear !== null ? (lyYear - 4 + 1200) % 12 : null;
       const lyStem = lyStemIdx !== null ? STEMS[lyStemIdx] : '';
       const lyBranch = lyBranchIdx !== null ? BRANCHES[lyBranchIdx] : '';
-      const lyVirtualAge = lyYear !== null ? (lyYear - b.solar.year + 1) : (2026 - b.solar.year + 1);
+      const curLunarY = getCurrentLunarYear();
+      const lyVirtualAge = lyYear !== null ? (lyYear - b.lunar.year + 1) : (curLunarY - b.lunar.year + 1);
 
       // XiaoXian (小限) Ming Palace for lyVirtualAge
       const yBIdx = b.pillars.year.branchIdx;
@@ -6129,7 +6135,7 @@
       const gridContainer = document.getElementById('ziweiTraditionalGrid');
       gridContainer.innerHTML = gridCells.map(cell => {
         if (cell.type === 'center') {
-          const virtualAge = 2026 - b.solar.year + 1;
+          const virtualAge = curLunarY - b.lunar.year + 1;
           const personName = (document.getElementById('chartPersonNameInput')?.value || '無名氏').trim() || '無名氏';
           const isYangYear = (b.pillars.year.stemIdx % 2 === 0);
           const yinYangGender = `${isYangYear ? '陽' : '陰'}${b.gender === 'M' ? '男' : '女'}`;
@@ -6220,7 +6226,7 @@
           const bIdx = (y - 4 + 1200) % 12;
           liunianYears.push({
             year: y,
-            age: y - b.solar.year + 1,
+            age: y - b.lunar.year + 1,
             stem: STEMS[sIdx],
             branch: BRANCHES[bIdx]
           });
@@ -6348,7 +6354,7 @@
             state.selectedZiweiLiunianYear = yr;
             const sIdx = (yr - 4 + 1000) % 10;
             const bIdx = (yr - 4 + 1200) % 12;
-            const age = yr - b.solar.year + 1;
+            const age = yr - b.lunar.year + 1;
             showToast(`✨ 已切換至「${yr}年 (${age}歲・${STEMS[sIdx]}${BRANCHES[bIdx]}年)」！上方命盤已同步切換年命、小命與流月`);
             renderZiweiView();
           });
