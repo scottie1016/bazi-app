@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>八字・紫微・姓名・二十四山命盤系統</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    if (typeof tailwind !== "undefined") {
+      tailwind.config = { darkMode: "class" };
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
@@ -211,7 +216,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">八字・紫微・姓名・風水命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.8</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.9</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：八字/姓名改編自
@@ -293,7 +298,7 @@
       </div>
 
       <div class="text-xs theme-muted flex items-center gap-2 flex-wrap">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.8</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.9</span>
         <span>來源對照：</span>
         <a href="https://yunora.ai/bazi" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">八字</a>
         <span>·</span>
@@ -308,7 +313,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-2 border-b theme-border">
         <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-base font-bold serif-font">請輸入生辰年月日時</h2>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.8</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.9</span>
           <span class="text-xs theme-muted">（八字與紫微命盤自動同步生辰資料）</span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -629,7 +634,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base sm:text-lg font-bold serif-font">原站經典命盤呈現（1:1 還原 yunora.ai/bazi 格式）</h3>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold">經典直書表格</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.8</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.9</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <div class="inline-flex items-center gap-1.5 text-xs">
@@ -1191,7 +1196,7 @@
         <span id="footerExtraCredits" class="hidden sm:inline">（參考：黃恆堉、李鐵筆、陳德生、黃冠寰/江幸芬、林相如、勸學齋主等著作｜原作者聯絡：pyfate@gmail.com）</span>
       </div>
       <div class="flex items-center gap-3">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.8</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.9</span>
         <button type="button" id="footerEmbedBtn" class="underline hover:text-amber-700 font-medium">取得網站嵌入代碼</button>
       </div>
     </div>
@@ -6143,7 +6148,7 @@
           const pOrder = ['year', 'month', 'day', 'hour'];
 
           return `
-            <div class="ziwei-center bg-white dark:bg-slate-900 border theme-border rounded-xl p-3.5 sm:p-4 flex flex-col justify-between">
+            <div class="ziwei-center theme-card border theme-border rounded-xl p-3.5 sm:p-4 flex flex-col justify-between">
               <div class="space-y-1.5 text-xs">
                 <div class="text-center font-bold serif-font text-base sm:text-lg tracking-wide border-b theme-border pb-1.5">
                   萬宗紫微
@@ -7481,6 +7486,7 @@
       document.body.classList.remove('theme-paper', 'theme-light', 'theme-dark');
       if (themeName === 'light') document.body.classList.add('theme-light');
       else if (themeName === 'dark') document.body.classList.add('theme-dark');
+      document.documentElement.classList.toggle('dark', themeName === 'dark');
 
       const btns = {
         paper: document.getElementById('themePaperBtn'),
