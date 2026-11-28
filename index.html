@@ -216,7 +216,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg sm:text-xl font-bold serif-font tracking-tight">八字・紫微・姓名・風水命盤</h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.10</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium border border-emerald-300">v5.11</span>
           </div>
           <p class="text-xs theme-muted">
             來源出處：八字/姓名改編自
@@ -298,7 +298,7 @@
       </div>
 
       <div class="text-xs theme-muted flex items-center gap-2 flex-wrap">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.10</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">版本 v5.11</span>
         <span>來源對照：</span>
         <a href="https://yunora.ai/bazi" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-700">八字</a>
         <span>·</span>
@@ -313,7 +313,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-2 border-b theme-border">
         <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-base font-bold serif-font">請輸入生辰年月日時</h2>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.10</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.11</span>
           <span class="text-xs theme-muted">（八字與紫微命盤自動同步生辰資料）</span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -634,7 +634,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base sm:text-lg font-bold serif-font">原站經典命盤呈現（1:1 還原 yunora.ai/bazi 格式）</h3>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold">經典直書表格</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.10</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">v5.11</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <div class="inline-flex items-center gap-1.5 text-xs">
@@ -1196,7 +1196,7 @@
         <span id="footerExtraCredits" class="hidden sm:inline">（參考：黃恆堉、李鐵筆、陳德生、黃冠寰/江幸芬、林相如、勸學齋主等著作｜原作者聯絡：pyfate@gmail.com）</span>
       </div>
       <div class="flex items-center gap-3">
-        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.10</span>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">系統版本 v5.11</span>
         <button type="button" id="footerEmbedBtn" class="underline hover:text-amber-700 font-medium">取得網站嵌入代碼</button>
       </div>
     </div>
@@ -3114,9 +3114,10 @@
       const dayunFooterStr = `出生後${luckYears}年${luckMonths}個月又${luckDays}天上大運`;
       const handDate = new Date(Date.UTC(solarY + luckYears, solarM - 1 + luckMonths, solarD + luckDays, hourOpt.value, 0, 0));
       const hy = handDate.getUTCFullYear();
-      const startAge = hy - solarY + 1;
       const hm = handDate.getUTCMonth() + 1;
       const hd = handDate.getUTCDate();
+      const handLunar = solarToLunar(hy, hm, hd);
+      const startAge = handLunar.year - lunar.year + 1;
       const handMs = handDate.getTime();
       let handPrevJie = prevJie;
       for (let ty = hy - 1; ty <= hy + 1; ty++) {
@@ -3143,7 +3144,7 @@
         const dyStemIdx = (monthStemIdx + step + 100) % 10;
         const dyBranchIdx = (monthBranchIdx + step + 120) % 12;
         const ageStart = startAge + (i - 1) * 10;
-        const yearStart = solarY + ageStart - 1;
+        const yearStart = lunar.year + ageStart - 1;
         dayunList.push({
           index: i - 1,
           stemIdx: dyStemIdx,
@@ -3225,7 +3226,11 @@
 
       const baZhaiGua = calculateBaZhaiGua(solarY, solarM, solarD, gender);
 
-      return {
+      const birthKey = `${solarY}_${solarM}_${solarD}_${hourOpt.value}_${gender}`;
+      let dayunSyncSource = null;
+      const baziObj = {
+        birthKey,
+        dayunSyncSource,
         solar: { year: solarY, month: solarM, day: solarD },
         lunar,
         hourOpt,
@@ -3294,6 +3299,10 @@
         dayunSolarRowHtml,
         dayunList
       };
+      if (typeof window !== "undefined" && window.MYFATE_REMOTE_DAYUN_CACHE && window.MYFATE_REMOTE_DAYUN_CACHE[birthKey]) {
+        applyRemoteDayunToBazi(baziObj, window.MYFATE_REMOTE_DAYUN_CACHE[birthKey]);
+      }
+      return baziObj;
     }
 
     function computeShensha(pillars, gender = 'F') {
@@ -4175,10 +4184,159 @@
       }
     })();
 
+    const DAYUN_REMOTE_CACHE_STORAGE_KEY = "myfate_dayun_remote_cache_v5_11";
+    window.MYFATE_REMOTE_DAYUN_CACHE = (() => {
+      try {
+        const raw = localStorage.getItem(DAYUN_REMOTE_CACHE_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return (parsed && typeof parsed === "object" && !Array.isArray(parsed)) ? parsed : {};
+      } catch (e) {
+        return {};
+      }
+    })();
+
     function saveMyFateRemoteCache() {
       try {
         localStorage.setItem(WUDI_REMOTE_CACHE_STORAGE_KEY, JSON.stringify(window.MYFATE_REMOTE_WUDI_CACHE || {}));
       } catch (e) {}
+    }
+
+    function saveMyFateRemoteDayunCache() {
+      try {
+        localStorage.setItem(DAYUN_REMOTE_CACHE_STORAGE_KEY, JSON.stringify(window.MYFATE_REMOTE_DAYUN_CACHE || {}));
+      } catch (e) {}
+    }
+
+    function isValidRemoteDayun(rd) {
+      if (!rd || typeof rd !== "object") return false;
+      if (!Array.isArray(rd.ages) || rd.ages.length < 8) return false;
+      if (!Array.isArray(rd.gz) || rd.gz.length !== rd.ages.length) return false;
+      for (let i = 0; i < rd.ages.length; i++) {
+        const age = rd.ages[i];
+        const gz = rd.gz[i];
+        if (!Number.isInteger(age) || age < 0 || age > 120) return false;
+        if (i > 0 && age - rd.ages[i - 1] !== 10) return false;
+        if (typeof gz !== "string" || gz.length !== 2) return false;
+        if (STEMS.indexOf(gz[0]) === -1 || BRANCHES.indexOf(gz[1]) === -1) return false;
+      }
+      return true;
+    }
+
+    function parseRemoteDayunFromHtml(htmlText, sourceName) {
+      if (!htmlText || typeof htmlText !== "string") return null;
+      const stripCell = (s) => s
+        .replace(/<[^>]+>/g, "")
+        .replace(/&nbsp;/g, " ")
+        .replace(/\s+/g, "")
+        .trim();
+
+      // 1. Try MyFate HTML <table> format (10 descending ages + '大運' cell, followed by 10 GanZhi cells)
+      const trList = htmlText.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || [];
+      for (let i = 0; i < trList.length - 1; i++) {
+        const cells = (trList[i].match(/<(?:td|th)[^>]*>[\s\S]*?<\/(?:td|th)>/gi) || []).map(stripCell);
+        if (cells.length >= 9 && cells[cells.length - 1] === "大運") {
+          const rawAges = cells.slice(0, cells.length - 1);
+          if (rawAges.every(tok => /^\d{1,3}$/.test(tok))) {
+            const agesDesc = rawAges.map(n => parseInt(n, 10));
+            const nextCells = (trList[i + 1].match(/<(?:td|th)[^>]*>[\s\S]*?<\/(?:td|th)>/gi) || []).map(stripCell);
+            const rawGz = nextCells.slice(0, rawAges.length);
+            const agesAsc = [...agesDesc].reverse();
+            const gzAsc = [...rawGz].reverse();
+            let footerStr = null;
+            if (i + 2 < trList.length) {
+              const footTxt = stripCell(trList[i + 2]);
+              const fm = footTxt.match(/出生後\d+年\d+個月又\d+天上大運/);
+              if (fm) footerStr = fm[0];
+            }
+            const cand = { ages: agesAsc, gz: gzAsc, footer: footerStr, source: sourceName || "myfate.herokuapp.com" };
+            if (isValidRemoteDayun(cand)) return cand;
+          }
+        }
+      }
+
+      // 2. Try Yunora <svg class="svgtable"> format
+      if (htmlText.includes("svgtable")) {
+        const footerMatch = htmlText.match(/出生後\d+年\d+個月又\d+天上大運/);
+        const svgRegex = /<svg[^>]*class=["'][^"']*svgtable[^"']*["'][^>]*>([\s\S]*?)<\/svg>/gi;
+        let sm;
+        while ((sm = svgRegex.exec(htmlText)) !== null) {
+          const inner = sm[1];
+          if (!inner.includes("大") || !inner.includes("上大運")) continue;
+          const tRegex = /<text([^>]*)>([\s\S]*?)<\/text>/gi;
+          const items = [];
+          let tm;
+          while ((tm = tRegex.exec(inner)) !== null) {
+            const attrs = tm[1];
+            const txt = tm[2].replace(/<[^>]+>/g, "").replace(/\s+/g, "").trim();
+            const xm = attrs.match(/x=["']?([0-9.]+)/i);
+            const ym = attrs.match(/y=["']?([0-9.]+)/i);
+            if (xm && ym && txt) {
+              items.push({ x: parseFloat(xm[1]), y: parseFloat(ym[1]), text: txt });
+            }
+          }
+          // Find row of 10 numbers descending from left to right
+          const numItems = items.filter(it => /^\d{1,3}$/.test(it.text));
+          const byY = new Map();
+          for (const it of numItems) {
+            const yKey = Math.round(it.y / 6) * 6;
+            if (!byY.has(yKey)) byY.set(yKey, []);
+            byY.get(yKey).push(it);
+          }
+          for (const [, row] of byY.entries()) {
+            if (row.length >= 8 && row.length <= 10) {
+              row.sort((a, b) => a.x - b.x);
+              const agesAsc = row.map(it => parseInt(it.text, 10)).reverse();
+              if (agesAsc.every((a, idx) => idx === 0 || a - agesAsc[idx - 1] === 10)) {
+                const ageY = row[0].y;
+                const gzAsc = [...row].reverse().map(it => {
+                  const colChars = items
+                    .filter(c => Math.abs(c.x - it.x) < 12 && c.y > ageY + 5 && c.y < ageY + 65 && (STEMS.includes(c.text) || BRANCHES.includes(c.text)))
+                    .sort((a, b) => a.y - b.y)
+                    .map(c => c.text)
+                    .join("");
+                  return colChars;
+                });
+                const cand = { ages: agesAsc, gz: gzAsc, footer: footerMatch ? footerMatch[0] : null, source: sourceName || "yunora.ai" };
+                if (isValidRemoteDayun(cand)) return cand;
+              }
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    function applyRemoteDayunToBazi(bazi, remoteDayun) {
+      if (!bazi || !isValidRemoteDayun(remoteDayun)) return false;
+      const dayStemIdx = bazi.pillars.day.stemIdx;
+      const baseLunarYear = bazi.lunar.year;
+      bazi.startAge = remoteDayun.ages[0];
+      if (remoteDayun.footer) {
+        bazi.dayunFooterStr = remoteDayun.footer;
+      }
+      bazi.dayunList = remoteDayun.ages.map((ageStart, i) => {
+        const gz = remoteDayun.gz[i];
+        const dyStemIdx = STEMS.indexOf(gz[0]);
+        const dyBranchIdx = BRANCHES.indexOf(gz[1]);
+        const yearStart = baseLunarYear + ageStart - 1;
+        return {
+          index: i,
+          stemIdx: dyStemIdx,
+          branchIdx: dyBranchIdx,
+          stem: gz[0],
+          branch: gz[1],
+          stemWx: STEM_WX[dyStemIdx],
+          branchWx: BRANCH_WX[dyBranchIdx],
+          tenGod: getTenGod(dayStemIdx, dyStemIdx),
+          branchTenGod: getTenGod(dayStemIdx, STEMS.indexOf(HIDDEN_STEMS[gz[1]][0])),
+          ageStart,
+          ageEnd: ageStart + 9,
+          yearStart,
+          yearEnd: yearStart + 9
+        };
+      });
+      bazi.dayunSyncSource = remoteDayun.source || "myfate.herokuapp.com";
+      return true;
     }
 
     function parseStrictWudiScoreCell(rawCellText) {
@@ -4642,7 +4800,8 @@
 
     async function fetchRemoteWudiFromMyFate(bazi, forceRefresh = false) {
       if (!bazi || !bazi.fourPillarKey) return;
-      if (!forceRefresh && (bazi.wudiSyncStatus === "synced_live" || bazi.wudiSyncStatus === "synced_yunora_fallback")) {
+      const hasCachedRemoteDayun = Boolean(bazi.birthKey && window.MYFATE_REMOTE_DAYUN_CACHE && window.MYFATE_REMOTE_DAYUN_CACHE[bazi.birthKey]);
+      if (!forceRefresh && (bazi.wudiSyncStatus === "synced_live" || bazi.wudiSyncStatus === "synced_yunora_fallback") && hasCachedRemoteDayun) {
         return;
       }
 
@@ -4793,9 +4952,11 @@
             ? parseRes.data.patternPercent
             : null;
           const isMyFateAuth = (originSource === "myfate.herokuapp.com");
+          const remoteDayun = parseRemoteDayunFromHtml(htmlText, originSource);
           const verifiedPayload = {
             s: { ...validation.normalized.s },
             r: { ...validation.normalized.r },
+            remoteDayun: remoteDayun || null,
             patternName: cleanPattern,
             patternPercent: cleanPct,
             hasPatternName: Boolean(cleanPattern),
@@ -4948,8 +5109,16 @@
           recordWudiDiscardNotice(notice);
         } else {
           const srcMeta = srcCheck.meta;
-          window.MYFATE_REMOTE_WUDI_CACHE[bazi.fourPillarKey] = parsed;
+          const { remoteDayun: parsedRemoteDayun, ...wudiOnlyPayload } = parsed;
+          window.MYFATE_REMOTE_WUDI_CACHE[bazi.fourPillarKey] = wudiOnlyPayload;
           saveMyFateRemoteCache();
+          if (parsedRemoteDayun && isValidRemoteDayun(parsedRemoteDayun)) {
+            if (bazi.birthKey) {
+              window.MYFATE_REMOTE_DAYUN_CACHE[bazi.birthKey] = parsedRemoteDayun;
+              saveMyFateRemoteDayunCache();
+            }
+            applyRemoteDayunToBazi(bazi, parsedRemoteDayun);
+          }
 
           bazi.wxScores = { ...parsed.s };
           bazi.wudiRoles = { ...parsed.r };
